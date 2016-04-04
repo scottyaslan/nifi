@@ -17,7 +17,8 @@
 
 /* global nf, CodeMirror */
 
-nf.nfel = (function() {
+define([],
+    function() {
     
     /**
      * Formats the specified arguments for the EL function tooltip.
@@ -831,4 +832,4 @@ nf.nfel = (function() {
             return completions;
         }
     };
-}());
+});

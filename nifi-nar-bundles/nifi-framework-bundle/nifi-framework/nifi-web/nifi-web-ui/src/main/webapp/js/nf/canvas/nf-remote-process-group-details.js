@@ -17,7 +17,10 @@
 
 /* global nf */
 
-nf.RemoteProcessGroupDetails = (function () {
+define(['nf-common',
+        'nf-canvas-utils'],
+    function (nfCommon,
+              nfCanvasUtils) {
     return {
         init: function () {
             $('#remote-process-group-details').modal({
@@ -34,11 +37,11 @@ nf.RemoteProcessGroupDetails = (function () {
                 handler: {
                     close: function () {
                         // clear the remote process group details
-                        nf.Common.clearField('read-only-remote-process-group-id');
-                        nf.Common.clearField('read-only-remote-process-group-name');
-                        nf.Common.clearField('read-only-remote-process-group-url');
-                        nf.Common.clearField('read-only-remote-process-group-timeout');
-                        nf.Common.clearField('read-only-remote-process-group-yield-duration');
+                        nfCommon.clearField('read-only-remote-process-group-id');
+                        nfCommon.clearField('read-only-remote-process-group-name');
+                        nfCommon.clearField('read-only-remote-process-group-url');
+                        nfCommon.clearField('read-only-remote-process-group-timeout');
+                        nfCommon.clearField('read-only-remote-process-group-yield-duration');
                     }
                 }
             }).draggable({
@@ -54,19 +57,19 @@ nf.RemoteProcessGroupDetails = (function () {
          */
         showDetails: function (selection) {
             // if the specified component is a remote process group, load its properties
-            if (nf.CanvasUtils.isRemoteProcessGroup(selection)) {
+            if (nfCanvasUtils.isRemoteProcessGroup(selection)) {
                 var selectionData = selection.datum();
 
                 // populate the port settings
-                nf.Common.populateField('read-only-remote-process-group-id', selectionData.component.id);
-                nf.Common.populateField('read-only-remote-process-group-name', selectionData.component.name);
-                nf.Common.populateField('read-only-remote-process-group-url', selectionData.component.targetUri);
-                nf.Common.populateField('read-only-remote-process-group-timeout', selectionData.component.communicationsTimeout);
-                nf.Common.populateField('read-only-remote-process-group-yield-duration', selectionData.component.yieldDuration);
+                nfCommon.populateField('read-only-remote-process-group-id', selectionData.component.id);
+                nfCommon.populateField('read-only-remote-process-group-name', selectionData.component.name);
+                nfCommon.populateField('read-only-remote-process-group-url', selectionData.component.targetUri);
+                nfCommon.populateField('read-only-remote-process-group-timeout', selectionData.component.communicationsTimeout);
+                nfCommon.populateField('read-only-remote-process-group-yield-duration', selectionData.component.yieldDuration);
 
                 // show the details
                 $('#remote-process-group-details').modal('show');
             }
         }
     };
-}());
+});

@@ -19,14 +19,14 @@
     <div id="nf-logo"></div>
     <div id="nf-logo-name"></div>
     <div id="toolbox-container">
-        <div id="toolbox"></div>
+        <div layout="row" layout-md="column" id="toolbox"></div>
         <div id="toolbox-right-edge"></div>
     </div>
     <div id="toolbar">
         <div id="global-controls"></div>
         <div id="utilities-container">
             <div id="utilities-border"></div>
-            <div id="utility-buttons">
+            <div layout="row" layout-md="column" id="utility-buttons">
                 <div id="reporting-link" class="utility-button" title="Summary"></div>
                 <div id="counters-link" class="utility-button" title="Counters"></div>
                 <div id="history-link" class="utility-button" title="Flow Configuration History"></div>

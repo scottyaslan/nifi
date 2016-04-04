@@ -17,7 +17,18 @@
 
 /* global nf, d3 */
 
-nf.PortConfiguration = (function () {
+define(['nf-client',
+        'nf-common',
+        'nf-canvas-utils',
+        'nf-canvas',
+        'nf-port',
+        'nf-dialog'],
+    function (nfClient,
+              nfCommon,
+              nfCanvasUtils,
+              nfCanvas,
+              nfPort,
+              nfDialog) {
 
     /**
      * Initializes the port dialog.
@@ -30,7 +41,7 @@ nf.PortConfiguration = (function () {
                     buttonText: 'Apply',
                     handler: {
                         click: function () {
-                            var revision = nf.Client.getRevision();
+                            var revision = nfClient.getRevision();
 
                             // get the port data to reference the uri
                             var portId = $('#port-id').text();
@@ -63,17 +74,17 @@ nf.PortConfiguration = (function () {
                                 dataType: 'json'
                             }).done(function (response) {
                                 // update the revision
-                                nf.Client.setRevision(response.revision);
+                                nfClient.setRevision(response.revision);
 
                                 var port;
-                                if (nf.Common.isDefinedAndNotNull(response.inputPort)) {
+                                if (nfCommon.isDefinedAndNotNull(response.inputPort)) {
                                     port = response.inputPort;
                                 } else {
                                     port = response.outputPort;
                                 }
 
                                 // refresh the port component
-                                nf.Port.set(port);
+                                nfPort.set(port);
 
                                 // close the details panel
                                 $('#port-configuration').modal('hide');
@@ -88,10 +99,10 @@ nf.PortConfiguration = (function () {
                                     if (errors.length === 1) {
                                         content = $('<span></span>').text(errors[0]);
                                     } else {
-                                        content = nf.Common.formatUnorderedList(errors);
+                                        content = nfCommon.formatUnorderedList(errors);
                                     }
 
-                                    nf.Dialog.showOkDialog({
+                                    nfDialog.showOkDialog({
                                         dialogContent: content,
                                         overlayBackground: false,
                                         headerText: 'Configuration Error'
@@ -101,7 +112,7 @@ nf.PortConfiguration = (function () {
                                     $('#port-configuration').modal('hide');
 
                                     // handle the error
-                                    nf.Common.handleAjaxError(xhr, status, error);
+                                    nfCommon.handleAjaxError(xhr, status, error);
                                 }
                             });
                         }
@@ -142,7 +153,7 @@ nf.PortConfiguration = (function () {
          */
         showConfiguration: function (selection) {
             // if the specified component is a port, load its properties
-            if (nf.CanvasUtils.isInputPort(selection) || nf.CanvasUtils.isOutputPort(selection)) {
+            if (nfCanvasUtils.isInputPort(selection) || nfCanvasUtils.isOutputPort(selection)) {
                 var selectionData = selection.datum();
 
                 // determine if the enabled checkbox is checked or not
@@ -152,7 +163,7 @@ nf.PortConfiguration = (function () {
                 }
 
                 // show concurrent tasks for root groups only
-                if (nf.Canvas.getParentGroupId() === null) {
+                if (nfCanvas.getParentGroupId() === null) {
                     $('#port-concurrent-task-container').show();
                 } else {
                     $('#port-concurrent-task-container').hide();
@@ -170,4 +181,4 @@ nf.PortConfiguration = (function () {
             }
         }
     };
-}());
+});

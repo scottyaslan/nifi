@@ -32,292 +32,293 @@
  *   minWidth: 150,
  *   minHeight: 150
  * }
- * 
+ *
  * @param {type} $
  */
-(function ($) {
+define([],
+    function () {
+        var isUndefined = function (obj) {
+            return typeof obj === 'undefined';
+        };
 
-    var isUndefined = function (obj) {
-        return typeof obj === 'undefined';
-    };
+        var isNull = function (obj) {
+            return obj === null;
+        };
 
-    var isNull = function (obj) {
-        return obj === null;
-    };
+        var isDefinedAndNotNull = function (obj) {
+            return !isUndefined(obj) && !isNull(obj);
+        };
 
-    var isDefinedAndNotNull = function (obj) {
-        return !isUndefined(obj) && !isNull(obj);
-    };
+        var isBlank = function (str) {
+            return isUndefined(str) || isNull(str) || str === '';
+        };
 
-    var isBlank = function (str) {
-        return isUndefined(str) || isNull(str) || str === '';
-    };
+        var isFunction = function (funct) {
+            return typeof funct === 'function';
+        };
 
-    var isFunction = function (funct) {
-        return typeof funct === 'function';
-    };
+        var methods = {
 
-    var methods = {
-        
-        /**
-         * Initializes the nf editor.
-         * 
-         * @param {object} options  The options for this editor.
-         */
-        init: function (options) {
-            return this.each(function () {
-                if (isUndefined(options) || isNull(options)) {
-                    return false;
-                }
-
-                var languageId = options.languageId;
-                var languageAssist = nf[languageId];
-
-                if (isUndefined(languageAssist) || isNull(languageAssist)) {
-                    return false;
-                }
-
-                // should support resizing
-                var resizable = options.resizable === true;
-
-                // is the property sensitive
-                var sensitive = options.sensitive === true;
-
-                var content = isDefinedAndNotNull(options.content) ? options.content : '';
-                var field = $('<textarea></textarea>').text(content).appendTo($(this));
-
-                // define a mode for NiFi expression language
-                if (isFunction(languageAssist.color)) {
-                    CodeMirror.commands.autocomplete = function (cm) {
-                        if (isFunction(languageAssist.suggest)) {
-                            CodeMirror.showHint(cm, nf[languageId].suggest);
-                        }
-                    };
-
-                    CodeMirror.defineMode(languageId, nf[languageId].color);
-
-                    // is the editor read only
-                    var readOnly = options.readOnly === true;
-
-                    var editor = CodeMirror.fromTextArea(field.get(0), {
-                        mode: languageId,
-                        lineNumbers: true,
-                        matchBrackets: true,
-                        readOnly: readOnly,
-                        extraKeys: {
-                            'Ctrl-Space': 'autocomplete',
-                            'Esc': function (cm) {
-                                if (isFunction(options.escape)) {
-                                    options.escape();
-                                }
-                            },
-                            'Enter': function (cm) {
-                                if (isFunction(options.enter)) {
-                                    options.enter();
-                                }
-                            }
-                        }
-                    });
-                    
-                    // set the size
-                    var width = null;
-                    if (isDefinedAndNotNull(options.width)) {
-                        width = options.width;
-                    }
-                    var height = null;
-                    if (isDefinedAndNotNull(options.height)) {
-                        height = options.height;
-                    }
-                    editor.setSize(width, height);
-
-                    // store the editor instance for later
-                    $(this).data('editorInstance', editor);
-
-                    // get a reference to the codemirror
-                    var codeMirror = $(this).find('.CodeMirror');
-
-                    // reference the code portion
-                    var code = codeMirror.find('.CodeMirror-code');
-
-                    // make this resizable if specified
-                    if (resizable) {
-                        codeMirror.append('<div class="ui-resizable-handle ui-resizable-se"></div>').resizable({
-                            handles: {
-                                'se': '.ui-resizable-se'
-                            },
-                            resize: function () {
-                                editor.setSize($(this).width(), $(this).height());
-                                editor.refresh();
-                            }
-                        });
+            /**
+             * Initializes the nf editor.
+             *
+             * @param {object} options  The options for this editor.
+             */
+            init: function (options) {
+                return this.each(function () {
+                    if (isUndefined(options) || isNull(options)) {
+                        return false;
                     }
 
-                    // handle keydown to signify the content has changed
-                    editor.on('change', function (cm, event) {
-                        codeMirror.addClass('modified');
-                    });
+                    var languageId = options.languageId;
+                    var languageAssist = nf[languageId];
 
-                    // handle keyHandled to stop event propagation/default as necessary
-                    editor.on('keyHandled', function (cm, name, evt) {
-                        if (name === 'Esc') {
-                            // stop propagation of the escape event
-                            evt.stopImmediatePropagation();
-                            evt.preventDefault();
-                        }
-                    });
+                    if (isUndefined(languageAssist) || isNull(languageAssist)) {
+                        return false;
+                    }
 
-                    // handle sensitive values differently
-                    if (sensitive) {
-                        code.addClass('sensitive');
+                    // should support resizing
+                    var resizable = options.resizable === true;
 
-                        var handleSensitive = function (cm, event) {
-                            if (code.hasClass('sensitive')) {
-                                code.removeClass('sensitive');
-                                editor.setValue('');
+                    // is the property sensitive
+                    var sensitive = options.sensitive === true;
+
+                    var content = isDefinedAndNotNull(options.content) ? options.content : '';
+                    var field = $('<textarea></textarea>').text(content).appendTo($(this));
+
+                    // define a mode for NiFi expression language
+                    if (isFunction(languageAssist.color)) {
+                        CodeMirror.commands.autocomplete = function (cm) {
+                            if (isFunction(languageAssist.suggest)) {
+                                CodeMirror.showHint(cm, nf[languageId].suggest);
                             }
                         };
 
-                        // remove the sensitive style if necessary
-                        editor.on('mousedown', handleSensitive);
-                        editor.on('keydown', handleSensitive);
+                        CodeMirror.defineMode(languageId, nf[languageId].color);
+
+                        // is the editor read only
+                        var readOnly = options.readOnly === true;
+
+                        var editor = CodeMirror.fromTextArea(field.get(0), {
+                            mode: languageId,
+                            lineNumbers: true,
+                            matchBrackets: true,
+                            readOnly: readOnly,
+                            extraKeys: {
+                                'Ctrl-Space': 'autocomplete',
+                                'Esc': function (cm) {
+                                    if (isFunction(options.escape)) {
+                                        options.escape();
+                                    }
+                                },
+                                'Enter': function (cm) {
+                                    if (isFunction(options.enter)) {
+                                        options.enter();
+                                    }
+                                }
+                            }
+                        });
+
+                        // set the size
+                        var width = null;
+                        if (isDefinedAndNotNull(options.width)) {
+                            width = options.width;
+                        }
+                        var height = null;
+                        if (isDefinedAndNotNull(options.height)) {
+                            height = options.height;
+                        }
+                        editor.setSize(width, height);
+
+                        // store the editor instance for later
+                        $(this).data('editorInstance', editor);
+
+                        // get a reference to the codemirror
+                        var codeMirror = $(this).find('.CodeMirror');
+
+                        // reference the code portion
+                        var code = codeMirror.find('.CodeMirror-code');
+
+                        // make this resizable if specified
+                        if (resizable) {
+                            codeMirror.append('<div class="ui-resizable-handle ui-resizable-se"></div>').resizable({
+                                handles: {
+                                    'se': '.ui-resizable-se'
+                                },
+                                resize: function () {
+                                    editor.setSize($(this).width(), $(this).height());
+                                    editor.refresh();
+                                }
+                            });
+                        }
+
+                        // handle keydown to signify the content has changed
+                        editor.on('change', function (cm, event) {
+                            codeMirror.addClass('modified');
+                        });
+
+                        // handle keyHandled to stop event propagation/default as necessary
+                        editor.on('keyHandled', function (cm, name, evt) {
+                            if (name === 'Esc') {
+                                // stop propagation of the escape event
+                                evt.stopImmediatePropagation();
+                                evt.preventDefault();
+                            }
+                        });
+
+                        // handle sensitive values differently
+                        if (sensitive) {
+                            code.addClass('sensitive');
+
+                            var handleSensitive = function (cm, event) {
+                                if (code.hasClass('sensitive')) {
+                                    code.removeClass('sensitive');
+                                    editor.setValue('');
+                                }
+                            };
+
+                            // remove the sensitive style if necessary
+                            editor.on('mousedown', handleSensitive);
+                            editor.on('keydown', handleSensitive);
+                        }
+
+                        // set the min width/height
+                        if (isDefinedAndNotNull(options.minWidth)) {
+                            codeMirror.resizable('option', 'minWidth', options.minWidth);
+                        }
+                        if (isDefinedAndNotNull(options.minHeight)) {
+                            codeMirror.resizable('option', 'minHeight', options.minHeight);
+                        }
+                    }
+                });
+            },
+
+            /**
+             * Refreshes the editor.
+             */
+            refresh: function () {
+                return this.each(function () {
+                    var editor = $(this).data('editorInstance');
+
+                    // ensure the editor was initialized
+                    if (isDefinedAndNotNull(editor)) {
+                        editor.refresh();
+                    }
+                });
+            },
+
+            /**
+             * Sets the size of the editor.
+             *
+             * @param {integer} width
+             * @param {integer} height
+             */
+            setSize: function (width, height) {
+                return this.each(function () {
+                    var editor = $(this).data('editorInstance');
+
+                    // ensure the editor was initialized
+                    if (isDefinedAndNotNull(editor)) {
+                        editor.setSize(width, height);
+                    }
+                });
+            },
+
+            /**
+             * Gets the value of the editor in the first matching selector.
+             */
+            getValue: function () {
+                var value;
+
+                this.each(function () {
+                    var editor = $(this).data('editorInstance');
+
+                    // ensure the editor was initialized
+                    if (isDefinedAndNotNull(editor)) {
+                        value = editor.getValue();
                     }
 
-                    // set the min width/height
-                    if (isDefinedAndNotNull(options.minWidth)) {
-                        codeMirror.resizable('option', 'minWidth', options.minWidth);
+                    return false;
+                });
+
+                return value;
+            },
+
+            /**
+             * Sets the value of the editor.
+             *
+             * @param {string} value
+             */
+            setValue: function (value) {
+                return this.each(function () {
+                    var editor = $(this).data('editorInstance');
+
+                    // ensure the editor was initialized
+                    if (isDefinedAndNotNull(editor)) {
+                        editor.setValue(value);
+
+                        // remove the modified marking since the value was reset
+                        $(this).find('.CodeMirror').removeClass('modified');
                     }
-                    if (isDefinedAndNotNull(options.minHeight)) {
-                        codeMirror.resizable('option', 'minHeight', options.minHeight);
+                });
+            },
+
+            /**
+             * Sets the focus.
+             */
+            focus: function () {
+                return this.each(function () {
+                    var editor = $(this).data('editorInstance');
+
+                    // ensure the editor was initialized
+                    if (isDefinedAndNotNull(editor)) {
+                        editor.focus();
                     }
-                }
-            });
-        },
-        
-        /**
-         * Refreshes the editor.
-         */
-        refresh: function () {
-            return this.each(function () {
-                var editor = $(this).data('editorInstance');
+                });
+            },
 
-                // ensure the editor was initialized
-                if (isDefinedAndNotNull(editor)) {
-                    editor.refresh();
-                }
-            });
-        },
-        
-        /**
-         * Sets the size of the editor.
-         * 
-         * @param {integer} width
-         * @param {integer} height
-         */
-        setSize: function (width, height) {
-            return this.each(function () {
-                var editor = $(this).data('editorInstance');
+            /**
+             * Sets the focus.
+             */
+            selectAll: function () {
+                return this.each(function () {
+                    var editor = $(this).data('editorInstance');
 
-                // ensure the editor was initialized
-                if (isDefinedAndNotNull(editor)) {
-                    editor.setSize(width, height);
-                }
-            });
-        },
-        
-        /**
-         * Gets the value of the editor in the first matching selector.
-         */
-        getValue: function () {
-            var value;
+                    // ensure the editor was initialized
+                    if (isDefinedAndNotNull(editor)) {
+                        editor.execCommand('selectAll');
+                    }
+                });
+            },
 
-            this.each(function () {
-                var editor = $(this).data('editorInstance');
+            /**
+             * Gets whether the value of the editor in the first matching selector has been modified.
+             */
+            isModified: function () {
+                var modified;
 
-                // ensure the editor was initialized
-                if (isDefinedAndNotNull(editor)) {
-                    value = editor.getValue();
-                }
+                this.each(function () {
+                    modified = $(this).find('.CodeMirror').hasClass('modified');
+                    return false;
+                });
 
-                return false;
-            });
+                return modified;
+            },
 
-            return value;
-        },
-        
-        /**
-         * Sets the value of the editor.
-         * 
-         * @param {string} value
-         */
-        setValue: function (value) {
-            return this.each(function () {
-                var editor = $(this).data('editorInstance');
+            /**
+             * Destroys the editor.
+             */
+            destroy: function () {
+                return this.removeData('editorInstance').find('.CodeMirror').removeClass('modified');
+            }
+        };
 
-                // ensure the editor was initialized
-                if (isDefinedAndNotNull(editor)) {
-                    editor.setValue(value);
-
-                    // remove the modified marking since the value was reset
-                    $(this).find('.CodeMirror').removeClass('modified');
-                }
-            });
-        },
-        
-        /**
-         * Sets the focus.
-         */
-        focus: function () {
-            return this.each(function () {
-                var editor = $(this).data('editorInstance');
-
-                // ensure the editor was initialized
-                if (isDefinedAndNotNull(editor)) {
-                    editor.focus();
-                }
-            });
-        },
-        
-        /**
-         * Sets the focus.
-         */
-        selectAll: function () {
-            return this.each(function () {
-                var editor = $(this).data('editorInstance');
-
-                // ensure the editor was initialized
-                if (isDefinedAndNotNull(editor)) {
-                    editor.execCommand('selectAll');
-                }
-            });
-        },
-        
-        /**
-         * Gets whether the value of the editor in the first matching selector has been modified.
-         */
-        isModified: function () {
-            var modified;
-
-            this.each(function () {
-                modified = $(this).find('.CodeMirror').hasClass('modified');
-                return false;
-            });
-
-            return modified;
-        },
-        
-        /**
-         * Destroys the editor.
-         */
-        destroy: function () {
-            return this.removeData('editorInstance').find('.CodeMirror').removeClass('modified');
-        }
-    };
-
-    $.fn.nfeditor = function (method) {
-        if (methods[method]) {
-            return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
-        } else {
-            return methods.init.apply(this, arguments);
-        }
-    };
-})(jQuery);
+        $.fn.nfeditor = function (method) {
+            if (methods[method]) {
+                return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
+            } else {
+                return methods.init.apply(this, arguments);
+            }
+        };
+    }
+);

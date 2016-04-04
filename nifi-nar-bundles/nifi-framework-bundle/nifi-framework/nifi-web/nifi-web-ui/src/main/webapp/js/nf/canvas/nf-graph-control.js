@@ -17,7 +17,12 @@
 
 /* global nf */
 
-nf.GraphControl = (function () {
+define(['nf-common',
+        'nf-canvas',
+        'nf-context-menu'],
+    function (nfCommon,
+              nfCanvas,
+              nfContextMenu) {
 
     var config = {
         translateIncrement: 20
@@ -29,112 +34,112 @@ nf.GraphControl = (function () {
          */
         init: function () {
             // pan up
-            nf.Common.addHoverEffect('#pan-up-button', 'pan-up', 'pan-up-hover').on('click', function () {
-                var translate = nf.Canvas.View.translate();
-                nf.Canvas.View.translate([translate[0], translate[1] + config.translateIncrement]);
+            nfCommon.addHoverEffect('#pan-up-button', 'pan-up', 'pan-up-hover').on('click', function () {
+                var translate = nfCanvas.View.translate();
+                nfCanvas.View.translate([translate[0], translate[1] + config.translateIncrement]);
 
                 // hide the context menu
-                nf.ContextMenu.hide();
+                nfContextMenu.hide();
 
                 // refresh the canvas
-                nf.Canvas.View.refresh({
+                nfCanvas.View.refresh({
                     transition: true
                 });
             });
 
             // pan down
-            nf.Common.addHoverEffect('#pan-down-button', 'pan-down', 'pan-down-hover').on('click', function () {
-                var translate = nf.Canvas.View.translate();
-                nf.Canvas.View.translate([translate[0], translate[1] - config.translateIncrement]);
+            nfCommon.addHoverEffect('#pan-down-button', 'pan-down', 'pan-down-hover').on('click', function () {
+                var translate = nfCanvas.View.translate();
+                nfCanvas.View.translate([translate[0], translate[1] - config.translateIncrement]);
 
                 // hide the context menu
-                nf.ContextMenu.hide();
+                nfContextMenu.hide();
 
                 // refresh the canvas
-                nf.Canvas.View.refresh({
+                nfCanvas.View.refresh({
                     transition: true
                 });
             });
 
             // pan left
-            nf.Common.addHoverEffect('#pan-left-button', 'pan-left', 'pan-left-hover').on('click', function () {
-                var translate = nf.Canvas.View.translate();
-                nf.Canvas.View.translate([translate[0] + config.translateIncrement, translate[1]]);
+            nfCommon.addHoverEffect('#pan-left-button', 'pan-left', 'pan-left-hover').on('click', function () {
+                var translate = nfCanvas.View.translate();
+                nfCanvas.View.translate([translate[0] + config.translateIncrement, translate[1]]);
 
                 // hide the context menu
-                nf.ContextMenu.hide();
+                nfContextMenu.hide();
 
                 // refresh the canvas
-                nf.Canvas.View.refresh({
+                nfCanvas.View.refresh({
                     transition: true
                 });
             });
 
             // pan right
-            nf.Common.addHoverEffect('#pan-right-button', 'pan-right', 'pan-right-hover').on('click', function () {
-                var translate = nf.Canvas.View.translate();
-                nf.Canvas.View.translate([translate[0] - config.translateIncrement, translate[1]]);
+            nfCommon.addHoverEffect('#pan-right-button', 'pan-right', 'pan-right-hover').on('click', function () {
+                var translate = nfCanvas.View.translate();
+                nfCanvas.View.translate([translate[0] - config.translateIncrement, translate[1]]);
 
                 // hide the context menu
-                nf.ContextMenu.hide();
+                nfContextMenu.hide();
 
                 // refresh the canvas
-                nf.Canvas.View.refresh({
+                nfCanvas.View.refresh({
                     transition: true
                 });
             });
 
             // zoom in
-            nf.Common.addHoverEffect('#zoom-in-button', 'zoom-in', 'zoom-in-hover').on('click', function () {
-                nf.Canvas.View.zoomIn();
+            nfCommon.addHoverEffect('#zoom-in-button', 'zoom-in', 'zoom-in-hover').on('click', function () {
+                nfCanvas.View.zoomIn();
 
                 // hide the context menu
-                nf.ContextMenu.hide();
+                nfContextMenu.hide();
 
                 // refresh the canvas
-                nf.Canvas.View.refresh({
+                nfCanvas.View.refresh({
                     transition: true
                 });
             });
 
             // zoom out
-            nf.Common.addHoverEffect('#zoom-out-button', 'zoom-out', 'zoom-out-hover').on('click', function () {
-                nf.Canvas.View.zoomOut();
+            nfCommon.addHoverEffect('#zoom-out-button', 'zoom-out', 'zoom-out-hover').on('click', function () {
+                nfCanvas.View.zoomOut();
 
                 // hide the context menu
-                nf.ContextMenu.hide();
+                nfContextMenu.hide();
 
                 // refresh the canvas
-                nf.Canvas.View.refresh({
+                nfCanvas.View.refresh({
                     transition: true
                 });
             });
 
             // zoom fit
-            nf.Common.addHoverEffect('#zoom-fit-button', 'fit-image', 'fit-image-hover').on('click', function () {
-                nf.Canvas.View.fit();
+            nfCommon.addHoverEffect('#zoom-fit-button', 'fit-image', 'fit-image-hover').on('click', function () {
+                nfCanvas.View.fit();
 
                 // hide the context menu
-                nf.ContextMenu.hide();
+                nfContextMenu.hide();
 
                 // refresh the canvas
-                nf.Canvas.View.refresh({
+                nfCanvas.View.refresh({
                     transition: true
                 });
             });
 
             // one to one
-            nf.Common.addHoverEffect('#zoom-actual-button', 'actual-size', 'actual-size-hover').on('click', function () {
-                nf.Canvas.View.actualSize();
+            nfCommon.addHoverEffect('#zoom-actual-button', 'actual-size', 'actual-size-hover').on('click', function () {
+                nfCanvas.View.actualSize();
 
                 // hide the context menu
-                nf.ContextMenu.hide();
+                nfContextMenu.hide();
 
                 // refresh the canvas
-                nf.Canvas.View.refresh({
+                nfCanvas.View.refresh({
                     transition: true
                 });
             });
         }
     };
-}());
+});

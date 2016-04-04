@@ -17,7 +17,10 @@
 
 /* global nf, d3 */
 
-nf.StatusHistory = (function () {
+define(['nf-common',
+        'nf-dialog',],
+    function (nfCommon,
+              nfDialog) {
     var config = {
         nifiInstanceId: 'nifi-instance-id',
         nifiInstanceLabel: 'NiFi',
@@ -42,19 +45,19 @@ nf.StatusHistory = (function () {
      */
     var formatters = {
         'DURATION': function (d) {
-            return nf.Common.formatDuration(d);
+            return nfCommon.formatDuration(d);
         },
         'COUNT': function (d) {
             // need to handle floating point number since this formatter 
             // will also be used for average values
             if (d % 1 === 0) {
-                return nf.Common.formatInteger(d);
+                return nfCommon.formatInteger(d);
             } else {
-                return nf.Common.formatFloat(d);
+                return nfCommon.formatFloat(d);
             }
         },
         'DATA_SIZE': function (d) {
-            return nf.Common.formatDataSize(d);
+            return nfCommon.formatDataSize(d);
         }
     };
 
@@ -102,10 +105,10 @@ nf.StatusHistory = (function () {
         // get the descriptors
         var descriptors = componentStatusHistory.fieldDescriptors;
         statusHistory.details = componentStatusHistory.componentDetails;
-        statusHistory.selectedDescriptor = nf.Common.isUndefined(selectedDescriptor) ? descriptors[0] : selectedDescriptor;
+        statusHistory.selectedDescriptor = nfCommon.isUndefined(selectedDescriptor) ? descriptors[0] : selectedDescriptor;
 
         // ensure enough status snapshots
-        if (nf.Common.isDefinedAndNotNull(componentStatusHistory.aggregateSnapshots) && componentStatusHistory.aggregateSnapshots.length > 1) {
+        if (nfCommon.isDefinedAndNotNull(componentStatusHistory.aggregateSnapshots) && componentStatusHistory.aggregateSnapshots.length > 1) {
             statusHistory.instances.push({
                 id: config.nifiInstanceId,
                 label: config.nifiInstanceLabel,
@@ -119,7 +122,7 @@ nf.StatusHistory = (function () {
         // get the status for each node in the cluster if applicable
         $.each(componentStatusHistory.nodeSnapshots, function (_, nodeSnapshots) {
             // ensure enough status snapshots
-            if (nf.Common.isDefinedAndNotNull(nodeSnapshots.statusSnapshots) && nodeSnapshots.statusSnapshots.length > 1) {
+            if (nfCommon.isDefinedAndNotNull(nodeSnapshots.statusSnapshots) && nodeSnapshots.statusSnapshots.length > 1) {
                 statusHistory.instances.push({
                     id: nodeSnapshots.nodeId,
                     label: nodeSnapshots.address + ':' + nodeSnapshots.apiPort,
@@ -145,7 +148,7 @@ nf.StatusHistory = (function () {
      */
     var insufficientHistory = function () {
         // notify the user
-        nf.Dialog.showOkDialog({
+        nfDialog.showOkDialog({
             dialogContent: 'Insufficient history, please try again later.',
             overlayBackground: false
         });
@@ -193,7 +196,7 @@ nf.StatusHistory = (function () {
             options.push({
                 text: d.label,
                 value: d.field,
-                description: nf.Common.escapeHtml(d.description)
+                description: nfCommon.escapeHtml(d.description)
             });
         });
 
@@ -282,7 +285,7 @@ nf.StatusHistory = (function () {
         // go through each instance of this status history
         $.each(statusHistory.instances, function (_, instance) {
             // if this is the first time this instance is being rendered, make it visible
-            if (nf.Common.isUndefinedOrNull(instances[instance.id])) {
+            if (nfCommon.isUndefinedOrNull(instances[instance.id])) {
                 instances[instance.id] = true;
             }
 
@@ -393,8 +396,8 @@ nf.StatusHistory = (function () {
                 return s.timestamp;
             });
         });
-        addDetailItem(detailsContainer, 'Start', nf.Common.formatDateTime(minDate));
-        addDetailItem(detailsContainer, 'End', nf.Common.formatDateTime(maxDate));
+        addDetailItem(detailsContainer, 'Start', nfCommon.formatDateTime(minDate));
+        addDetailItem(detailsContainer, 'End', nfCommon.formatDateTime(maxDate));
 
         // determine the x axis range
         x.domain([minDate, maxDate]);
@@ -663,7 +666,7 @@ nf.StatusHistory = (function () {
                 .on('brush', brushed);
 
         // conditionally set the brush extent
-        if (nf.Common.isDefinedAndNotNull(brushExtent)) {
+        if (nfCommon.isDefinedAndNotNull(brushExtent)) {
             brush = brush.extent(brushExtent);
         }
 
@@ -931,7 +934,7 @@ nf.StatusHistory = (function () {
                 control.select('.y.axis').call(yControlAxis);
 
                 // restore the extent if necessary
-                if (nf.Common.isDefinedAndNotNull(resizeExtent)) {
+                if (nfCommon.isDefinedAndNotNull(resizeExtent)) {
                     brush.extent(resizeExtent);
                 }
 
@@ -1027,7 +1030,7 @@ nf.StatusHistory = (function () {
         $('<div class="detail-item-label"></div>').text(label).appendTo(detailContainer);
         var detailElement = $('<div class="detail-item-value"></div>').text(value).appendTo(detailContainer);
 
-        if (nf.Common.isDefinedAndNotNull(valueElementId)) {
+        if (nfCommon.isDefinedAndNotNull(valueElementId)) {
             detailElement.attr('id', valueElementId);
         }
     };
@@ -1041,17 +1044,17 @@ nf.StatusHistory = (function () {
         init: function (timeOffset) {
             serverTimeOffset = timeOffset;
 
-            nf.Common.addHoverEffect('#status-history-refresh-button', 'button-refresh', 'button-refresh-hover').click(function () {
+            nfCommon.addHoverEffect('#status-history-refresh-button', 'button-refresh', 'button-refresh-hover').click(function () {
                 var statusHistory = $('#status-history-dialog').data('status-history');
                 if (statusHistory !== null) {
                     if (statusHistory.type === config.type.processor) {
-                        nf.StatusHistory.showProcessorChart(statusHistory.groupId, statusHistory.id, statusHistory.selectedDescriptor);
+                        this.showProcessorChart(statusHistory.groupId, statusHistory.id, statusHistory.selectedDescriptor);
                     } else if (statusHistory.type === config.type.processGroup) {
-                        nf.StatusHistory.showProcessGroupChart(statusHistory.groupId, statusHistory.id, statusHistory.selectedDescriptor);
+                        this.showProcessGroupChart(statusHistory.groupId, statusHistory.id, statusHistory.selectedDescriptor);
                     } else if (statusHistory.type === config.type.remoteProcessGroup) {
-                        nf.StatusHistory.showRemoteProcessGroupChart(statusHistory.groupId, statusHistory.id, statusHistory.selectedDescriptor);
+                        this.showRemoteProcessGroupChart(statusHistory.groupId, statusHistory.id, statusHistory.selectedDescriptor);
                     } else {
-                        nf.StatusHistory.showConnectionChart(statusHistory.groupId, statusHistory.id, statusHistory.selectedDescriptor);
+                        this.showConnectionChart(statusHistory.groupId, statusHistory.id, statusHistory.selectedDescriptor);
                     }
                 }
             });
@@ -1103,7 +1106,7 @@ nf.StatusHistory = (function () {
                 dataType: 'json'
             }).done(function (response) {
                 handleStatusHistoryResponse(groupId, connectionId, response.statusHistory, config.type.connection, selectedDescriptor);
-            }).fail(nf.Common.handleAjaxError);
+            }).fail(nfCommon.handleAjaxError);
         },
         
         /**
@@ -1120,7 +1123,7 @@ nf.StatusHistory = (function () {
                 dataType: 'json'
             }).done(function (response) {
                 handleStatusHistoryResponse(groupId, processorId, response.statusHistory, config.type.processor, selectedDescriptor);
-            }).fail(nf.Common.handleAjaxError);
+            }).fail(nfCommon.handleAjaxError);
         },
         
         /**
@@ -1137,7 +1140,7 @@ nf.StatusHistory = (function () {
                 dataType: 'json'
             }).done(function (response) {
                 handleStatusHistoryResponse(groupId, processGroupId, response.statusHistory, config.type.processGroup, selectedDescriptor);
-            }).fail(nf.Common.handleAjaxError);
+            }).fail(nfCommon.handleAjaxError);
         },
         
         /**
@@ -1154,7 +1157,7 @@ nf.StatusHistory = (function () {
                 dataType: 'json'
             }).done(function (response) {
                 handleStatusHistoryResponse(groupId, remoteProcessGroupId, response.statusHistory, config.type.remoteProcessGroup, selectedDescriptor);
-            }).fail(nf.Common.handleAjaxError);
+            }).fail(nfCommon.handleAjaxError);
         }
     };
-}());
+});

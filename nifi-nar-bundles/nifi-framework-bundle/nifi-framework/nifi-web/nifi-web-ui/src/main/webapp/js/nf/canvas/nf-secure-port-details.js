@@ -17,7 +17,10 @@
 
 /* global nf */
 
-nf.SecurePortDetails = (function () {
+define(['nf-common',
+        'nf-canvas-utils'],
+    function (nfCommon,
+              nfCanvasUtils) {
 
     /**
      * Adds the specified user to the list of allowed users.
@@ -76,10 +79,10 @@ nf.SecurePortDetails = (function () {
                 handler: {
                     close: function () {
                         // clear the processor details
-                        nf.Common.clearField('read-only-secure-port-name');
-                        nf.Common.clearField('read-only-secure-port-id');
-                        nf.Common.clearField('read-only-secure-port-comments');
-                        nf.Common.clearField('read-only-secure-port-concurrent-tasks');
+                        nfCommon.clearField('read-only-secure-port-name');
+                        nfCommon.clearField('read-only-secure-port-id');
+                        nfCommon.clearField('read-only-secure-port-comments');
+                        nfCommon.clearField('read-only-secure-port-concurrent-tasks');
 
                         // clear the access control
                         $('#read-only-allowed-users').empty();
@@ -94,14 +97,14 @@ nf.SecurePortDetails = (function () {
         
         showDetails: function (selection) {
             // if the specified component is a port, load its properties
-            if (nf.CanvasUtils.isInputPort(selection) || nf.CanvasUtils.isOutputPort(selection)) {
+            if (nfCanvasUtils.isInputPort(selection) || nfCanvasUtils.isOutputPort(selection)) {
                 var selectionData = selection.datum();
 
                 // populate the port settings
-                nf.Common.populateField('read-only-secure-port-name', selectionData.component.name);
-                nf.Common.populateField('read-only-secure-port-id', selectionData.component.id);
-                nf.Common.populateField('read-only-secure-port-concurrent-tasks', selectionData.component.concurrentlySchedulableTaskCount);
-                nf.Common.populateField('read-only-secure-port-comments', selectionData.component.comments);
+                nfCommon.populateField('read-only-secure-port-name', selectionData.component.name);
+                nfCommon.populateField('read-only-secure-port-id', selectionData.component.id);
+                nfCommon.populateField('read-only-secure-port-concurrent-tasks', selectionData.component.concurrentlySchedulableTaskCount);
+                nfCommon.populateField('read-only-secure-port-comments', selectionData.component.comments);
 
                 // add allowed users
                 $.each(selectionData.component.userAccessControl, function (_, allowedUser) {
@@ -118,4 +121,4 @@ nf.SecurePortDetails = (function () {
             }
         }
     };
-}());
+});

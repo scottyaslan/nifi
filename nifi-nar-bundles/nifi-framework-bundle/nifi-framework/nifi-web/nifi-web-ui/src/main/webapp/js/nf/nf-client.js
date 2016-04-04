@@ -17,43 +17,51 @@
 
 /* global nf */
 
-nf.Client = {};
+define(['nf-common',
+        'nf-client'],
+    function(nfCommon,
+             nfClient) {
+        function Client() {
+            this.version = -1;
+            this.clientId = null;
+        };
 
-nf.Client.version = -1;
-nf.Client.clientId = null;
+        /**
+         * Gets the current revision.
+         */
+        Client.prototype.getRevision = function () {
+            return {
+                version: this.version,
+                clientId: this.clientId
+            };
+        };
 
-/**
- * Gets the current revision.
- */
-nf.Client.getRevision = function () {
-    return {
-        version: nf.Client.version,
-        clientId: nf.Client.clientId
-    };
-};
-
-/**
- * Sets the current revision.
- * 
- * @argument {integer} revision     The revision
- */
-nf.Client.setRevision = function (revision) {
-    // ensure a value was returned
-    if (nf.Common.isDefinedAndNotNull(revision.version)) {
-        if (nf.Common.isDefinedAndNotNull(nf.Client.version)) {
-            // if the client version was already set, ensure
-            // the new value is greater
-            if (revision.version > nf.Client.version) {
-                nf.Client.version = revision.version;
+        /**
+         * Sets the current revision.
+         *
+         * @argument {integer} revision     The revision
+         */
+        Client.prototype.setRevision = function (revision) {
+            // ensure a value was returned
+            if (nfCommon.isDefinedAndNotNull(revision.version)) {
+                if (nfCommon.isDefinedAndNotNull(this.version)) {
+                    // if the client version was already set, ensure
+                    // the new value is greater
+                    if (revision.version > this.version) {
+                        this.version = revision.version;
+                    }
+                } else {
+                    // otherwise just set the value
+                    this.version = revision.version;
+                }
             }
-        } else {
-            // otherwise just set the value
-            nf.Client.version = revision.version;
-        }
-    }
 
-    // ensure a value was returned
-    if (nf.Common.isDefinedAndNotNull(revision.clientId)) {
-        nf.Client.clientId = revision.clientId;
+            // ensure a value was returned
+            if (nfCommon.isDefinedAndNotNull(revision.clientId)) {
+                this.clientId = revision.clientId;
+            }
+        };
+
+        return new Client();
     }
-};
+);

@@ -17,7 +17,8 @@
 
 /* global nf, d3 */
 
-nf.Storage = (function () {
+define([],
+    function () {
 
     // Store items for two days before being eligible for removal.
     var MILLIS_PER_DAY = 86400000;
@@ -87,7 +88,7 @@ nf.Storage = (function () {
                     var key = localStorage.key(i);
                     
                     // attempt to get the item which will expire if necessary
-                    nf.Storage.getItem(key);
+                    this.getItem(key);
                 } catch (e) {
                 }
             }
@@ -140,7 +141,7 @@ nf.Storage = (function () {
 
             // if the entry is expired, drop it and return null
             if (checkExpiration(entry)) {
-                nf.Storage.removeItem(key);
+                this.removeItem(key);
                 return null;
             }
 
@@ -182,4 +183,4 @@ nf.Storage = (function () {
             localStorage.removeItem(key);
         }
     };
-}());
+});

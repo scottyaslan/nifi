@@ -14,7 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-nf.SecurePortConfiguration = (function () {
+define(['nf-client',
+        'nf-common',
+        'nf-port',
+        'nf-canvas-utils',
+        'nf-canvas'],
+    function (nfClient,
+              nfCommon,
+              nfPort,
+              nfCanvasUtils,
+              nfCanvas) {
 
     var portUri = '';
 
@@ -70,7 +79,7 @@ nf.SecurePortConfiguration = (function () {
                             }
 
                             var portEntity = {};
-                            portEntity['revision'] = nf.Client.getRevision();
+                            portEntity['revision'] = nfClient.getRevision();
                             portEntity[portType] = portDto;
 
                             // update the selected component
@@ -82,17 +91,17 @@ nf.SecurePortConfiguration = (function () {
                                 dataType: 'json'
                             }).done(function (response) {
                                 // update the revision
-                                nf.Client.setRevision(response.revision);
+                                nfClient.setRevision(response.revision);
 
                                 var port;
-                                if (nf.Common.isDefinedAndNotNull(response.inputPort)) {
+                                if (nfCommon.isDefinedAndNotNull(response.inputPort)) {
                                     port = response.inputPort;
                                 } else {
                                     port = response.outputPort;
                                 }
 
                                 // refresh the port component
-                                nf.Port.set(port);
+                                nfPort.set(port);
 
                                 // close the details panel
                                 $('#secure-port-configuration').modal('hide');
@@ -101,7 +110,7 @@ nf.SecurePortConfiguration = (function () {
                                 $('#secure-port-configuration').modal('hide');
 
                                 // handle the error
-                                nf.Common.handleAjaxError(xhr, status, error);
+                                nfCommon.handleAjaxError(xhr, status, error);
                             });
                         }
                     }
@@ -157,7 +166,7 @@ nf.SecurePortConfiguration = (function () {
                 var results = items[0];
 
                 // show all groups not currently selected
-                if (!nf.Common.isEmpty(results.userGroupResults)) {
+                if (!nfCommon.isEmpty(results.userGroupResults)) {
                     var allowedGroups = getAllowedGroups();
                     var groupHeaderAdded = false;
 
@@ -180,7 +189,7 @@ nf.SecurePortConfiguration = (function () {
                 }
 
                 // show all users not currently selected
-                if (!nf.Common.isEmpty(results.userResults)) {
+                if (!nfCommon.isEmpty(results.userResults)) {
                     var allowedUsers = getAllowedUsers();
                     var userHeaderAdded = false;
 
@@ -243,7 +252,7 @@ nf.SecurePortConfiguration = (function () {
                 var item = ui.item;
 
                 // add the item appropriately
-                if (nf.Common.isDefinedAndNotNull(item.group)) {
+                if (nfCommon.isDefinedAndNotNull(item.group)) {
                     addAllowedGroup(item.group);
                 } else {
                     addAllowedUser(item.userDn);
@@ -300,7 +309,7 @@ nf.SecurePortConfiguration = (function () {
         var allowedUsers = [];
         $('#allowed-users').children('li').each(function (_, allowedUser) {
             var user = $(allowedUser).data('user');
-            if (nf.Common.isDefinedAndNotNull(user)) {
+            if (nfCommon.isDefinedAndNotNull(user)) {
                 allowedUsers.push(user);
             }
         });
@@ -314,7 +323,7 @@ nf.SecurePortConfiguration = (function () {
         var allowedGroups = [];
         $('#allowed-groups').children('li').each(function (_, allowedGroup) {
             var group = $(allowedGroup).data('group');
-            if (nf.Common.isDefinedAndNotNull(group)) {
+            if (nfCommon.isDefinedAndNotNull(group)) {
                 allowedGroups.push(group);
             }
         });
@@ -333,7 +342,7 @@ nf.SecurePortConfiguration = (function () {
          */
         showConfiguration: function (selection) {
             // if the specified component is a port, load its properties
-            if (nf.CanvasUtils.isInputPort(selection) || nf.CanvasUtils.isOutputPort(selection)) {
+            if (nfCanvasUtils.isInputPort(selection) || nfCanvasUtils.isOutputPort(selection)) {
                 var selectionData = selection.datum();
 
                 // determine the port type
@@ -347,7 +356,7 @@ nf.SecurePortConfiguration = (function () {
                 portUri = selectionData.component.uri;
 
                 // show concurrent tasks for root groups only
-                if (nf.Canvas.getParentGroupId() === null) {
+                if (nfCanvas.getParentGroupId() === null) {
                     $('#secure-port-concurrent-task-container').show();
                 } else {
                     $('#secure-port-concurrent-task-container').hide();
@@ -381,4 +390,4 @@ nf.SecurePortConfiguration = (function () {
             }
         }
     };
-}());
+});

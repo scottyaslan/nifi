@@ -17,7 +17,12 @@
 
 /* global nf, d3 */
 
-nf.Snippet = (function () {
+define(['nf-client',
+        'nf-canvas',
+        'nf-common'],
+    function (nfClient,
+              nfCanvas,
+              nfCommon) {
 
     var config = {
         urls: {
@@ -35,8 +40,8 @@ nf.Snippet = (function () {
          */
         marshal: function (selection, linked) {
             var snippet = {
-                parentGroupId: nf.Canvas.getGroupId(),
-                linked: nf.Common.isDefinedAndNotNull(linked) ? linked : false,
+                parentGroupId: nfCanvas.getGroupId(),
+                linked: nfCommon.isDefinedAndNotNull(linked) ? linked : false,
                 processorIds: [],
                 funnelIds: [],
                 inputPortIds: [],
@@ -51,21 +56,21 @@ nf.Snippet = (function () {
             selection.each(function (d) {
                 var selected = d3.select(this);
 
-                if (nf.CanvasUtils.isProcessor(selected)) {
+                if (nfCanvasUtils.isProcessor(selected)) {
                     snippet.processorIds.push(d.component.id);
-                } else if (nf.CanvasUtils.isFunnel(selected)) {
+                } else if (nfCanvasUtils.isFunnel(selected)) {
                     snippet.funnelIds.push(d.component.id);
-                } else if (nf.CanvasUtils.isLabel(selected)) {
+                } else if (nfCanvasUtils.isLabel(selected)) {
                     snippet.labelIds.push(d.component.id);
-                } else if (nf.CanvasUtils.isInputPort(selected)) {
+                } else if (nfCanvasUtils.isInputPort(selected)) {
                     snippet.inputPortIds.push(d.component.id);
-                } else if (nf.CanvasUtils.isOutputPort(selected)) {
+                } else if (nfCanvasUtils.isOutputPort(selected)) {
                     snippet.outputPortIds.push(d.component.id);
-                } else if (nf.CanvasUtils.isProcessGroup(selected)) {
+                } else if (nfCanvasUtils.isProcessGroup(selected)) {
                     snippet.processGroupIds.push(d.component.id);
-                } else if (nf.CanvasUtils.isRemoteProcessGroup(selected)) {
+                } else if (nfCanvasUtils.isRemoteProcessGroup(selected)) {
                     snippet.remoteProcessGroupIds.push(d.component.id);
-                } else if (nf.CanvasUtils.isConnection(selected)) {
+                } else if (nfCanvasUtils.isConnection(selected)) {
                     snippet.connectionIds.push(d.component.id);
                 }
             });
@@ -79,7 +84,7 @@ nf.Snippet = (function () {
          * @argument {object} snippet       The snippet
          */
         create: function (snippet) {
-            var revision = nf.Client.getRevision();
+            var revision = nfClient.getRevision();
 
             return $.ajax({
                 type: 'POST',
@@ -91,7 +96,7 @@ nf.Snippet = (function () {
                 dataType: 'json'
             }).done(function (response) {
                 // update the revision
-                nf.Client.setRevision(response.revision);
+                nfClient.setRevision(response.revision);
             });
         },
         
@@ -103,7 +108,7 @@ nf.Snippet = (function () {
          * @argument {object} origin            The origin
          */
         copy: function (snippetId, groupId, origin) {
-            var revision = nf.Client.getRevision();
+            var revision = nfClient.getRevision();
 
             return $.ajax({
                 type: 'POST',
@@ -118,7 +123,7 @@ nf.Snippet = (function () {
                 dataType: 'json'
             }).done(function (response) {
                 // update the revision
-                nf.Client.setRevision(response.revision);
+                nfClient.setRevision(response.revision);
             });
         },
         
@@ -128,7 +133,7 @@ nf.Snippet = (function () {
          * @argument {string} snippetId         The snippet id
          */
         remove: function (snippetId) {
-            var revision = nf.Client.getRevision();
+            var revision = nfClient.getRevision();
 
             return $.ajax({
                 type: 'DELETE',
@@ -138,7 +143,7 @@ nf.Snippet = (function () {
                 })
             }).done(function (response) {
                 // update the revision
-                nf.Client.setRevision(response.revision);
+                nfClient.setRevision(response.revision);
             });
         },
         
@@ -149,7 +154,7 @@ nf.Snippet = (function () {
          * @argument {string} newGroupId        The new group id
          */
         move: function (snippetId, newGroupId) {
-            var revision = nf.Client.getRevision();
+            var revision = nfClient.getRevision();
 
             return $.ajax({
                 type: 'PUT',
@@ -162,7 +167,7 @@ nf.Snippet = (function () {
                 dataType: 'json'
             }).done(function (response) {
                 // update the revision
-                nf.Client.setRevision(response.revision);
+                nfClient.setRevision(response.revision);
             });
         },
         
@@ -172,7 +177,7 @@ nf.Snippet = (function () {
          * @argument {string} snippetId         The snippet id
          */
         unlink: function (snippetId) {
-            var revision = nf.Client.getRevision();
+            var revision = nfClient.getRevision();
 
             return $.ajax({
                 type: 'PUT',
@@ -185,7 +190,7 @@ nf.Snippet = (function () {
                 dataType: 'json'
             }).done(function (response) {
                 // update the revision
-                nf.Client.setRevision(response.revision);
+                nfClient.setRevision(response.revision);
             });
         },
         
@@ -195,7 +200,7 @@ nf.Snippet = (function () {
          * @argument {string} snippetId         The snippet id
          */
         link: function (snippetId) {
-            var revision = nf.Client.getRevision();
+            var revision = nfClient.getRevision();
 
             return $.ajax({
                 type: 'PUT',
@@ -208,8 +213,8 @@ nf.Snippet = (function () {
                 dataType: 'json'
             }).done(function (response) {
                 // update the revision
-                nf.Client.setRevision(response.revision);
+                nfClient.setRevision(response.revision);
             });
         }
     };
-}());
+});

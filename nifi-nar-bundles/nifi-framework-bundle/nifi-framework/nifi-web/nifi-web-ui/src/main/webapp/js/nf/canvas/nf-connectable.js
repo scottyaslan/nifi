@@ -17,7 +17,10 @@
 
 /* global nf, d3 */
 
-nf.Connectable = (function () {
+define(['nf-canvas-utils',
+        'nf-connection'],
+    function (nfCanvasUtils,
+              nfConnection) {
 
     var connect;
     var canvas;
@@ -56,7 +59,7 @@ nf.Connectable = (function () {
                         d3.event.sourceEvent.stopPropagation();
 
                         // unselect the previous components
-                        nf.CanvasUtils.getSelection().classed('selected', false);
+                        nfCanvasUtils.getSelection().classed('selected', false);
 
                         // mark the source component has selected
                         var source = d3.select(this.parentNode).classed('selected', true);
@@ -106,7 +109,7 @@ nf.Connectable = (function () {
                             // component to itself. requiring the mouse to have actually moved before 
                             // checking the eligiblity of the destination addresses the issue
                             return (Math.abs(origin[0] - d3.event.x) > 10 || Math.abs(origin[1] - d3.event.y) > 10) &&
-                                    nf.CanvasUtils.isValidConnectionDestination(d3.select(this));
+                                    nfCanvasUtils.isValidConnectionDestination(d3.select(this));
                         });
 
                         // update the drag line
@@ -126,12 +129,12 @@ nf.Connectable = (function () {
                                     var x = pathDatum.x;
                                     var y = pathDatum.y;
                                     var componentOffset = pathDatum.sourceWidth / 2;
-                                    var xOffset = nf.Connection.config.selfLoopXOffset;
-                                    var yOffset = nf.Connection.config.selfLoopYOffset;
+                                    var xOffset = nfConnection.config.selfLoopXOffset;
+                                    var yOffset = nfConnection.config.selfLoopYOffset;
                                     return 'M' + x + ' ' + y + 'L' + (x + componentOffset + xOffset) + ' ' + (y - yOffset) + 'L' + (x + componentOffset + xOffset) + ' ' + (y + yOffset) + 'Z';
                                 } else {
                                     // get the position on the destination perimeter
-                                    var end = nf.CanvasUtils.getPerimeterPoint(pathDatum, {
+                                    var end = nfCanvasUtils.getPerimeterPoint(pathDatum, {
                                         'x': destinationData.component.position.x,
                                         'y': destinationData.component.position.y,
                                         'width': destinationData.dimensions.width,
@@ -190,7 +193,7 @@ nf.Connectable = (function () {
 
                             // create the connection
                             var destinationData = destination.datum();
-                            nf.ConnectionConfiguration.createConnection(connectorData.sourceId, destinationData.component.id);
+                            nfConnectionConfiguration.createConnection(connectorData.sourceId, destinationData.component.id);
                         }
                     });
         },
@@ -202,7 +205,7 @@ nf.Connectable = (function () {
                             var selection = d3.select(this);
 
                             // ensure the current component supports connection source
-                            if (nf.CanvasUtils.isValidConnectionSource(selection)) {
+                            if (nfCanvasUtils.isValidConnectionSource(selection)) {
                                 // see if theres already a connector rendered
                                 var addConnect = d3.select('image.add-connect');
                                 if (addConnect.empty()) {
@@ -215,7 +218,7 @@ nf.Connectable = (function () {
                                                 origY: y
                                             })
                                             .call(connect)
-                                            .call(nf.CanvasUtils.disableImageHref)
+                                            .call(nfCanvasUtils.disableImageHref)
                                             .attr({
                                                 'class': 'add-connect',
                                                 'xlink:href': 'images/addConnect.png',
@@ -247,4 +250,4 @@ nf.Connectable = (function () {
                     });
         }
     };
-}());
+});

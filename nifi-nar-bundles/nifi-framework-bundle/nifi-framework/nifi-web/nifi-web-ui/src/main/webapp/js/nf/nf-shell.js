@@ -17,36 +17,39 @@
 
 /* global nf */
 
-$(document).ready(function () {
-    // configure the dialog
-    $('#shell-dialog').modal({
-        overlayBackground: true
-    });
+// $(document).ready(function () {
+//     // configure the dialog
+//     $('#shell-dialog').modal({
+//         overlayBackground: true
+//     });
+//
+//     // register a listener when the frame is closed
+//     $('#shell-close-button').click(function () {
+//         // close the shell
+//         $('#shell-dialog').modal('hide');
+//     });
+//
+//     // register a listener when the frame is undocked
+//     $('#shell-undock-button').click(function () {
+//         var uri = $('#shell-iframe').attr('src');
+//         if (!nfCommon.isBlank(uri)) {
+//             // open the page and close the shell
+//             window.open(uri);
+//
+//             // close the shell
+//             $('#shell-dialog').modal('hide');
+//         }
+//     });
+//
+//     // add hover effects
+//     nfCommon.addHoverEffect('#shell-undock-button', 'undock-normal', 'undock-hover');
+//     nfCommon.addHoverEffect('#shell-close-button', 'close-normal', 'close-hover');
+// });
 
-    // register a listener when the frame is closed
-    $('#shell-close-button').click(function () {
-        // close the shell
-        $('#shell-dialog').modal('hide');
-    });
-
-    // register a listener when the frame is undocked
-    $('#shell-undock-button').click(function () {
-        var uri = $('#shell-iframe').attr('src');
-        if (!nf.Common.isBlank(uri)) {
-            // open the page and close the shell
-            window.open(uri);
-
-            // close the shell
-            $('#shell-dialog').modal('hide');
-        }
-    });
-
-    // add hover effects
-    nf.Common.addHoverEffect('#shell-undock-button', 'undock-normal', 'undock-hover');
-    nf.Common.addHoverEffect('#shell-close-button', 'close-normal', 'close-hover');
-});
-
-nf.Shell = (function () {
+define(['nf-common',
+        'nf-context-menu'],
+    function (nfCommon,
+              nfContextMenu) {
 
     return {
         /**
@@ -57,15 +60,15 @@ nf.Shell = (function () {
          */
         showPage: function (uri, canUndock) {
             // if the context menu is on this page, attempt to close
-            if (nf.Common.isDefinedAndNotNull(nf.ContextMenu)) {
-                nf.ContextMenu.hide();
+            if (nfCommon.isDefinedAndNotNull(nfContextMenu)) {
+                nfContextMenu.hide();
             }
             
             return $.Deferred(function (deferred) {
                 var shell = $('#shell');
 
                 // default undockable to true
-                if (nf.Common.isNull(canUndock) || nf.Common.isUndefined(canUndock)) {
+                if (nfCommon.isNull(canUndock) || nfCommon.isUndefined(canUndock)) {
                     canUndock = true;
                 }
 
@@ -117,8 +120,8 @@ nf.Shell = (function () {
          */
         showContent: function (domId) {
             // if the context menu is on this page, attempt to close
-            if (nf.Common.isDefinedAndNotNull(nf.ContextMenu)) {
-                nf.ContextMenu.hide();
+            if (nfCommon.isDefinedAndNotNull(nfContextMenu)) {
+                nfContextMenu.hide();
             }
             
             return $.Deferred(function (deferred) {
@@ -167,4 +170,4 @@ nf.Shell = (function () {
             }).promise();
         }
     };
-}());
+});

@@ -20,7 +20,12 @@
 /**
  * Handles the upstream/downstream dialogs.
  */
-nf.GoTo = (function () {
+define(['nf-canvas-utils',
+        'nf-common',
+        'nf-canvas'],
+    function (nfCanvasUtils,
+              nfCommon,
+              nfCanvas) {
 
     var config = {
         urls: {
@@ -78,7 +83,7 @@ nf.GoTo = (function () {
 
             // format the connection name.. fall back to id
             var connectionStyle = '';
-            var connectionName = nf.CanvasUtils.formatConnectionName(connection);
+            var connectionName = nfCanvasUtils.formatConnectionName(connection);
             if (connectionName === '') {
                 connectionStyle = 'unset';
                 connectionName = 'Connection';
@@ -88,7 +93,7 @@ nf.GoTo = (function () {
             $('<div class="search-result-icon connection-small-icon"></div>').appendTo(connectionEntry);
             $('<div class="connection-entry-name go-to-link"></div>').attr('title', connectionName).addClass(connectionStyle).text(connectionName).on('click', function () {
                 // go to the connection
-                nf.CanvasUtils.showComponent(connection.parentGroupId, connection.id);
+                nfCanvasUtils.showComponent(connection.parentGroupId, connection.id);
 
                 // close the dialog
                 $('#connections-dialog').modal('hide');
@@ -134,7 +139,7 @@ nf.GoTo = (function () {
             $('<div class="search-result-icon"></div>').addClass(smallIconClass).appendTo(downstreamComponent);
             $('<div class="destination-component-name go-to-link"></div>').attr('title', connection.destination.name).text(connection.destination.name).on('click', function () {
                 // go to the component
-                nf.CanvasUtils.showComponent(connection.destination.groupId, connection.destination.id);
+                nfCanvasUtils.showComponent(connection.destination.groupId, connection.destination.id);
 
                 // close the dialog
                 $('#connections-dialog').modal('hide');
@@ -163,7 +168,7 @@ nf.GoTo = (function () {
             $('<div class="search-result-icon process-group-small-icon"></div>').appendTo(downstreamComponent);
             $('<div class="destination-component-name go-to-link"></div>').attr('title', processGroup.name).text(processGroup.name).on('click', function () {
                 // go to the remote process group
-                nf.CanvasUtils.showComponent(processGroup.parentGroupId, processGroup.id);
+                nfCanvasUtils.showComponent(processGroup.parentGroupId, processGroup.id);
 
                 // close the dialog
                 $('#connections-dialog').modal('hide');
@@ -177,7 +182,7 @@ nf.GoTo = (function () {
             $('<div class="search-result-icon input-port-small-icon"></div>').appendTo(downstreamInputPort);
             $('<div class="destination-input-port-name go-to-link"></div>').attr('title', connection.destination.name).text(connection.destination.name).on('click', function () {
                 // go to the remote process group
-                nf.CanvasUtils.showComponent(connection.destination.groupId, connection.destination.id);
+                nfCanvasUtils.showComponent(connection.destination.groupId, connection.destination.id);
 
                 // close the dialog
                 $('#connections-dialog').modal('hide');
@@ -204,7 +209,7 @@ nf.GoTo = (function () {
             $('<div class="search-result-icon remote-process-group-small-icon"></div>').appendTo(downstreamComponent);
             $('<div class="destination-component-name go-to-link"></div>').attr('title', remoteProcessGroup.name).text(remoteProcessGroup.name).on('click', function () {
                 // go to the remote process group
-                nf.CanvasUtils.showComponent(remoteProcessGroup.parentGroupId, remoteProcessGroup.id);
+                nfCanvasUtils.showComponent(remoteProcessGroup.parentGroupId, remoteProcessGroup.id);
 
                 // close the dialog
                 $('#connections-dialog').modal('hide');
@@ -244,7 +249,7 @@ nf.GoTo = (function () {
             $('<div class="search-result-icon"></div>').addClass(smallIconClass).appendTo(sourceComponent);
             $('<div class="source-component-name go-to-link"></div>').attr('title', connection.source.name).text(connection.source.name).on('click', function () {
                 // go to the component
-                nf.CanvasUtils.showComponent(connection.source.groupId, connection.source.id);
+                nfCanvasUtils.showComponent(connection.source.groupId, connection.source.id);
 
                 // close the dialog
                 $('#connections-dialog').modal('hide');
@@ -270,7 +275,7 @@ nf.GoTo = (function () {
             $('<div class="search-result-icon process-group-small-icon"></div>').appendTo(sourceComponent);
             $('<div class="source-component-name go-to-link"></div>').attr('title', processGroup.name).text(processGroup.name).on('click', function () {
                 // go to the process group
-                nf.CanvasUtils.showComponent(processGroup.parentGroupId, processGroup.id);
+                nfCanvasUtils.showComponent(processGroup.parentGroupId, processGroup.id);
 
                 // close the dialog
                 $('#connections-dialog').modal('hide');
@@ -280,7 +285,7 @@ nf.GoTo = (function () {
             $('<div class="search-result-icon output-port-small-icon"></div>').appendTo(sourceOutputPort);
             $('<div class="source-output-port-name go-to-link"></div>').attr('title', connection.source.name).text(connection.source.name).on('click', function () {
                 // go to the output port
-                nf.CanvasUtils.showComponent(connection.source.groupId, connection.source.id);
+                nfCanvasUtils.showComponent(connection.source.groupId, connection.source.id);
 
                 // close the dialog
                 $('#connections-dialog').modal('hide');
@@ -304,7 +309,7 @@ nf.GoTo = (function () {
             $('<div class="search-result-icon remote-process-group-small-icon"></div>').appendTo(sourceComponent);
             $('<div class="source-component-name go-to-link"></div>').attr('title', remoteProcessGroup.name).text(remoteProcessGroup.name).on('click', function () {
                 // go to the remote process group
-                nf.CanvasUtils.showComponent(remoteProcessGroup.parentGroupId, remoteProcessGroup.id);
+                nfCanvasUtils.showComponent(remoteProcessGroup.parentGroupId, remoteProcessGroup.id);
 
                 // close the dialog
                 $('#connections-dialog').modal('hide');
@@ -376,7 +381,7 @@ nf.GoTo = (function () {
 
                 // show the downstream dialog
                 $('#connections-dialog').modal('setHeaderText', 'Downstream Connections').modal('show');
-            }).fail(nf.Common.handleAjaxError);
+            }).fail(nfCommon.handleAjaxError);
         },
         
         /**
@@ -415,7 +420,7 @@ nf.GoTo = (function () {
 
                 // show the upstream dialog
                 $('#connections-dialog').modal('setHeaderText', 'Upstream Connections').modal('show');
-            }).fail(nf.Common.handleAjaxError);
+            }).fail(nfCommon.handleAjaxError);
         },
         
         /**
@@ -454,7 +459,7 @@ nf.GoTo = (function () {
 
                 // show the downstream dialog
                 $('#connections-dialog').modal('setHeaderText', 'Downstream Connections').modal('show');
-            }).fail(nf.Common.handleAjaxError);
+            }).fail(nfCommon.handleAjaxError);
         },
         
         /**
@@ -493,7 +498,7 @@ nf.GoTo = (function () {
 
                 // show the dialog
                 $('#connections-dialog').modal('setHeaderText', 'Upstream Connections').modal('show');
-            }).fail(nf.Common.handleAjaxError);
+            }).fail(nfCommon.handleAjaxError);
         },
         
         /**
@@ -532,7 +537,7 @@ nf.GoTo = (function () {
 
                 // show the downstream dialog
                 $('#connections-dialog').modal('setHeaderText', 'Downstream Connections').modal('show');
-            }).fail(nf.Common.handleAjaxError);
+            }).fail(nfCommon.handleAjaxError);
         },
         
         /**
@@ -545,7 +550,7 @@ nf.GoTo = (function () {
 
             $.ajax({
                 type: 'GET',
-                url: config.urls.controller + '/process-groups/' + encodeURIComponent(nf.Canvas.getParentGroupId()) + '/connections',
+                url: config.urls.controller + '/process-groups/' + encodeURIComponent(nfCanvas.getParentGroupId()) + '/connections',
                 dataType: 'json'
             }).done(function (response) {
                 var connections = response.connections;
@@ -553,7 +558,7 @@ nf.GoTo = (function () {
                 // populate the upstream dialog
                 $('#connections-context')
                         .append('<div class="search-result-icon process-group-small-icon"></div>')
-                        .append($('<div class="connections-component-name"></div>').text(nf.Canvas.getGroupName()))
+                        .append($('<div class="connections-component-name"></div>').text(nfCanvas.getGroupName()))
                         .append('<div class="clear"></div>')
                         .append('<div class="search-result-icon input-port-small-icon" style="margin-left: 20px;"></div>')
                         .append($('<div class="connections-component-name"></div>').text(selectionData.component.name))
@@ -574,7 +579,7 @@ nf.GoTo = (function () {
 
                 // show the upstream dialog
                 $('#connections-dialog').modal('setHeaderText', 'Upstream Connections').modal('show');
-            }).fail(nf.Common.handleAjaxError);
+            }).fail(nfCommon.handleAjaxError);
         },
         
         /**
@@ -587,7 +592,7 @@ nf.GoTo = (function () {
 
             $.ajax({
                 type: 'GET',
-                url: config.urls.controller + '/process-groups/' + encodeURIComponent(nf.Canvas.getParentGroupId()) + '/connections',
+                url: config.urls.controller + '/process-groups/' + encodeURIComponent(nfCanvas.getParentGroupId()) + '/connections',
                 dataType: 'json'
             }).done(function (response) {
                 var connections = response.connections;
@@ -595,7 +600,7 @@ nf.GoTo = (function () {
                 // populate the downstream dialog
                 $('#connections-context')
                         .append('<div class="search-result-icon process-group-small-icon"></div>')
-                        .append($('<div class="connections-component-name"></div>').text(nf.Canvas.getGroupName()))
+                        .append($('<div class="connections-component-name"></div>').text(nfCanvas.getGroupName()))
                         .append('<div class="clear"></div>')
                         .append('<div class="search-result-icon output-port-small-icon" style="margin-left: 20px;"></div>')
                         .append($('<div class="connections-component-name"></div>').text(selectionData.component.name))
@@ -616,7 +621,7 @@ nf.GoTo = (function () {
 
                 // show the downstream dialog
                 $('#connections-dialog').modal('setHeaderText', 'Downstream Connections').modal('show');
-            }).fail(nf.Common.handleAjaxError);
+            }).fail(nfCommon.handleAjaxError);
         },
         
         /**
@@ -655,7 +660,7 @@ nf.GoTo = (function () {
 
                 // show the upstream dialog
                 $('#connections-dialog').modal('setHeaderText', 'Upstream Connections').modal('show');
-            }).fail(nf.Common.handleAjaxError);
+            }).fail(nfCommon.handleAjaxError);
         },
         
         /**
@@ -691,7 +696,7 @@ nf.GoTo = (function () {
 
                 // show the downstream dialog
                 $('#connections-dialog').modal('setHeaderText', 'Downstream Connections').modal('show');
-            }).fail(nf.Common.handleAjaxError);
+            }).fail(nfCommon.handleAjaxError);
         },
         
         /**
@@ -727,7 +732,7 @@ nf.GoTo = (function () {
 
                 // show the upstream dialog
                 $('#connections-dialog').modal('setHeaderText', 'Upstream Connections').modal('show');
-            }).fail(nf.Common.handleAjaxError);
+            }).fail(nfCommon.handleAjaxError);
         }
     };
-}());
+});

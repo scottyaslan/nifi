@@ -17,7 +17,18 @@
 
 /* global nf, d3 */
 
-nf.Draggable = (function () {
+define(['nf-client',
+        'nf-dialog',
+        'nf-common',
+        'nf-connection',
+        'nf-canvas-utils',
+        'nf-canvas'],
+    function (nfClient,
+              nfDialog,
+              nfCommon,
+              nfConnection,
+              nfCanvasUtils,
+              nfCanvas) {
 
     var drag;
 
@@ -27,7 +38,7 @@ nf.Draggable = (function () {
      * @param {selection} dragSelection The current drag selection
      */
     var updateComponentsPosition = function (dragSelection) {
-        var revision = nf.Client.getRevision();
+        var revision = nfClient.getRevision();
         var updates = d3.map();
 
         // determine the drag delta
@@ -62,7 +73,7 @@ nf.Draggable = (function () {
                     dataType: 'json'
                 }).done(function (response) {
                     // update the revision
-                    nf.Client.setRevision(response.revision);
+                    nfClient.setRevision(response.revision);
 
                     // store the updated location
                     d.component.position = newPosition;
@@ -74,12 +85,12 @@ nf.Draggable = (function () {
                     });
                 }).fail(function (xhr, status, error) {
                     if (xhr.status === 400 || xhr.status === 404 || xhr.status === 409) {
-                        nf.Dialog.showOkDialog({
-                            dialogContent: nf.Common.escapeHtml(xhr.responseText),
+                        nfDialog.showOkDialog({
+                            dialogContent: nfCommon.escapeHtml(xhr.responseText),
                             overlayBackground: true
                         });
                     } else {
-                        nf.Common.handleAjaxError(xhr, status, error);
+                        nfCommon.handleAjaxError(xhr, status, error);
                     }
 
                     deferred.reject();
@@ -119,7 +130,7 @@ nf.Draggable = (function () {
                     contentType: 'application/json'
                 }).done(function (response) {
                     // update the revision
-                    nf.Client.setRevision(response.revision);
+                    nfClient.setRevision(response.revision);
 
                     // store the updated bend points
                     d.component.bends = response.connection.bends;
@@ -137,12 +148,12 @@ nf.Draggable = (function () {
                     });
                 }).fail(function (xhr, status, error) {
                     if (xhr.status === 400 || xhr.status === 404 || xhr.status === 409) {
-                        nf.Dialog.showOkDialog({
-                            dialogContent: nf.Common.escapeHtml(xhr.responseText),
+                        nfDialog.showOkDialog({
+                            dialogContent: nfCommon.escapeHtml(xhr.responseText),
                             overlayBackground: true
                         });
                     } else {
-                        nf.Common.handleAjaxError(xhr, status, error);
+                        nfCommon.handleAjaxError(xhr, status, error);
                     }
 
                     deferred.reject();
@@ -161,10 +172,10 @@ nf.Draggable = (function () {
         // go through each selected component
         d3.selectAll('g.component.selected').each(function (d) {
             // consider any self looping connections
-            var connections = nf.Connection.getComponentConnections(d.component.id);
+            var connections = nfConnection.getComponentConnections(d.component.id);
             $.each(connections, function(_, connection) {
-                if (!updates.has(connection.id) && nf.CanvasUtils.getConnectionSourceComponentId(connection) === nf.CanvasUtils.getConnectionDestinationComponentId(connection)) {
-                    var connectionUpdate = updateConnectionPosition(nf.Connection.get(connection.id));
+                if (!updates.has(connection.id) && nfCanvasUtils.getConnectionSourceComponentId(connection) === nfCanvasUtils.getConnectionDestinationComponentId(connection)) {
+                    var connectionUpdate = updateConnectionPosition(nfConnection.get(connection.id));
                     if (connectionUpdate !== null) {
                         updates.set(connection.id, connectionUpdate);
                     }
@@ -187,7 +198,7 @@ nf.Draggable = (function () {
                     connections.add(component.id);
                 } else {
                     // get connections that need to be refreshed because its attached to this component
-                    var componentConnections = nf.Connection.getComponentConnections(component.id);
+                    var componentConnections = nfConnection.getComponentConnections(component.id);
                     $.each(componentConnections, function (_, connection) {
                         connections.add(connection.id);
                     });
@@ -199,7 +210,7 @@ nf.Draggable = (function () {
 
             // refresh the connections
             connections.forEach(function (connectionId) {
-                nf.Connection.refresh(connectionId);
+                nfConnection.refresh(connectionId);
             });
         });
     };
@@ -212,7 +223,7 @@ nf.Draggable = (function () {
         var group = d3.select('g.drop');
 
         // move the seleciton into the group
-        nf.CanvasUtils.moveComponents(selection, group);
+        nfCanvasUtils.moveComponents(selection, group);
     };
 
     return {
@@ -261,10 +272,10 @@ nf.Draggable = (function () {
                                     .attr('width', maxX - minX)
                                     .attr('height', maxY - minY)
                                     .attr('stroke-width', function () {
-                                        return 1 / nf.Canvas.View.scale();
+                                        return 1 / nfCanvas.View.scale();
                                     })
                                     .attr('stroke-dasharray', function () {
-                                        return 4 / nf.Canvas.View.scale();
+                                        return 4 / nfCanvas.View.scale();
                                     })
                                     .datum({
                                         original: {
@@ -319,4 +330,4 @@ nf.Draggable = (function () {
             components.classed('moveable', true).call(drag);
         }
     };
-}());
+});

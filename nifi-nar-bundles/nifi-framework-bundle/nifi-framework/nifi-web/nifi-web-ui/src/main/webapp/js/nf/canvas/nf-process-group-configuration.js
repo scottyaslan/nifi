@@ -17,7 +17,14 @@
 
 /* global nf, d3 */
 
-nf.ProcessGroupConfiguration = (function () {
+define(['nf-client',
+        'nf-common',
+        'nf-process-group',
+        'nf-canvas-utils'],
+    function (nfClient,
+              nfCommon,
+              nfProcessGroup,
+              nfCanvasUtils) {
 
     return {
         init: function () {
@@ -28,7 +35,7 @@ nf.ProcessGroupConfiguration = (function () {
                         buttonText: 'Apply',
                         handler: {
                             click: function () {
-                                var revision = nf.Client.getRevision();
+                                var revision = nfClient.getRevision();
 
                                 // get the process group data to reference the uri
                                 var processGroupId = $('#process-group-id').text();
@@ -46,12 +53,12 @@ nf.ProcessGroupConfiguration = (function () {
                                     url: processGroupData.component.uri,
                                     dataType: 'json'
                                 }).done(function (response) {
-                                    if (nf.Common.isDefinedAndNotNull(response.processGroup)) {
+                                    if (nfCommon.isDefinedAndNotNull(response.processGroup)) {
                                         // update the revision
-                                        nf.Client.setRevision(response.revision);
+                                        nfClient.setRevision(response.revision);
 
                                         // refresh the process group
-                                        nf.ProcessGroup.set(response.processGroup);
+                                        nfProcessGroup.set(response.processGroup);
 
                                         // close the details panel
                                         $('#process-group-configuration').modal('hide');
@@ -61,7 +68,7 @@ nf.ProcessGroupConfiguration = (function () {
                                     $('#process-group-configuration').modal('hide');
 
                                     // handle the error
-                                    nf.Common.handleAjaxError(xhr, status, error);
+                                    nfCommon.handleAjaxError(xhr, status, error);
                                 });
                             }
                         }
@@ -94,7 +101,7 @@ nf.ProcessGroupConfiguration = (function () {
          */
         showConfiguration: function (selection) {
             // if the specified selection is a processor, load its properties
-            if (nf.CanvasUtils.isProcessGroup(selection)) {
+            if (nfCanvasUtils.isProcessGroup(selection)) {
                 var selectionData = selection.datum();
 
                 // populate the process group settings
@@ -107,4 +114,4 @@ nf.ProcessGroupConfiguration = (function () {
             }
         }
     };
-}());
+});

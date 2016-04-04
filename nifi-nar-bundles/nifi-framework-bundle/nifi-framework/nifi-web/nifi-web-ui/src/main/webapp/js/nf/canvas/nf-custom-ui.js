@@ -17,47 +17,51 @@
 
 /* global nf */
 
-nf.CustomUi = {
-    /**
-     * Shows the custom ui.
-     * 
-     * @argument {string} id       The component id
-     * @argument {string} uri               The uri for the custom ui
-     * @argument {boolean} editable         Whether the custom ui should support editing
-     */
-    showCustomUi: function (id, uri, editable) {
-        return $.Deferred(function (deferred) {
-            nf.Common.getAccessToken('../nifi-api/access/ui-extension-token').done(function (uiExtensionToken) {
-                // record the processor id
-                $('#shell-close-button');
+define([],
+    function() {
+        return {
+            /**
+             * Shows the custom ui.
+             *
+             * @argument {string} id       The component id
+             * @argument {string} uri               The uri for the custom ui
+             * @argument {boolean} editable         Whether the custom ui should support editing
+             */
+            showCustomUi: function (id, uri, editable) {
+                return $.Deferred(function (deferred) {
+                    nf.Common.getAccessToken('../nifi-api/access/ui-extension-token').done(function (uiExtensionToken) {
+                        // record the processor id
+                        $('#shell-close-button');
 
-                var revision = nf.Client.getRevision();
+                        var revision = nf.Client.getRevision();
 
-                // build the customer ui params
-                var customUiParams = {
-                    'id': id,
-                    'processorId': id,                  // deprecated
-                    'revision': revision.version,
-                    'clientId': revision.clientId,
-                    'editable': editable
-                };
+                        // build the customer ui params
+                        var customUiParams = {
+                            'id': id,
+                            'processorId': id,                  // deprecated
+                            'revision': revision.version,
+                            'clientId': revision.clientId,
+                            'editable': editable
+                        };
 
-                // conditionally include the ui extension token
-                if (!nf.Common.isBlank(uiExtensionToken)) {
-                    customUiParams['access_token'] = uiExtensionToken;
-                }
+                        // conditionally include the ui extension token
+                        if (!nf.Common.isBlank(uiExtensionToken)) {
+                            customUiParams['access_token'] = uiExtensionToken;
+                        }
 
-                // show the shell
-                nf.Shell.showPage('..' + uri + '?' + $.param(customUiParams), false).done(function () {
-                    deferred.resolve();
-                });
-            }).fail(function () {
-                nf.Dialog.showOkDialog({
-                    dialogContent: 'Unable to generate access token for accessing the advanced configuration dialog.',
-                    overlayBackground: false
-                });
-                deferred.resolve();
-            });
-        }).promise();
+                        // show the shell
+                        nf.Shell.showPage('..' + uri + '?' + $.param(customUiParams), false).done(function () {
+                            deferred.resolve();
+                        });
+                    }).fail(function () {
+                        nf.Dialog.showOkDialog({
+                            dialogContent: 'Unable to generate access token for accessing the advanced configuration dialog.',
+                            overlayBackground: false
+                        });
+                        deferred.resolve();
+                    });
+                }).promise();
+            }
+        };
     }
-};
+);

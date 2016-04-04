@@ -18,22 +18,22 @@
 /**
  * Performs ajax setup for use within NiFi.
  */
-$(document).ready(function () {
-    // include jwt when possible
-    $.ajaxSetup({
-        'beforeSend': function(xhr) {
-            var hadToken = nf.Storage.hasItem('jwt');
-
-            // get the token to include in all requests
-            var token = nf.Storage.getItem('jwt');
-            if (token !== null) {
-                xhr.setRequestHeader('Authorization', 'Bearer ' + token);
-            } else {
-                // if the current user was logged in with a token and the token just expired, cancel the request
-                if (hadToken === true) {
-                    return false;
-                }
-            }
-        }
-    });
-});
+// $(document).ready(function () {
+//     // include jwt when possible
+//     $.ajaxSetup({
+//         'beforeSend': function(xhr) {
+//             var hadToken = nf.Storage.hasItem('jwt');
+//
+//             // get the token to include in all requests
+//             var token = nf.Storage.getItem('jwt');
+//             if (token !== null) {
+//                 xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+//             } else {
+//                 // if the current user was logged in with a token and the token just expired, cancel the request
+//                 if (hadToken === true) {
+//                     return false;
+//                 }
+//             }
+//         }
+//     });
+// });

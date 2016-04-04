@@ -20,7 +20,8 @@
 /**
  * Clipboard used for copying and pasting content.
  */
-nf.Clipboard = (function () {
+define(['nf-common'],
+    function (nfCommon) {
 
     var COPY = 'copy';
     var PASTE = 'paste';
@@ -44,7 +45,7 @@ nf.Clipboard = (function () {
          * @argument {object} listener      A clipboard listener
          */
         removeListener: function (listener) {
-            if (nf.Common.isDefinedAndNotNull(listeners[listener])) {
+            if (nfCommon.isDefinedAndNotNull(listeners[listener])) {
                 delete listeners[listener];
             }
         },
@@ -67,7 +68,7 @@ nf.Clipboard = (function () {
          * Checks to see if any data has been copied.
          */
         isCopied: function () {
-            return nf.Common.isDefinedAndNotNull(data);
+            return nfCommon.isDefinedAndNotNull(data);
         },
         
         /**
@@ -77,7 +78,7 @@ nf.Clipboard = (function () {
         paste: function () {
             return $.Deferred(function (deferred) {
                 // ensure there was data
-                if (nf.Common.isDefinedAndNotNull(data)) {
+                if (nfCommon.isDefinedAndNotNull(data)) {
                     var clipboardData = data;
 
                     // resolve the deferred
@@ -96,4 +97,4 @@ nf.Clipboard = (function () {
             }).promise();
         }
     };
-}());
+});

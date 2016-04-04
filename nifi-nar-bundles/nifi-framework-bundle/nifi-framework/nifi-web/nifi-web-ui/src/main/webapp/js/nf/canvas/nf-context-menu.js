@@ -17,7 +17,12 @@
 
 /* global nf, d3 */
 
-nf.ContextMenu = (function () {
+define(['nf-canvas',
+        'nf-common',
+        'nf-actions'],
+    function (nfCanvas,
+              nfCommon,
+              nfActions) {
 
     /**
      * Returns whether the current group is not the root group.
@@ -25,7 +30,7 @@ nf.ContextMenu = (function () {
      * @param {selection} selection         The selection of currently selected components
      */
     var isNotRootGroup = function (selection) {
-        return nf.Canvas.getParentGroupId() !== null && selection.empty();
+        return nfCanvas.getParentGroupId() !== null && selection.empty();
     };
 
     /**
@@ -39,14 +44,14 @@ nf.ContextMenu = (function () {
             return false;
         }
 
-        var isConfigurableComponent = nf.CanvasUtils.isLabel(selection) || nf.CanvasUtils.isProcessGroup(selection);
+        var isConfigurableComponent = nfCanvasUtils.isLabel(selection) || nfCanvasUtils.isProcessGroup(selection);
         if (!isConfigurableComponent) {
-            if (nf.CanvasUtils.isProcessor(selection) || nf.CanvasUtils.isInputPort(selection) || nf.CanvasUtils.isOutputPort(selection) || nf.CanvasUtils.isRemoteProcessGroup(selection) || nf.CanvasUtils.isConnection(selection)) {
-                isConfigurableComponent = nf.CanvasUtils.supportsModification(selection);
+            if (nfCanvasUtils.isProcessor(selection) || nfCanvasUtils.isInputPort(selection) || nfCanvasUtils.isOutputPort(selection) || nfCanvasUtils.isRemoteProcessGroup(selection) || nfCanvasUtils.isConnection(selection)) {
+                isConfigurableComponent = nfCanvasUtils.supportsModification(selection);
             }
         }
 
-        return isConfigurableComponent && nf.Common.isDFM();
+        return isConfigurableComponent && nfCommon.isDFM();
     };
 
     /**
@@ -60,12 +65,12 @@ nf.ContextMenu = (function () {
             return false;
         }
 
-        if (nf.Common.isDFM()) {
-            if (nf.CanvasUtils.isProcessor(selection) || nf.CanvasUtils.isInputPort(selection) || nf.CanvasUtils.isOutputPort(selection) || nf.CanvasUtils.isRemoteProcessGroup(selection) || nf.CanvasUtils.isConnection(selection)) {
-                return !nf.CanvasUtils.supportsModification(selection);
+        if (nfCommon.isDFM()) {
+            if (nfCanvasUtils.isProcessor(selection) || nfCanvasUtils.isInputPort(selection) || nfCanvasUtils.isOutputPort(selection) || nfCanvasUtils.isRemoteProcessGroup(selection) || nfCanvasUtils.isConnection(selection)) {
+                return !nfCanvasUtils.supportsModification(selection);
             }
         } else {
-            return nf.CanvasUtils.isProcessor(selection) || nf.CanvasUtils.isConnection(selection) || nf.CanvasUtils.isProcessGroup(selection) || nf.CanvasUtils.isInputPort(selection) || nf.CanvasUtils.isOutputPort(selection) || nf.CanvasUtils.isRemoteProcessGroup(selection);
+            return nfCanvasUtils.isProcessor(selection) || nfCanvasUtils.isConnection(selection) || nfCanvasUtils.isProcessGroup(selection) || nfCanvasUtils.isInputPort(selection) || nfCanvasUtils.isOutputPort(selection) || nfCanvasUtils.isRemoteProcessGroup(selection);
         }
 
         return false;
@@ -77,7 +82,7 @@ nf.ContextMenu = (function () {
      * @param {selection} selection         The selection of currently selected components 
      */
     var isDeletable = function (selection) {
-        return nf.Common.isDFM() && nf.CanvasUtils.isDeletable(selection);
+        return nfCommon.isDFM() && nfCanvasUtils.isDeletable(selection);
     };
 
     /**
@@ -86,7 +91,7 @@ nf.ContextMenu = (function () {
      * @param {selection} selection         The selection of currently selected components 
      */
     var isRunnable = function (selection) {
-        return nf.Common.isDFM() && nf.CanvasUtils.areRunnable(selection);
+        return nfCommon.isDFM() && nfCanvasUtils.areRunnable(selection);
     };
 
     /**
@@ -95,7 +100,7 @@ nf.ContextMenu = (function () {
      * @param {selection} selection         The selection of currently selected components 
      */
     var isStoppable = function (selection) {
-        return nf.Common.isDFM() && nf.CanvasUtils.areStoppable(selection);
+        return nfCommon.isDFM() && nfCanvasUtils.areStoppable(selection);
     };
 
     /**
@@ -109,7 +114,7 @@ nf.ContextMenu = (function () {
             return false;
         }
 
-        return nf.CanvasUtils.isProcessor(selection) || nf.CanvasUtils.isProcessGroup(selection) || nf.CanvasUtils.isRemoteProcessGroup(selection) || nf.CanvasUtils.isConnection(selection);
+        return nfCanvasUtils.isProcessor(selection) || nfCanvasUtils.isProcessGroup(selection) || nfCanvasUtils.isRemoteProcessGroup(selection) || nfCanvasUtils.isConnection(selection);
     };
 
     /**
@@ -123,7 +128,7 @@ nf.ContextMenu = (function () {
             return false;
         }
 
-        return nf.CanvasUtils.isProcessor(selection);
+        return nfCanvasUtils.isProcessor(selection);
     };
 
     /**
@@ -132,7 +137,7 @@ nf.ContextMenu = (function () {
      * @param {selection} selection         The selection of currently selected components
      */
     var isNotConnection = function (selection) {
-        return selection.size() === 1 && !nf.CanvasUtils.isConnection(selection);
+        return selection.size() === 1 && !nfCanvasUtils.isConnection(selection);
     };
 
     /**
@@ -141,7 +146,7 @@ nf.ContextMenu = (function () {
      * @param {selection} selection         The selection of currently selected components
      */
     var isCopyable = function (selection) {
-        return nf.Common.isDFM() && nf.CanvasUtils.isCopyable(selection);
+        return nfCommon.isDFM() && nfCanvasUtils.isCopyable(selection);
     };
 
     /**
@@ -150,7 +155,7 @@ nf.ContextMenu = (function () {
      * @param {selection} selection         The selection of currently selected components
      */
     var isPastable = function (selection) {
-        return nf.Common.isDFM() && nf.CanvasUtils.isPastable();
+        return nfCommon.isDFM() && nfCanvasUtils.isPastable();
     };
 
     /**
@@ -173,7 +178,7 @@ nf.ContextMenu = (function () {
             return false;
         }
 
-        return nf.Common.isDFM() && nf.CanvasUtils.isConnection(selection);
+        return nfCommon.isDFM() && nfCanvasUtils.isConnection(selection);
     };
 
     /**
@@ -182,7 +187,7 @@ nf.ContextMenu = (function () {
      * @param {selection} selection          The selection
      */
     var isColorable = function (selection) {
-        return nf.Common.isDFM() && nf.CanvasUtils.isColorable(selection);
+        return nfCommon.isDFM() && nfCanvasUtils.isColorable(selection);
     };
 
     /**
@@ -196,7 +201,7 @@ nf.ContextMenu = (function () {
             return false;
         }
 
-        return nf.CanvasUtils.isConnection(selection);
+        return nfCanvasUtils.isConnection(selection);
     };
 
     /**
@@ -210,9 +215,9 @@ nf.ContextMenu = (function () {
             return false;
         }
 
-        return nf.CanvasUtils.isFunnel(selection) || nf.CanvasUtils.isProcessor(selection) || nf.CanvasUtils.isProcessGroup(selection) ||
-                nf.CanvasUtils.isRemoteProcessGroup(selection) || nf.CanvasUtils.isInputPort(selection) ||
-                (nf.CanvasUtils.isOutputPort(selection) && nf.Canvas.getParentGroupId() !== null);
+        return nfCanvasUtils.isFunnel(selection) || nfCanvasUtils.isProcessor(selection) || nfCanvasUtils.isProcessGroup(selection) ||
+                nfCanvasUtils.isRemoteProcessGroup(selection) || nfCanvasUtils.isInputPort(selection) ||
+                (nfCanvasUtils.isOutputPort(selection) && nfCanvas.getParentGroupId() !== null);
     };
 
     /**
@@ -226,9 +231,9 @@ nf.ContextMenu = (function () {
             return false;
         }
 
-        return nf.CanvasUtils.isFunnel(selection) || nf.CanvasUtils.isProcessor(selection) || nf.CanvasUtils.isProcessGroup(selection) ||
-                nf.CanvasUtils.isRemoteProcessGroup(selection) || nf.CanvasUtils.isOutputPort(selection) ||
-                (nf.CanvasUtils.isInputPort(selection) && nf.Canvas.getParentGroupId() !== null);
+        return nfCanvasUtils.isFunnel(selection) || nfCanvasUtils.isProcessor(selection) || nfCanvasUtils.isProcessGroup(selection) ||
+                nfCanvasUtils.isRemoteProcessGroup(selection) || nfCanvasUtils.isOutputPort(selection) ||
+                (nfCanvasUtils.isInputPort(selection) && nfCanvas.getParentGroupId() !== null);
     };
 
     /**
@@ -243,11 +248,11 @@ nf.ContextMenu = (function () {
         }
 
         // ensure the user is DFM
-        if (nf.Common.isDFM() === false) {
+        if (nfCommon.isDFM() === false) {
             return false;
         }
 
-        if (nf.CanvasUtils.isProcessor(selection)) {
+        if (nfCanvasUtils.isProcessor(selection)) {
             var processorData = selection.datum();
             return processorData.component.persistsState === true;
         } else {
@@ -266,7 +271,7 @@ nf.ContextMenu = (function () {
             return false;
         }
 
-        return nf.CanvasUtils.isProcessGroup(selection);
+        return nfCanvasUtils.isProcessGroup(selection);
     };
 
     /**
@@ -280,8 +285,8 @@ nf.ContextMenu = (function () {
             return false;
         }
 
-        return !nf.CanvasUtils.isLabel(selection) && !nf.CanvasUtils.isConnection(selection) && !nf.CanvasUtils.isProcessGroup(selection)
-            && !nf.CanvasUtils.isRemoteProcessGroup(selection) && nf.Common.canAccessProvenance();
+        return !nfCanvasUtils.isLabel(selection) && !nfCanvasUtils.isConnection(selection) && !nfCanvasUtils.isProcessGroup(selection)
+            && !nfCanvasUtils.isRemoteProcessGroup(selection) && nfCommon.canAccessProvenance();
     };
 
     /**
@@ -295,7 +300,7 @@ nf.ContextMenu = (function () {
             return false;
         }
 
-        return nf.CanvasUtils.isRemoteProcessGroup(selection);
+        return nfCanvasUtils.isRemoteProcessGroup(selection);
     };
 
     /**
@@ -304,7 +309,7 @@ nf.ContextMenu = (function () {
      * @param {selection} selection
      */
     var canStartTransmission = function (selection) {
-        return nf.Common.isDFM() && nf.CanvasUtils.canAllStartTransmitting(selection);
+        return nfCommon.isDFM() && nfCanvasUtils.canAllStartTransmitting(selection);
     };
 
     /**
@@ -313,7 +318,7 @@ nf.ContextMenu = (function () {
      * @param {selection} selection
      */
     var canStopTransmission = function (selection) {
-        return nf.Common.isDFM() && nf.CanvasUtils.canAllStopTransmitting(selection);
+        return nfCommon.isDFM() && nfCanvasUtils.canAllStopTransmitting(selection);
     };
     
     /**
@@ -322,7 +327,7 @@ nf.ContextMenu = (function () {
      * @param {selection} selection
      */
     var canEmptyQueue = function (selection) {
-        return nf.Common.isDFM() && isConnection(selection);
+        return nfCommon.isDFM() && isConnection(selection);
     };
 
     /**
@@ -331,7 +336,7 @@ nf.ContextMenu = (function () {
      * @param {selection} selection
      */
     var canListQueue = function (selection) {
-        return nf.Common.isDFM() && isConnection(selection);
+        return nfCommon.isDFM() && isConnection(selection);
     };
     
     /**
@@ -340,7 +345,7 @@ nf.ContextMenu = (function () {
      * @param {type} selection
      */
     var canMoveToParent = function (selection) {
-        return !selection.empty() && nf.CanvasUtils.isDisconnected(selection) && nf.Canvas.getParentGroupId() !== null;
+        return !selection.empty() && nfCanvasUtils.isDisconnected(selection) && nfCanvas.getParentGroupId() !== null;
     };
 
     /**
@@ -372,7 +377,7 @@ nf.ContextMenu = (function () {
 
             // create the img and conditionally add the style
             var img = $('<div class="context-menu-item-img"></div>').css('background-image', 'url(' + item['img'] + ')').appendTo(menuItem);
-            if (nf.Common.isDefinedAndNotNull(item['imgStyle'])) {
+            if (nfCommon.isDefinedAndNotNull(item['imgStyle'])) {
                 img.addClass(item['imgStyle']);
             }
             
@@ -403,10 +408,10 @@ nf.ContextMenu = (function () {
      */
     var executeAction = function (action, selection, evt) {
         // execute the action
-        nf.Actions[action](selection, evt);
+        nfActions[action](selection, evt);
 
         // close the context menu
-        nf.ContextMenu.hide();
+        this.hide();
     };
 
     // defines the available actions and the conditions which they apply
@@ -472,7 +477,7 @@ nf.ContextMenu = (function () {
             var contextMenu = $('#context-menu').empty();
 
             // get the current selection
-            var selection = nf.CanvasUtils.getSelection();
+            var selection = nfCanvasUtils.getSelection();
 
             // consider each component action for the current selection
             $.each(actions, function (_, action) {
@@ -501,7 +506,7 @@ nf.ContextMenu = (function () {
             });
 
             // refresh the toolbar incase we've click on the canvas
-            nf.CanvasToolbar.refresh();
+            nfCanvasToolbar.refresh();
         },
         
         /**
@@ -519,7 +524,7 @@ nf.ContextMenu = (function () {
         activate: function (components) {
             components.on('contextmenu.selection', function () {
                 // get the clicked component to update selection
-                nf.ContextMenu.show();
+                this.show();
 
                 // stop propagation and prevent default
                 d3.event.preventDefault();
@@ -527,4 +532,4 @@ nf.ContextMenu = (function () {
             });
         }
     };
-}());
+});

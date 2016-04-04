@@ -17,39 +17,40 @@
 
 /* global nf */
 
-$(document).ready(function () {
-    // setup general button mouse behavior
-    nf.Common.addHoverEffect('div.button', 'button-normal', 'button-over');
+// $(document).ready(function () {
+//     // setup general button mouse behavior
+//     nf.Common.addHoverEffect('div.button', 'button-normal', 'button-over');
+//
+//     // configure the ok dialog
+//     $('#nf-ok-dialog').modal({
+//         handler: {
+//             close: function () {
+//                 // clear the content
+//                 $('#nf-ok-dialog-content').empty();
+//             }
+//         }
+//     }).draggable({
+//         containment: 'parent',
+//         handle: '.dialog-header'
+//     });
+//
+//     // configure the yes/no dialog
+//     $('#nf-yes-no-dialog').modal({
+//         handler: {
+//             close: function () {
+//                 // clear the content and reset the button model
+//                 $('#nf-yes-no-dialog-content').empty();
+//                 $('#nf-yes-no-dialog').modal('setButtonModel', []);
+//             }
+//         }
+//     }).draggable({
+//         containment: 'parent',
+//         handle: '.dialog-header'
+//     });
+// });
 
-    // configure the ok dialog
-    $('#nf-ok-dialog').modal({
-        handler: {
-            close: function () {
-                // clear the content
-                $('#nf-ok-dialog-content').empty();
-            }
-        }
-    }).draggable({
-        containment: 'parent',
-        handle: '.dialog-header'
-    });
-
-    // configure the yes/no dialog
-    $('#nf-yes-no-dialog').modal({
-        handler: {
-            close: function () {
-                // clear the content and reset the button model
-                $('#nf-yes-no-dialog-content').empty();
-                $('#nf-yes-no-dialog').modal('setButtonModel', []);
-            }
-        }
-    }).draggable({
-        containment: 'parent',
-        handle: '.dialog-header'
-    });
-});
-
-nf.Dialog = (function () {
+define([],
+    function () {
 
     return {
         /**
@@ -135,4 +136,4 @@ nf.Dialog = (function () {
             $('#nf-yes-no-dialog').modal('setHeaderText', options.headerText).modal('setOverlayBackground', options.overlayBackground).modal('show');
         }
     };
-}());
+});

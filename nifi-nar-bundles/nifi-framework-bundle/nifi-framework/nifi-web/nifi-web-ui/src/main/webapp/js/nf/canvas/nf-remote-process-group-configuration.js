@@ -17,7 +17,16 @@
 
 /* global nf, d3 */
 
-nf.RemoteProcessGroupConfiguration = (function () {
+define(['nf-client',
+        'nf-remote-process-group',
+        'nf-dialog',
+        'nf-common',
+        'nf-canvas-utils'],
+    function (nfClient,
+              nfRemoteProcessGroup,
+              nfDialog,
+              nfCommon,
+              nfCanvasUtils) {
     return {
         init: function () {
             $('#remote-process-group-configuration').modal({
@@ -32,7 +41,7 @@ nf.RemoteProcessGroupConfiguration = (function () {
 
                                 // create the remote process group details
                                 var remoteProcessGroupEntity = {
-                                    revision: nf.Client.getRevision(),
+                                    revision: nfClient.getRevision(),
                                     remoteProcessGroup: {
                                         id: remoteProcessGroupId,
                                         communicationsTimeout: $('#remote-process-group-timeout').val(),
@@ -50,10 +59,10 @@ nf.RemoteProcessGroupConfiguration = (function () {
                                     contentType: 'application/json'
                                 }).done(function (response) {
                                     // update the revision
-                                    nf.Client.setRevision(response.revision);
+                                    nfClient.setRevision(response.revision);
                                     
                                     // refresh the remote process group component
-                                    nf.RemoteProcessGroup.set(response.remoteProcessGroup);
+                                    nfRemoteProcessGroup.set(response.remoteProcessGroup);
 
                                     // close the details panel
                                     $('#remote-process-group-configuration').modal('hide');
@@ -65,16 +74,16 @@ nf.RemoteProcessGroupConfiguration = (function () {
                                         if (errors.length === 1) {
                                             content = $('<span></span>').text(errors[0]);
                                         } else {
-                                            content = nf.Common.formatUnorderedList(errors);
+                                            content = nfCommon.formatUnorderedList(errors);
                                         }
 
-                                        nf.Dialog.showOkDialog({
+                                        nfDialog.showOkDialog({
                                             dialogContent: content,
                                             overlayBackground: false,
                                             headerText: 'Configuration Error'
                                         });
                                     } else {
-                                        nf.Common.handleAjaxError(xhr, status, error);
+                                        nfCommon.handleAjaxError(xhr, status, error);
                                     }
                                 });
                             }
@@ -110,7 +119,7 @@ nf.RemoteProcessGroupConfiguration = (function () {
          */
         showConfiguration: function (selection) {
             // if the specified component is a remote process group, load its properties
-            if (nf.CanvasUtils.isRemoteProcessGroup(selection)) {
+            if (nfCanvasUtils.isRemoteProcessGroup(selection)) {
                 var selectionData = selection.datum();
 
                 // populate the port settings
@@ -127,4 +136,4 @@ nf.RemoteProcessGroupConfiguration = (function () {
             }
         }
     };
-}());
+});

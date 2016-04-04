@@ -17,7 +17,18 @@
 
 /* global nf, d3 */
 
-nf.Funnel = (function () {
+define(['nf-canvas-utils',
+        'nf-selectable',
+        'nf-context-menu',
+        'nf-common',
+        'nf-draggable',
+        'nf-connectable'],
+    function (nfCanvasUtils,
+              nfSelectable,
+              nfContextMenu,
+              nfCommon,
+              nfDraggable,
+              nfConnectable) {
 
     var dimensions = {
         width: 61,
@@ -68,7 +79,7 @@ nf.Funnel = (function () {
                     'class': 'funnel component'
                 })
                 .classed('selected', selected)
-                .call(nf.CanvasUtils.position);
+                .call(nfCanvasUtils.position);
 
         // funnel border
         funnel.append('rect')
@@ -87,7 +98,7 @@ nf.Funnel = (function () {
 
         // processor icon
         funnel.append('image')
-                .call(nf.CanvasUtils.disableImageHref)
+                .call(nfCanvasUtils.disableImageHref)
                 .attr({
                     'xlink:href': 'images/iconFunnel.png',
                     'width': 41,
@@ -97,11 +108,11 @@ nf.Funnel = (function () {
                 });
 
         // always support selection
-        funnel.call(nf.Selectable.activate).call(nf.ContextMenu.activate);
+        funnel.call(nfSelectable.activate).call(nfContextMenu.activate);
 
         // only support dragging and connecting when appropriate
-        if (nf.Common.isDFM()) {
-            funnel.call(nf.Draggable.activate).call(nf.Connectable.activate);
+        if (nfCommon.isDFM()) {
+            funnel.call(nfDraggable.activate).call(nfConnectable.activate);
         }
 
         return funnel;
@@ -146,7 +157,7 @@ nf.Funnel = (function () {
          * @argument {boolean} selectAll                Whether or not to select the new contents
          */
         add: function (funnels, selectAll) {
-            selectAll = nf.Common.isDefinedAndNotNull(selectAll) ? selectAll : false;
+            selectAll = nfCommon.isDefinedAndNotNull(selectAll) ? selectAll : false;
 
             var add = function (funnel) {
                 // add the funnel
@@ -177,7 +188,7 @@ nf.Funnel = (function () {
          * @param {string} id
          */
         get: function (id) {
-            if (nf.Common.isUndefined(id)) {
+            if (nfCommon.isUndefined(id)) {
                 return funnelMap.values();
             } else {
                 return funnelMap.get(id);
@@ -191,7 +202,7 @@ nf.Funnel = (function () {
          * @param {string} id      Optional
          */
         refresh: function (id) {
-            if (nf.Common.isDefinedAndNotNull(id)) {
+            if (nfCommon.isDefinedAndNotNull(id)) {
                 d3.select('#id-' + id).call(updateFunnels);
             } else {
                 d3.selectAll('g.funnel').call(updateFunnels);
@@ -211,7 +222,7 @@ nf.Funnel = (function () {
                     url: funnel.uri,
                     dataType: 'json'
                 }).done(function (response) {
-                    nf.Funnel.set(response.funnel);
+                    this.set(response.funnel);
                 });
             }
         },
@@ -222,7 +233,7 @@ nf.Funnel = (function () {
          * @param {string} id   The id
          */
         position: function (id) {
-            d3.select('#id-' + id).call(nf.CanvasUtils.position);
+            d3.select('#id-' + id).call(nfCanvasUtils.position);
         },
         
         /**
@@ -276,7 +287,7 @@ nf.Funnel = (function () {
          * Removes all processors.
          */
         removeAll: function () {
-            nf.Funnel.remove(funnelMap.keys());
+            this.remove(funnelMap.keys());
         }
     };
-}());
+});

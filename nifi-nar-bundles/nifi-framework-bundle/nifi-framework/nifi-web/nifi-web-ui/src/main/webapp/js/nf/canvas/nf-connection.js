@@ -17,7 +17,18 @@
 
 /* global nf, d3 */
 
-nf.Connection = (function () {
+define(['nf-common',
+        'nf-canvas',
+        'nf-selectable',
+        'nf-context-menu',
+        'nf-dialog',
+        'nf-client'],
+    function (nfCommon,
+              nfCanvas,
+              nfSelectable,
+              nfContextMenu,
+              nfDialog,
+              nfClient) {
 
     // the dimensions for the connection label
     var dimensions = {
@@ -152,7 +163,7 @@ nf.Connection = (function () {
         for (var i = 0; i < line.length; i++) {
             if (i + 1 < line.length) {
                 var distance = distanceToSegment(p, line[i], line[i + 1]);
-                if (nf.Common.isUndefined(minimumDistance) || distance < minimumDistance) {
+                if (nfCommon.isUndefined(minimumDistance) || distance < minimumDistance) {
                     minimumDistance = distance;
                     index = i;
                 }
@@ -187,7 +198,7 @@ nf.Connection = (function () {
      * @param {object} terminal
      */
     var isGroup = function (terminal) {
-        return terminal.groupId !== nf.Canvas.getGroupId() && (isInputPortType(terminal.type) || isOutputPortType(terminal.type));
+        return terminal.groupId !== nfCanvas.getGroupId() && (isInputPortType(terminal.type) || isOutputPortType(terminal.type));
     };
     
     /**
@@ -197,7 +208,7 @@ nf.Connection = (function () {
      * @return {boolean} Whether expiration is configured
      */
     var isExpirationConfigured = function (connection) {
-        if (nf.Common.isDefinedAndNotNull(connection.flowFileExpiration)) {
+        if (nfCommon.isDefinedAndNotNull(connection.flowFileExpiration)) {
             var match = connection.flowFileExpiration.match(/^(\d+).*/);
             if (match !== null && match.length > 0) {
                 if (parseInt(match[0], 10) > 0) {
@@ -264,11 +275,11 @@ nf.Connection = (function () {
                 })
                 .on('mousedown.selection', function () {
                     // select the connection when clicking the selectable path
-                    nf.Selectable.select(d3.select(this.parentNode));
+                    nfSelectable.select(d3.select(this.parentNode));
                 })
-                .call(nf.ContextMenu.activate);
+                .call(nfContextMenu.activate);
 
-        if (nf.Common.isDFM()) {
+        if (nfCommon.isDFM()) {
             // only support adding bend points when appropriate
             selectableConnection.on('dblclick', function (d) {
                 var position = d3.mouse(this.parentNode);
@@ -317,7 +328,7 @@ nf.Connection = (function () {
         var unavailable = false;
 
         // verify each selected relationship is still available
-        if (nf.Common.isDefinedAndNotNull(d.component.selectedRelationships) && nf.Common.isDefinedAndNotNull(d.component.availableRelationships)) {
+        if (nfCommon.isDefinedAndNotNull(d.component.selectedRelationships) && nfCommon.isDefinedAndNotNull(d.component.availableRelationships)) {
             $.each(d.component.selectedRelationships, function (_, selectedRelationship) {
                 if ($.inArray(selectedRelationship, d.component.availableRelationships) === -1) {
                     unavailable = true;
@@ -340,7 +351,7 @@ nf.Connection = (function () {
                 var grouped = false;
 
                 // if there are more than one selected relationship, mark this as grouped
-                if (nf.Common.isDefinedAndNotNull(d.component.selectedRelationships) && d.component.selectedRelationships.length > 1) {
+                if (nfCommon.isDefinedAndNotNull(d.component.selectedRelationships) && d.component.selectedRelationships.length > 1) {
                     grouped = true;
                 }
 
@@ -363,7 +374,7 @@ nf.Connection = (function () {
 
             if (updatePath === true) {
                 // calculate the start and end points
-                var sourceComponentId = nf.CanvasUtils.getConnectionSourceComponentId(d.component);
+                var sourceComponentId = nfCanvasUtils.getConnectionSourceComponentId(d.component);
                 var sourceData = d3.select('#id-' + sourceComponentId).datum();
                 var end;
 
@@ -380,7 +391,7 @@ nf.Connection = (function () {
 
                 // if we are currently dragging the endpoint to a new target, use that 
                 // position, otherwise we need to calculate it for the current target
-                if (nf.Common.isDefinedAndNotNull(d.end) && d.end.dragging === true) {
+                if (nfCommon.isDefinedAndNotNull(d.end) && d.end.dragging === true) {
                     // since we're dragging, use the same object thats bound to the endpoint drag event
                     end = d.end;
 
@@ -390,7 +401,7 @@ nf.Connection = (function () {
                         var newDestinationData = newDestination.datum();
 
                         // get the position on the new destination perimeter
-                        var newEnd = nf.CanvasUtils.getPerimeterPoint(endAnchor, {
+                        var newEnd = nfCanvasUtils.getPerimeterPoint(endAnchor, {
                             'x': newDestinationData.component.position.x,
                             'y': newDestinationData.component.position.y,
                             'width': newDestinationData.dimensions.width,
@@ -402,11 +413,11 @@ nf.Connection = (function () {
                         end.y = newEnd.y;
                     }
                 } else {
-                    var destinationComponentId = nf.CanvasUtils.getConnectionDestinationComponentId(d.component);
+                    var destinationComponentId = nfCanvasUtils.getConnectionDestinationComponentId(d.component);
                     var destinationData = d3.select('#id-' + destinationComponentId).datum();
 
                     // get the position on the destination perimeter
-                    end = nf.CanvasUtils.getPerimeterPoint(endAnchor, {
+                    end = nfCanvasUtils.getPerimeterPoint(endAnchor, {
                         'x': destinationData.component.position.x,
                         'y': destinationData.component.position.y,
                         'width': destinationData.dimensions.width,
@@ -423,7 +434,7 @@ nf.Connection = (function () {
                 }
 
                 // get the position on the source perimeter
-                var start = nf.CanvasUtils.getPerimeterPoint(startAnchor, {
+                var start = nfCanvasUtils.getPerimeterPoint(startAnchor, {
                     'x': sourceData.component.position.x,
                     'y': sourceData.component.position.y,
                     'width': sourceData.dimensions.width,
@@ -471,7 +482,7 @@ nf.Connection = (function () {
                 // bends
                 // -----
 
-                if (nf.Common.isDFM()) {
+                if (nfCommon.isDFM()) {
                     // ------------------
                     // bends - startpoint
                     // ------------------
@@ -488,9 +499,9 @@ nf.Connection = (function () {
                             })
                             .on('mousedown.selection', function () {
                                 // select the connection when clicking the label
-                                nf.Selectable.select(d3.select(this.parentNode));
+                                nfSelectable.select(d3.select(this.parentNode));
                             })
-                            .call(nf.ContextMenu.activate);
+                            .call(nfContextMenu.activate);
 
                     // update the start point
                     startpoints.attr('transform', function (p) {
@@ -517,9 +528,9 @@ nf.Connection = (function () {
                             })
                             .on('mousedown.selection', function () {
                                 // select the connection when clicking the label
-                                nf.Selectable.select(d3.select(this.parentNode));
+                                nfSelectable.select(d3.select(this.parentNode));
                             })
-                            .call(nf.ContextMenu.activate);
+                            .call(nfContextMenu.activate);
 
                     // update the end point
                     endpoints.attr('transform', function (p) {
@@ -549,10 +560,10 @@ nf.Connection = (function () {
                                 d3.event.stopPropagation();
 
                                 // if this is a self loop prevent removing the last two bends
-                                var sourceComponentId = nf.CanvasUtils.getConnectionSourceComponentId(d.component);
-                                var destinationComponentId = nf.CanvasUtils.getConnectionDestinationComponentId(d.component);
+                                var sourceComponentId = nfCanvasUtils.getConnectionSourceComponentId(d.component);
+                                var destinationComponentId = nfCanvasUtils.getConnectionDestinationComponentId(d.component);
                                 if (sourceComponentId === destinationComponentId && d.component.bends.length <= 2) {
-                                    nf.Dialog.showOkDialog({
+                                    nfDialog.showOkDialog({
                                         dialogContent: 'Looping connections must have at least two bend points.',
                                         overlayBackground: false
                                     });
@@ -593,9 +604,9 @@ nf.Connection = (function () {
                             })
                             .on('mousedown.selection', function () {
                                 // select the connection when clicking the label
-                                nf.Selectable.select(d3.select(this.parentNode));
+                                nfSelectable.select(d3.select(this.parentNode));
                             })
-                            .call(nf.ContextMenu.activate);
+                            .call(nfContextMenu.activate);
 
                     // update the midpoints
                     midpoints.attr('transform', function (p) {
@@ -624,9 +635,9 @@ nf.Connection = (function () {
                                 })
                                 .on('mousedown.selection', function () {
                                     // select the connection when clicking the label
-                                    nf.Selectable.select(d3.select(this.parentNode));
+                                    nfSelectable.select(d3.select(this.parentNode));
                                 })
-                                .call(nf.ContextMenu.activate);
+                                .call(nfContextMenu.activate);
 
                         // connection label
                         connectionLabelContainer.append('rect')
@@ -672,7 +683,7 @@ nf.Connection = (function () {
                                     });
 
                             connectionFrom.append('image')
-                                    .call(nf.CanvasUtils.disableImageHref)
+                                    .call(nfCanvasUtils.disableImageHref)
                                     .attr({
                                         'class': 'connection-from-run-status',
                                         'width': 10,
@@ -697,7 +708,7 @@ nf.Connection = (function () {
                                     connectionFromLabel.text(null).selectAll('title').remove();
 
                                     // apply ellipsis to the label as necessary
-                                    nf.CanvasUtils.ellipsis(connectionFromLabel, d.component.source.name);
+                                    nfCanvasUtils.ellipsis(connectionFromLabel, d.component.source.name);
                                 }).append('title').text(function () {
                                     return d.component.source.name;
                                 });
@@ -752,7 +763,7 @@ nf.Connection = (function () {
                                     });
 
                             connectionTo.append('image')
-                                    .call(nf.CanvasUtils.disableImageHref)
+                                    .call(nfCanvasUtils.disableImageHref)
                                     .attr({
                                         'class': 'connection-to-run-status',
                                         'width': 10,
@@ -777,7 +788,7 @@ nf.Connection = (function () {
                                     connectionToLabel.text(null).selectAll('title').remove();
 
                                     // apply ellipsis to the label as necessary
-                                    nf.CanvasUtils.ellipsis(connectionToLabel, d.component.destination.name);
+                                    nfCanvasUtils.ellipsis(connectionToLabel, d.component.destination.name);
                                 }).append('title').text(function (d) {
                                     return d.component.destination.name;
                                 });
@@ -805,11 +816,11 @@ nf.Connection = (function () {
                     // -----------------------
 
                     // get the connection name
-                    var connectionNameValue = nf.CanvasUtils.formatConnectionName(d.component);
+                    var connectionNameValue = nfCanvasUtils.formatConnectionName(d.component);
                     var connectionName = connectionLabelContainer.select('g.connection-name-container');
 
                     // is there a name to render
-                    if (!nf.Common.isBlank(connectionNameValue)) {
+                    if (!nfCommon.isBlank(connectionNameValue)) {
                         // see if the connection name label is already rendered
                         if (connectionName.empty()) {
                             connectionName = connectionLabelContainer.append('g')
@@ -849,7 +860,7 @@ nf.Connection = (function () {
                                     connectionToLabel.text(null).selectAll('title').remove();
 
                                     // apply ellipsis to the label as necessary
-                                    nf.CanvasUtils.ellipsis(connectionToLabel, connectionNameValue);
+                                    nfCanvasUtils.ellipsis(connectionToLabel, connectionNameValue);
                                 }).append('title').text(function () {
                                     return connectionNameValue;
                                 });
@@ -948,7 +959,7 @@ nf.Connection = (function () {
                                 return 'Expires FlowFiles older than ' + d.component.flowFileExpiration;
                             });
 
-                    if (nf.Common.isDFM()) {
+                    if (nfCommon.isDFM()) {
                         // only support dragging the label when appropriate
                         connectionLabelContainer.call(labelDrag);
                     }
@@ -984,7 +995,7 @@ nf.Connection = (function () {
 
         updated.select('text.queued')
                 .text(function (d) {
-                    if (nf.Common.isDefinedAndNotNull(d.status)) {
+                    if (nfCommon.isDefinedAndNotNull(d.status)) {
                         return d.status.queued;
                     } else {
                         return '- / -';
@@ -1000,7 +1011,7 @@ nf.Connection = (function () {
      * @param {type} connection
      */
     var save = function (d, connection) {
-        var revision = nf.Client.getRevision();
+        var revision = nfClient.getRevision();
 
         var entity = {
             revision: revision,
@@ -1015,18 +1026,18 @@ nf.Connection = (function () {
             contentType: 'application/json'
         }).done(function (response) {
             // update the revision
-            nf.Client.setRevision(response.revision);
+            nfClient.setRevision(response.revision);
 
             // request was successful, update the entry
-            nf.Connection.set(response.connection);
+            this.set(response.connection);
         }).fail(function (xhr, status, error) {
             if (xhr.status === 400 || xhr.status === 404 || xhr.status === 409) {
-                nf.Dialog.showOkDialog({
-                    dialogContent: nf.Common.escapeHtml(xhr.responseText),
+                nfDialog.showOkDialog({
+                    dialogContent: nfCommon.escapeHtml(xhr.responseText),
                     overlayBackground: true
                 });
             } else {
-                nf.Common.handleAjaxError(xhr, status, error);
+                nfCommon.handleAjaxError(xhr, status, error);
             }
         });
     };
@@ -1035,7 +1046,7 @@ nf.Connection = (function () {
     var removeConnections = function (removed) {
         // consider reloading source/destination of connection being removed
         removed.each(function (d) {
-            nf.CanvasUtils.reloadConnectionSourceAndDestination(d.component.source.id, d.component.destination.id);
+            nfCanvasUtils.reloadConnectionSourceAndDestination(d.component.source.id, d.component.destination.id);
         });
         
         // remove the connection
@@ -1135,7 +1146,7 @@ nf.Connection = (function () {
 
                         // ensure the new destination is valid
                         d3.select('g.hover').classed('connectable-destination', function () {
-                            return nf.CanvasUtils.isValidConnectionDestination(d3.select(this));
+                            return nfCanvasUtils.isValidConnectionDestination(d3.select(this));
                         });
 
                         // redraw this connection
@@ -1158,28 +1169,28 @@ nf.Connection = (function () {
                             connection.call(updateConnections, true, false);
                         } else {
                             // prompt for the new port if appropriate
-                            if (nf.CanvasUtils.isProcessGroup(destination) || nf.CanvasUtils.isRemoteProcessGroup(destination)) {
+                            if (nfCanvasUtils.isProcessGroup(destination) || nfCanvasUtils.isRemoteProcessGroup(destination)) {
                                 // user will select new port and updated connect details will be set accordingly
-                                nf.ConnectionConfiguration.showConfiguration(connection, destination).done(function () {
+                                thisConfiguration.showConfiguration(connection, destination).done(function () {
                                     // reload the previous destination
-                                    nf.CanvasUtils.reloadConnectionSourceAndDestination(null, previousDestinationId);
+                                    nfCanvasUtils.reloadConnectionSourceAndDestination(null, previousDestinationId);
                                 }).fail(function () {
                                     // reset the connection
                                     connection.call(updateConnections, true, false);
                                 });
                             } else {
-                                var revision = nf.Client.getRevision();
+                                var revision = nfClient.getRevision();
 
                                 // get the destination details
                                 var destinationData = destination.datum();
-                                var destinationType = nf.CanvasUtils.getConnectableTypeForDestination(destination);
+                                var destinationType = nfCanvasUtils.getConnectableTypeForDestination(destination);
 
                                 var updatedConnectionData = {
                                     version: revision.version,
                                     clientId: revision.clientId,
                                     destinationId: destinationData.component.id,
                                     destinationType: destinationType,
-                                    destinationGroupId: nf.Canvas.getGroupId()
+                                    destinationGroupId: nfCanvas.getGroupId()
                                 };
 
                                 // if this is a self loop and there are less than 2 bends, add them
@@ -1188,8 +1199,8 @@ nf.Connection = (function () {
                                         x: destinationData.component.position.x + (destinationData.dimensions.width),
                                         y: destinationData.component.position.y + (destinationData.dimensions.height / 2)
                                     };
-                                    var xOffset = nf.Connection.config.selfLoopXOffset;
-                                    var yOffset = nf.Connection.config.selfLoopYOffset;
+                                    var xOffset = this.config.selfLoopXOffset;
+                                    var yOffset = this.config.selfLoopYOffset;
 
                                     updatedConnectionData.bends = [];
                                     updatedConnectionData.bends.push((rightCenter.x + xOffset) + ',' + (rightCenter.y - yOffset));
@@ -1205,25 +1216,25 @@ nf.Connection = (function () {
                                     var updatedConnectionData = response.connection;
 
                                     // update the revision
-                                    nf.Client.setRevision(response.revision);
+                                    nfClient.setRevision(response.revision);
 
                                     // refresh to update the label
-                                    nf.Connection.set(updatedConnectionData);
+                                    this.set(updatedConnectionData);
                                     
                                     // reload the previous destination and the new source/destination
-                                    nf.CanvasUtils.reloadConnectionSourceAndDestination(null, previousDestinationId);
-                                    nf.CanvasUtils.reloadConnectionSourceAndDestination(updatedConnectionData.source.id, updatedConnectionData.destination.id);
+                                    nfCanvasUtils.reloadConnectionSourceAndDestination(null, previousDestinationId);
+                                    nfCanvasUtils.reloadConnectionSourceAndDestination(updatedConnectionData.source.id, updatedConnectionData.destination.id);
                                 }).fail(function (xhr, status, error) {
                                     if (xhr.status === 400 || xhr.status === 404 || xhr.status === 409) {
-                                        nf.Dialog.showOkDialog({
-                                            dialogContent: nf.Common.escapeHtml(xhr.responseText),
+                                        nfDialog.showOkDialog({
+                                            dialogContent: nfCommon.escapeHtml(xhr.responseText),
                                             overlayBackground: true
                                         });
 
                                         // reset the connection
                                         connection.call(updateConnections, true, false);
                                     } else {
-                                        nf.Common.handleAjaxError(xhr, status, error);
+                                        nfCommon.handleAjaxError(xhr, status, error);
                                     }
                                 });
                             }
@@ -1262,10 +1273,10 @@ nf.Connection = (function () {
                                         .attr('width', width)
                                         .attr('height', height)
                                         .attr('stroke-width', function () {
-                                            return 1 / nf.Canvas.View.scale();
+                                            return 1 / nfCanvas.View.scale();
                                         })
                                         .attr('stroke-dasharray', function () {
-                                            return 4 / nf.Canvas.View.scale();
+                                            return 4 / nfCanvas.View.scale();
                                         })
                                         .datum({
                                             x: position.x,
@@ -1359,7 +1370,7 @@ nf.Connection = (function () {
          * @argument {boolean} selectAll                Whether or not to select the new contents
          */
         add: function (connections, selectAll) {
-            selectAll = nf.Common.isDefinedAndNotNull(selectAll) ? selectAll : false;
+            selectAll = nfCommon.isDefinedAndNotNull(selectAll) ? selectAll : false;
 
             var add = function (connection) {
                 // add the connection
@@ -1436,7 +1447,7 @@ nf.Connection = (function () {
          * @param {array} connectionStatus
          */
         setStatus: function (connectionStatus) {
-            if (nf.Common.isEmpty(connectionStatus)) {
+            if (nfCommon.isEmpty(connectionStatus)) {
                 return;
             }
 
@@ -1458,7 +1469,7 @@ nf.Connection = (function () {
          * @param {string} connectionId
          */
         refresh: function (connectionId) {
-            if (nf.Common.isDefinedAndNotNull(connectionId)) {
+            if (nfCommon.isDefinedAndNotNull(connectionId)) {
                 d3.select('#id-' + connectionId).call(updateConnections, true, true);
             } else {
                 d3.selectAll('g.connection').call(updateConnections, true, true);
@@ -1494,7 +1505,7 @@ nf.Connection = (function () {
          * Removes all processors.
          */
         removeAll: function () {
-            nf.Connection.remove(connectionMap.keys());
+            this.remove(connectionMap.keys());
         },
         
         /**
@@ -1509,7 +1520,7 @@ nf.Connection = (function () {
                     url: connection.uri,
                     dataType: 'json'
                 }).done(function (response) {
-                    nf.Connection.set(response.connection);
+                    this.set(response.connection);
                 });
             }
         },
@@ -1526,7 +1537,7 @@ nf.Connection = (function () {
                 var connection = entry.component;
 
                 // see if this component is the source or destination of this connection
-                if (nf.CanvasUtils.getConnectionSourceComponentId(connection) === id || nf.CanvasUtils.getConnectionDestinationComponentId(connection) === id) {
+                if (nfCanvasUtils.getConnectionSourceComponentId(connection) === id || nfCanvasUtils.getConnectionDestinationComponentId(connection) === id) {
                     connections.push(connection);
                 }
             });
@@ -1540,11 +1551,11 @@ nf.Connection = (function () {
          * @param {string} id
          */
         get: function (id) {
-            if (nf.Common.isUndefined(id)) {
+            if (nfCommon.isUndefined(id)) {
                 return connectionMap.values();
             } else {
                 return connectionMap.get(id);
             }
         }
     };
-}());
+});

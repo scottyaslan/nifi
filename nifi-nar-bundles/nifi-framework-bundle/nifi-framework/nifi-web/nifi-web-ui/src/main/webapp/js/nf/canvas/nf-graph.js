@@ -17,185 +17,200 @@
 
 /* global nf */
 
-nf.Graph = (function () {
+define(['nf-common',
+        'nf-label',
+        'nf-funnel',
+        'nf-port',
+        'nf-remote-process-group',
+        'nf-process-group',
+        'nf-processor',
+        'nf-connection'],
+    function (nfCommon,
+              nfLabel,
+              nfFunnel,
+              nfPort,
+              nfRemoteProcessGroup,
+              nfProcessGroup,
+              nfProcessor,
+              nfConnection) {
 
-    var combinePorts = function (contents) {
-        if (nf.Common.isDefinedAndNotNull(contents.inputPorts) && nf.Common.isDefinedAndNotNull(contents.outputPorts)) {
-            return contents.inputPorts.concat(contents.outputPorts);
-        } else if (nf.Common.isDefinedAndNotNull(contents.inputPorts)) {
-            return contents.inputPorts;
-        } else if (nf.Common.isDefinedAndNotNull(contents.outputPorts)) {
-            return contents.outputPorts;
-        } else {
-            return [];
-        }
-    };
+        var combinePorts = function (contents) {
+            if (nfCommon.isDefinedAndNotNull(contents.inputPorts) && nfCommon.isDefinedAndNotNull(contents.outputPorts)) {
+                return contents.inputPorts.concat(contents.outputPorts);
+            } else if (nfCommon.isDefinedAndNotNull(contents.inputPorts)) {
+                return contents.inputPorts;
+            } else if (nfCommon.isDefinedAndNotNull(contents.outputPorts)) {
+                return contents.outputPorts;
+            } else {
+                return [];
+            }
+        };
 
-    var combinePortStatus = function (status) {
-        if (nf.Common.isDefinedAndNotNull(status.inputPortStatusSnapshots) && nf.Common.isDefinedAndNotNull(status.outputPortStatusSnapshots)) {
-            return status.inputPortStatusSnapshots.concat(status.outputPortStatusSnapshots);
-        } else if (nf.Common.isDefinedAndNotNull(status.inputPortStatusSnapshots)) {
-            return status.inputPortStatusSnapshots;
-        } else if (nf.Common.isDefinedAndNotNull(status.outputPortStatusSnapshots)) {
-            return status.outputPortStatusSnapshots;
-        } else {
-            return [];
-        }
-    };
+        var combinePortStatus = function (status) {
+            if (nfCommon.isDefinedAndNotNull(status.inputPortStatusSnapshots) && nfCommon.isDefinedAndNotNull(status.outputPortStatusSnapshots)) {
+                return status.inputPortStatusSnapshots.concat(status.outputPortStatusSnapshots);
+            } else if (nfCommon.isDefinedAndNotNull(status.inputPortStatusSnapshots)) {
+                return status.inputPortStatusSnapshots;
+            } else if (nfCommon.isDefinedAndNotNull(status.outputPortStatusSnapshots)) {
+                return status.outputPortStatusSnapshots;
+            } else {
+                return [];
+            }
+        };
 
-    return {
-        init: function () {
+        return {
+            init: function (canvas, canvasUtils) {
 
-            // initialize the object responsible for each type of component
-            nf.Label.init();
-            nf.Funnel.init();
-            nf.Port.init();
-            nf.RemoteProcessGroup.init();
-            nf.ProcessGroup.init();
-            nf.Processor.init();
-            nf.Connection.init();
+                // initialize the object responsible for each type of component
+                nfLabel.init();
+                nfFunnel.init();
+                nfPort.init();
+                nfRemoteProcessGroup.init();
+                nfProcessGroup.init();
+                nfProcessor.init();
+                nfConnection.init();
 
-            // load the graph
-            return nf.CanvasUtils.enterGroup(nf.Canvas.getGroupId());
-        },
-        
-        /**
-         * Populates the graph with the resources defined in the response.
-         * 
-         * @argument {object} processGroupContents      The contents of the process group
-         * @argument {boolean} selectAll                Whether or not to select the new contents
-         */
-        add: function (processGroupContents, selectAll) {
-            selectAll = nf.Common.isDefinedAndNotNull(selectAll) ? selectAll : false;
+                // load the graph
+                return canvasUtils.enterGroup(canvas.getGroupId(), this, canvas);
+            },
 
-            // if we are going to select the new components, deselect the previous selection
-            if (selectAll) {
-                nf.CanvasUtils.getSelection().classed('selected', false);
-            }
+            /**
+             * Populates the graph with the resources defined in the response.
+             *
+             * @argument {object} processGroupContents      The contents of the process group
+             * @argument {boolean} selectAll                Whether or not to select the new contents
+             */
+            add: function (processGroupContents, selectAll, canvasUtils) {
+                selectAll = nfCommon.isDefinedAndNotNull(selectAll) ? selectAll : false;
 
-            // merge the ports together
-            var ports = combinePorts(processGroupContents);
+                // if we are going to select the new components, deselect the previous selection
+                if (selectAll) {
+                    canvasUtils.getSelection().classed('selected', false);
+                }
 
-            // add the components to the responsible object
-            if (!nf.Common.isEmpty(processGroupContents.labels)) {
-                nf.Label.add(processGroupContents.labels, selectAll);
-            }
-            if (!nf.Common.isEmpty(processGroupContents.funnels)) {
-                nf.Funnel.add(processGroupContents.funnels, selectAll);
-            }
-            if (!nf.Common.isEmpty(processGroupContents.remoteProcessGroups)) {
-                nf.RemoteProcessGroup.add(processGroupContents.remoteProcessGroups, selectAll);
-            }
-            if (!nf.Common.isEmpty(ports)) {
-                nf.Port.add(ports, selectAll);
-            }
-            if (!nf.Common.isEmpty(processGroupContents.processGroups)) {
-                nf.ProcessGroup.add(processGroupContents.processGroups, selectAll);
-            }
-            if (!nf.Common.isEmpty(processGroupContents.processors)) {
-                nf.Processor.add(processGroupContents.processors, selectAll);
-            }
-            if (!nf.Common.isEmpty(processGroupContents.connections)) {
-                nf.Connection.add(processGroupContents.connections, selectAll);
-            }
-            
-            // trigger the toolbar to refresh if the selection is changing
-            if (selectAll) {
-                nf.CanvasToolbar.refresh();
-            }
-        },
-        
-        /**
-         * Gets the components currently on the canvas.
-         */
-        get: function () {
-            return {
-                labels: nf.Label.get(),
-                funnels: nf.Funnel.get(),
-                ports: nf.Port.get(),
-                remoteProcessGroups: nf.RemoteProcessGroup.get(),
-                processGroups: nf.ProcessGroup.get(),
-                processors: nf.Processor.get(),
-                connections: nf.Connection.get()
-            };
-        },
-        
-        /**
-         * Sets the components contained within the specified process group.
-         * 
-         * @param {type} processGroupContents
-         */
-        set: function (processGroupContents) {
-            // merge the ports together
-            var ports = combinePorts(processGroupContents);
+                // merge the ports together
+                var ports = combinePorts(processGroupContents);
 
-            // set the components
-            if (!nf.Common.isEmpty(processGroupContents.labels)) {
-                nf.Label.set(processGroupContents.labels);
-            }
-            if (!nf.Common.isEmpty(processGroupContents.funnels)) {
-                nf.Funnel.set(processGroupContents.funnels);
-            }
-            if (!nf.Common.isEmpty(ports)) {
-                nf.Port.set(ports);
-            }
-            if (!nf.Common.isEmpty(processGroupContents.remoteProcessGroups)) {
-                nf.RemoteProcessGroup.set(processGroupContents.remoteProcessGroups);
-            }
-            if (!nf.Common.isEmpty(processGroupContents.processGroups)) {
-                nf.ProcessGroup.set(processGroupContents.processGroups);
-            }
-            if (!nf.Common.isEmpty(processGroupContents.processors)) {
-                nf.Processor.set(processGroupContents.processors);
-            }
-            if (!nf.Common.isEmpty(processGroupContents.connections)) {
-                nf.Connection.set(processGroupContents.connections);
-            }
-        },
-        
-        /**
-         * Populates the status for the components specified. This will update the content 
-         * of the existing components on the graph and will not cause them to be repainted. 
-         * This operation must be very inexpensive due to the frequency it is called.
-         * 
-         * @argument {object} aggregateSnapshot    The status of the process group aggregated accross the cluster
-         */
-        setStatus: function (aggregateSnapshot) {
-            // merge the port status together
-            var portStatus = combinePortStatus(aggregateSnapshot);
+                // add the components to the responsible object
+                if (!nfCommon.isEmpty(processGroupContents.labels)) {
+                    nfLabel.add(processGroupContents.labels, selectAll);
+                }
+                if (!nfCommon.isEmpty(processGroupContents.funnels)) {
+                    nfFunnel.add(processGroupContents.funnels, selectAll);
+                }
+                if (!nfCommon.isEmpty(processGroupContents.remoteProcessGroups)) {
+                    nfRemoteProcessGroup.add(processGroupContents.remoteProcessGroups, selectAll);
+                }
+                if (!nfCommon.isEmpty(ports)) {
+                    nfPort.add(ports, selectAll);
+                }
+                if (!nfCommon.isEmpty(processGroupContents.processGroups)) {
+                    nfProcessGroup.add(processGroupContents.processGroups, selectAll);
+                }
+                if (!nfCommon.isEmpty(processGroupContents.processors)) {
+                    nfProcessor.add(processGroupContents.processors, selectAll);
+                }
+                if (!nfCommon.isEmpty(processGroupContents.connections)) {
+                    nfConnection.add(processGroupContents.connections, selectAll);
+                }
 
-            // set the component status
-            nf.Port.setStatus(portStatus);
-            nf.RemoteProcessGroup.setStatus(aggregateSnapshot.remoteProcessGroupStatusSnapshots);
-            nf.ProcessGroup.setStatus(aggregateSnapshot.processGroupStatusSnapshots);
-            nf.Processor.setStatus(aggregateSnapshot.processorStatusSnapshots);
-            nf.Connection.setStatus(aggregateSnapshot.connectionStatusSnapshots);
-        },
-        
-        /**
-         * Clears all the components currently on the canvas. This function does not automatically refresh.
-         */
-        removeAll: function () {
-            // remove all the components
-            nf.Label.removeAll();
-            nf.Funnel.removeAll();
-            nf.Port.removeAll();
-            nf.RemoteProcessGroup.removeAll();
-            nf.ProcessGroup.removeAll();
-            nf.Processor.removeAll();
-            nf.Connection.removeAll();
-        },
-        
-        /**
-         * Refreshes all components currently on the canvas.
-         */
-        pan: function () {
-            // refresh the components
-            nf.Port.pan();
-            nf.RemoteProcessGroup.pan();
-            nf.ProcessGroup.pan();
-            nf.Processor.pan();
-            nf.Connection.pan();
-        }
-    };
-}());
+                // trigger the toolbar to refresh if the selection is changing
+                if (selectAll) {
+                    nfCanvasToolbar.refresh();
+                }
+            },
+
+            /**
+             * Gets the components currently on the canvas.
+             */
+            get: function () {
+                return {
+                    labels: nfLabel.get(),
+                    funnels: nfFunnel.get(),
+                    ports: nfPort.get(),
+                    remoteProcessGroups: nfRemoteProcessGroup.get(),
+                    processGroups: nfProcessGroup.get(),
+                    processors: nfProcessor.get(),
+                    connections: nfConnection.get()
+                };
+            },
+
+            /**
+             * Sets the components contained within the specified process group.
+             *
+             * @param {type} processGroupContents
+             */
+            set: function (processGroupContents) {
+                // merge the ports together
+                var ports = combinePorts(processGroupContents);
+
+                // set the components
+                if (!nfCommon.isEmpty(processGroupContents.labels)) {
+                    nfLabel.set(processGroupContents.labels);
+                }
+                if (!nfCommon.isEmpty(processGroupContents.funnels)) {
+                    nfFunnel.set(processGroupContents.funnels);
+                }
+                if (!nfCommon.isEmpty(ports)) {
+                    nfPort.set(ports);
+                }
+                if (!nfCommon.isEmpty(processGroupContents.remoteProcessGroups)) {
+                    nfRemoteProcessGroup.set(processGroupContents.remoteProcessGroups);
+                }
+                if (!nfCommon.isEmpty(processGroupContents.processGroups)) {
+                    nfProcessGroup.set(processGroupContents.processGroups);
+                }
+                if (!nfCommon.isEmpty(processGroupContents.processors)) {
+                    nfProcessor.set(processGroupContents.processors);
+                }
+                if (!nfCommon.isEmpty(processGroupContents.connections)) {
+                    nfConnection.set(processGroupContents.connections);
+                }
+            },
+
+            /**
+             * Populates the status for the components specified. This will update the content
+             * of the existing components on the graph and will not cause them to be repainted.
+             * This operation must be very inexpensive due to the frequency it is called.
+             *
+             * @argument {object} aggregateSnapshot    The status of the process group aggregated accross the cluster
+             */
+            setStatus: function (aggregateSnapshot) {
+                // merge the port status together
+                var portStatus = combinePortStatus(aggregateSnapshot);
+
+                // set the component status
+                nfPort.setStatus(portStatus);
+                nfRemoteProcessGroup.setStatus(aggregateSnapshot.remoteProcessGroupStatusSnapshots);
+                nfProcessGroup.setStatus(aggregateSnapshot.processGroupStatusSnapshots);
+                nfProcessor.setStatus(aggregateSnapshot.processorStatusSnapshots);
+                nfConnection.setStatus(aggregateSnapshot.connectionStatusSnapshots);
+            },
+
+            /**
+             * Clears all the components currently on the canvas. This function does not automatically refresh.
+             */
+            removeAll: function () {
+                // remove all the components
+                nfLabel.removeAll();
+                nfFunnel.removeAll();
+                nfPort.removeAll();
+                nfRemoteProcessGroup.removeAll();
+                nfProcessGroup.removeAll();
+                nfProcessor.removeAll();
+                nfConnection.removeAll();
+            },
+
+            /**
+             * Refreshes all components currently on the canvas.
+             */
+            pan: function () {
+                // refresh the components
+                nfPort.pan();
+                nfRemoteProcessGroup.pan();
+                nfProcessGroup.pan();
+                nfProcessor.pan();
+                nfConnection.pan();
+            }
+        };
+    });

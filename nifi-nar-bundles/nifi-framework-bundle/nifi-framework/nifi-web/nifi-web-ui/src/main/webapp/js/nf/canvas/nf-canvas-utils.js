@@ -17,7 +17,34 @@
 
 /* global nf, d3 */
 
-nf.CanvasUtils = (function () {
+define(['nf-common',
+        'nf-snippet',
+        'nf-birdseye',
+        'nf-canvas',
+        'nf-dialog',
+        'nf-actions',
+        'nf-clipboard',
+        'nf-connection',
+        'nf-storage',
+        'nf-processor',
+        'nf-port',
+        'nf-remote-process-group',
+        'nf-graph',
+        'nf-process-group'],
+    function (nfCommon,
+              nfSnippet,
+              nfBirdseye,
+              nfCanvas,
+              nfDialog,
+              nfActions,
+              nfClipboard,
+              nfConnection,
+              nfStorage,
+              nfProcessor,
+              nfPort,
+              nfRemoteProcessGroup,
+              nfGraph,
+              nfProcessGroup) {
 
     var config = {
         storage: {
@@ -54,14 +81,14 @@ nf.CanvasUtils = (function () {
     var moveComponents = function (components, groupId) {
         return $.Deferred(function (deferred) {
             // ensure the current selection is eligible for move into the specified group
-            nf.CanvasUtils.eligibleForMove(components, groupId).done(function () {
+            this.eligibleForMove(components, groupId).done(function () {
                 // create a snippet for the specified components and link to the data flow
-                var snippetDetails = nf.Snippet.marshal(components, true);
-                nf.Snippet.create(snippetDetails).done(function (response) {
+                var snippetDetails = nfSnippet.marshal(components, true);
+                nfSnippet.create(snippetDetails).done(function (response) {
                     var snippet = response.snippet;
 
                     // move the snippet into the target
-                    nf.Snippet.move(snippet.id, groupId).done(function () {
+                    nfSnippet.move(snippet.id, groupId).done(function () {
                         var componentMap = d3.map();
 
                         // add the id to the type's array
@@ -83,18 +110,18 @@ nf.CanvasUtils = (function () {
                         });
 
                         // refresh the birdseye
-                        nf.Birdseye.refresh();
+                        nfBirdseye.refresh();
                         deferred.resolve();
-                    }).fail(nf.Common.handleAjaxError).fail(function () {
+                    }).fail(nfCommon.handleAjaxError).fail(function () {
                         deferred.reject();
                     }).always(function () {
                         // unable to acutally move the components so attempt to
                         // unlink and remove just the snippet
-                        nf.Snippet.unlink(snippet.id).done(function () {
-                            nf.Snippet.remove(snippet.id);
+                        nfSnippet.unlink(snippet.id).done(function () {
+                            nfSnippet.remove(snippet.id);
                         });
                     });
-                }).fail(nf.Common.handleAjaxError).fail(function () {
+                }).fail(nfCommon.handleAjaxError).fail(function () {
                     deferred.reject();
                 });
             }).fail(function () {
@@ -195,16 +222,16 @@ nf.CanvasUtils = (function () {
          */
         showComponent: function (groupId, componentId) {
             // ensure the group id is specified
-            if (nf.Common.isDefinedAndNotNull(groupId)) {
+            if (nfCommon.isDefinedAndNotNull(groupId)) {
                 // initiate a graph refresh
                 var refreshGraph = $.Deferred(function (deferred) {
                     // load a different group if necessary
-                    if (groupId !== nf.Canvas.getGroupId()) {
-                        nf.Canvas.setGroupId(groupId);
-                        nf.Canvas.reload().done(function () {
+                    if (groupId !== nfCanvas.getGroupId()) {
+                        nfCanvas.setGroupId(groupId);
+                        nfCanvas.reload().done(function () {
                             deferred.resolve();
                         }).fail(function () {
-                            nf.Dialog.showOkDialog({
+                            nfDialog.showOkDialog({
                                 dialogContent: 'Unable to load the group for the specified component.',
                                 overlayBackground: false
                             });
@@ -220,9 +247,9 @@ nf.CanvasUtils = (function () {
                     // attempt to locate the corresponding component
                     var component = d3.select('#id-' + componentId);
                     if (!component.empty()) {
-                        nf.Actions.show(component);
+                        nfActions.show(component);
                     } else {
-                        nf.Dialog.showOkDialog({
+                        nfDialog.showOkDialog({
                             dialogContent: 'Unable to find the specified component.',
                             overlayBackground: false
                         });
@@ -245,7 +272,7 @@ nf.CanvasUtils = (function () {
          * @param {type} boundingBox
          */
         centerBoundingBox: function (boundingBox) {
-            var scale = nf.Canvas.View.scale();
+            var scale = nfCanvas.View.scale();
 
             // get the canvas normalized width and height
             var canvasContainer = $('#canvas-container');
@@ -256,7 +283,7 @@ nf.CanvasUtils = (function () {
             var center = [(screenWidth / 2) - (boundingBox.width / 2), (screenHeight / 2) - (boundingBox.height / 2)];
 
             // calculate the difference between the center point and the position of this component and convert to screen space
-            nf.Canvas.View.translate([(center[0] - boundingBox.x) * scale, (center[1] - boundingBox.y) * scale]);
+            nfCanvas.View.translate([(center[0] - boundingBox.x) * scale, (center[1] - boundingBox.y) * scale]);
         },
         
         /**
@@ -338,7 +365,7 @@ nf.CanvasUtils = (function () {
 
             // go through each word
             var word = words.pop();
-            while (nf.Common.isDefinedAndNotNull(word)) {
+            while (nfCommon.isDefinedAndNotNull(word)) {
                 // add the current word
                 line.push(word);
 
@@ -368,7 +395,7 @@ nf.CanvasUtils = (function () {
                         var remainder = [word].concat(words.reverse());
 
                         // apply ellipsis to the last line
-                        nf.CanvasUtils.ellipsis(tspan, remainder.join(' '));
+                        this.ellipsis(tspan, remainder.join(' '));
 
                         // we've reached the line count
                         break;
@@ -395,7 +422,7 @@ nf.CanvasUtils = (function () {
          */
         activeThreadCount: function (selection, d, setOffset) {
             // if there is active threads show the count, otherwise hide
-            if (nf.Common.isDefinedAndNotNull(d.status) && d.status.activeThreadCount > 0) {
+            if (nfCommon.isDefinedAndNotNull(d.status) && d.status.activeThreadCount > 0) {
                 // update the active thread count
                 var activeThreadCount = selection.select('text.active-thread-count')
                         .text(function () {
@@ -464,7 +491,7 @@ nf.CanvasUtils = (function () {
          * @param {function} offset                         Optional offset
          */
         bulletins: function (selection, d, getTooltipContainer, offset) {
-            offset = nf.Common.isDefinedAndNotNull(offset) ? offset : 0;
+            offset = nfCommon.isDefinedAndNotNull(offset) ? offset : 0;
 
             // remove any existing tip if necessary
             var tip = d3.select('#bulletin-tip-' + d.component.id);
@@ -473,7 +500,7 @@ nf.CanvasUtils = (function () {
             }
 
             // if there are bulletins show them, otherwise hide
-            if (nf.Common.isDefinedAndNotNull(d.status) && !nf.Common.isEmpty(d.status.bulletins)) {
+            if (nfCommon.isDefinedAndNotNull(d.status) && !nfCommon.isEmpty(d.status.bulletins)) {
                 // update the tooltip
                 selection.select('image.bulletin-icon')
                         .style('display', 'block')
@@ -493,10 +520,10 @@ nf.CanvasUtils = (function () {
                                     .attr('class', 'tooltip nifi-tooltip')
                                     .html(function () {
                                         // format the bulletins
-                                        var bulletins = nf.Common.getFormattedBulletins(d.status.bulletins);
+                                        var bulletins = nfCommon.getFormattedBulletins(d.status.bulletins);
 
                                         // create the unordered list based off the formatted bulletins
-                                        var list = nf.Common.formatUnorderedList(bulletins);
+                                        var list = nfCommon.formatUnorderedList(bulletins);
                                         if (list === null || list.length === 0) {
                                             return '';
                                         } else {
@@ -505,7 +532,7 @@ nf.CanvasUtils = (function () {
                                     });
 
                             // add the tooltip
-                            nf.CanvasUtils.canvasTooltip(tip, bulletinIcon);
+                            this.canvasTooltip(tip, bulletinIcon);
                         });
             } else {
                 selection.selectAll('image.bulletin-icon').style('display', 'none');
@@ -543,10 +570,10 @@ nf.CanvasUtils = (function () {
             
             // determine if the current selection is entirely processors or labels
             var selectedProcessors = selection.filter(function(d) {
-                return nf.CanvasUtils.isProcessor(d3.select(this));
+                return this.isProcessor(d3.select(this));
             });
             var selectedLabels = selection.filter(function(d) {
-                return nf.CanvasUtils.isLabel(d3.select(this));
+                return this.isLabel(d3.select(this));
             });
 
             var allProcessors = selectedProcessors.size() === selection.size();
@@ -640,7 +667,7 @@ nf.CanvasUtils = (function () {
 
             var runnable = true;
             selection.each(function () {
-                if (!nf.CanvasUtils.isRunnable(d3.select(this))) {
+                if (!this.isRunnable(d3.select(this))) {
                     runnable = false;
                     return false;
                 }
@@ -659,11 +686,11 @@ nf.CanvasUtils = (function () {
             var runnable = false;
 
             var selectionData = selection.datum();
-            if (nf.CanvasUtils.isProcessor(selection)) {
-                runnable = nf.CanvasUtils.supportsModification(selection) && nf.Common.isEmpty(selectionData.component.validationErrors);
-            } else if (nf.CanvasUtils.isInputPort(selection) || nf.CanvasUtils.isOutputPort(selection)) {
-                runnable = nf.CanvasUtils.supportsModification(selection);
-            } else if (nf.CanvasUtils.isProcessGroup(selection)) {
+            if (this.isProcessor(selection)) {
+                runnable = this.supportsModification(selection) && nfCommon.isEmpty(selectionData.component.validationErrors);
+            } else if (this.isInputPort(selection) || this.isOutputPort(selection)) {
+                runnable = this.supportsModification(selection);
+            } else if (this.isProcessGroup(selection)) {
                 runnable = true;
             }
 
@@ -683,7 +710,7 @@ nf.CanvasUtils = (function () {
 
             var stoppable = true;
             selection.each(function () {
-                if (!nf.CanvasUtils.isStoppable(d3.select(this))) {
+                if (!this.isStoppable(d3.select(this))) {
                     stoppable = false;
                     return false;
                 }
@@ -702,9 +729,9 @@ nf.CanvasUtils = (function () {
             var stoppable = false;
 
             var selectionData = selection.datum();
-            if (nf.CanvasUtils.isProcessor(selection) || nf.CanvasUtils.isInputPort(selection) || nf.CanvasUtils.isOutputPort(selection)) {
+            if (this.isProcessor(selection) || this.isInputPort(selection) || this.isOutputPort(selection)) {
                 stoppable = selectionData.component.state === 'RUNNING';
-            } else if (nf.CanvasUtils.isProcessGroup(selection)) {
+            } else if (this.isProcessGroup(selection)) {
                 stoppable = true;
             }
 
@@ -722,8 +749,8 @@ nf.CanvasUtils = (function () {
                 var selectedData = selected.datum();
 
                 // ensure its a processor, input port, or output port and supports modification and is disabled (can enable)
-                return ((nf.CanvasUtils.isProcessor(selected) || nf.CanvasUtils.isInputPort(selected) || nf.CanvasUtils.isOutputPort(selected)) &&
-                        nf.CanvasUtils.supportsModification(selected) &&
+                return ((this.isProcessor(selected) || this.isInputPort(selected) || this.isOutputPort(selected)) &&
+                        this.supportsModification(selected) &&
                         selectedData.component.state === 'DISABLED');
             });
         },
@@ -738,7 +765,7 @@ nf.CanvasUtils = (function () {
                 return false;
             }
 
-            return !nf.CanvasUtils.filterEnable(selection).empty();
+            return !this.filterEnable(selection).empty();
         },
 
         /**
@@ -752,8 +779,8 @@ nf.CanvasUtils = (function () {
                 var selectedData = selected.datum();
 
                 // ensure its a processor, input port, or output port and supports modification and is stopped (can disable)
-                return ((nf.CanvasUtils.isProcessor(selected) || nf.CanvasUtils.isInputPort(selected) || nf.CanvasUtils.isOutputPort(selected)) &&
-                        nf.CanvasUtils.supportsModification(selected) &&
+                return ((this.isProcessor(selected) || this.isInputPort(selected) || this.isOutputPort(selected)) &&
+                        this.supportsModification(selected) &&
                         selectedData.component.state === 'STOPPED');
             });
         },
@@ -768,7 +795,7 @@ nf.CanvasUtils = (function () {
                 return false;
             }
 
-            return !nf.CanvasUtils.filterDisable(selection).empty();
+            return !this.filterDisable(selection).empty();
         },
 
 
@@ -785,7 +812,7 @@ nf.CanvasUtils = (function () {
 
             var canStartTransmitting = true;
             selection.each(function () {
-                if (!nf.CanvasUtils.canStartTransmitting(d3.select(this))) {
+                if (!this.canStartTransmitting(d3.select(this))) {
                     canStartTransmitting = false;
                 }
             });
@@ -798,7 +825,7 @@ nf.CanvasUtils = (function () {
          * @argument {selection} selection      The selection
          */
         canStartTransmitting: function (selection) {
-            return nf.CanvasUtils.isRemoteProcessGroup(selection);
+            return this.isRemoteProcessGroup(selection);
         },
         
         /**
@@ -814,7 +841,7 @@ nf.CanvasUtils = (function () {
 
             var canStopTransmitting = true;
             selection.each(function () {
-                if (!nf.CanvasUtils.canStopTransmitting(d3.select(this))) {
+                if (!this.canStopTransmitting(d3.select(this))) {
                     canStopTransmitting = false;
                 }
             });
@@ -827,7 +854,7 @@ nf.CanvasUtils = (function () {
          * @argument {selection} selection      The selection
          */
         canStopTransmitting: function (selection) {
-            return nf.CanvasUtils.isRemoteProcessGroup(selection);
+            return this.isRemoteProcessGroup(selection);
         },
         
         /**
@@ -841,7 +868,7 @@ nf.CanvasUtils = (function () {
                 return false;
             }
 
-            return nf.CanvasUtils.supportsModification(selection);
+            return this.supportsModification(selection);
         },
         
         /**
@@ -853,45 +880,45 @@ nf.CanvasUtils = (function () {
             var selectionData = selection.datum();
 
             var supportsModification = false;
-            if (nf.CanvasUtils.isProcessor(selection) || nf.CanvasUtils.isInputPort(selection) || nf.CanvasUtils.isOutputPort(selection)) {
-                if (nf.Common.isDefinedAndNotNull(selectionData.status)) {
-                    supportsModification = !(selectionData.component.state === 'RUNNING' || nf.Common.isDefinedAndNotNull(selectionData.status.activeThreadCount) && selectionData.status.activeThreadCount > 0);
+            if (this.isProcessor(selection) || this.isInputPort(selection) || this.isOutputPort(selection)) {
+                if (nfCommon.isDefinedAndNotNull(selectionData.status)) {
+                    supportsModification = !(selectionData.component.state === 'RUNNING' || nfCommon.isDefinedAndNotNull(selectionData.status.activeThreadCount) && selectionData.status.activeThreadCount > 0);
                 } else {
                     supportsModification = selectionData.component.state !== 'RUNNING';
                 }
-            } else if (nf.CanvasUtils.isRemoteProcessGroup(selection)) {
-                if (nf.Common.isDefinedAndNotNull(selectionData.status)) {
-                    supportsModification = !(selectionData.component.transmitting === true || nf.Common.isDefinedAndNotNull(selectionData.status.activeThreadCount) && selectionData.status.activeThreadCount > 0);
+            } else if (this.isRemoteProcessGroup(selection)) {
+                if (nfCommon.isDefinedAndNotNull(selectionData.status)) {
+                    supportsModification = !(selectionData.component.transmitting === true || nfCommon.isDefinedAndNotNull(selectionData.status.activeThreadCount) && selectionData.status.activeThreadCount > 0);
                 } else {
                     supportsModification = selectionData.component.transmitting !== true;
                 }
-            } else if (nf.CanvasUtils.isProcessGroup(selection)) {
+            } else if (this.isProcessGroup(selection)) {
                 supportsModification = true;
-            } else if (nf.CanvasUtils.isFunnel(selection)) {
+            } else if (this.isFunnel(selection)) {
                 supportsModification = true;
-            } else if (nf.CanvasUtils.isLabel(selection)) {
+            } else if (this.isLabel(selection)) {
                 supportsModification = true;
-            } else if (nf.CanvasUtils.isConnection(selection)) {
+            } else if (this.isConnection(selection)) {
                 var isSourceConfigurable = false;
                 var isDestinationConfigurable = false;
 
-                var sourceComponentId = nf.CanvasUtils.getConnectionSourceComponentId(selectionData.component);
+                var sourceComponentId = this.getConnectionSourceComponentId(selectionData.component);
                 var source = d3.select('#id-' + sourceComponentId);
                 if (!source.empty()) {
-                    if (nf.CanvasUtils.isRemoteProcessGroup(source) || nf.CanvasUtils.isProcessGroup(source)) {
+                    if (this.isRemoteProcessGroup(source) || this.isProcessGroup(source)) {
                         isSourceConfigurable = true;
                     } else {
-                        isSourceConfigurable = nf.CanvasUtils.supportsModification(source);
+                        isSourceConfigurable = this.supportsModification(source);
                     }
                 }
 
-                var destinationComponentId = nf.CanvasUtils.getConnectionDestinationComponentId(selectionData.component);
+                var destinationComponentId = this.getConnectionDestinationComponentId(selectionData.component);
                 var destination = d3.select('#id-' + destinationComponentId);
                 if (!destination.empty()) {
-                    if (nf.CanvasUtils.isRemoteProcessGroup(destination) || nf.CanvasUtils.isProcessGroup(destination)) {
+                    if (this.isRemoteProcessGroup(destination) || this.isProcessGroup(destination)) {
                         isDestinationConfigurable = true;
                     } else {
-                        isDestinationConfigurable = nf.CanvasUtils.supportsModification(destination);
+                        isDestinationConfigurable = this.supportsModification(destination);
                     }
                 }
 
@@ -907,15 +934,15 @@ nf.CanvasUtils = (function () {
          */
         getConnectableTypeForSource: function (selection) {
             var type;
-            if (nf.CanvasUtils.isProcessor(selection)) {
+            if (this.isProcessor(selection)) {
                 type = 'PROCESSOR';
-            } else if (nf.CanvasUtils.isRemoteProcessGroup(selection)) {
+            } else if (this.isRemoteProcessGroup(selection)) {
                 type = 'REMOTE_OUTPUT_PORT';
-            } else if (nf.CanvasUtils.isProcessGroup(selection)) {
+            } else if (this.isProcessGroup(selection)) {
                 type = 'OUTPUT_PORT';
-            } else if (nf.CanvasUtils.isInputPort(selection)) {
+            } else if (this.isInputPort(selection)) {
                 type = 'INPUT_PORT';
-            } else if (nf.CanvasUtils.isFunnel(selection)) {
+            } else if (this.isFunnel(selection)) {
                 type = 'FUNNEL';
             }
             return type;
@@ -928,15 +955,15 @@ nf.CanvasUtils = (function () {
          */
         getConnectableTypeForDestination: function (selection) {
             var type;
-            if (nf.CanvasUtils.isProcessor(selection)) {
+            if (this.isProcessor(selection)) {
                 type = 'PROCESSOR';
-            } else if (nf.CanvasUtils.isRemoteProcessGroup(selection)) {
+            } else if (this.isRemoteProcessGroup(selection)) {
                 type = 'REMOTE_INPUT_PORT';
-            } else if (nf.CanvasUtils.isProcessGroup(selection)) {
+            } else if (this.isProcessGroup(selection)) {
                 type = 'INPUT_PORT';
-            } else if (nf.CanvasUtils.isOutputPort(selection)) {
+            } else if (this.isOutputPort(selection)) {
                 type = 'OUTPUT_PORT';
-            } else if (nf.CanvasUtils.isFunnel(selection)) {
+            } else if (this.isFunnel(selection)) {
                 type = 'FUNNEL';
             }
             return type;
@@ -956,18 +983,18 @@ nf.CanvasUtils = (function () {
             // determine how many copyable componets are selected
             var copyable = selection.filter(function (d) {
                 var selected = d3.select(this);
-                if (nf.CanvasUtils.isConnection(selected)) {
+                if (this.isConnection(selected)) {
                     var sourceIncluded = !selection.filter(function (source) {
-                        var sourceComponentId = nf.CanvasUtils.getConnectionSourceComponentId(d.component);
+                        var sourceComponentId = this.getConnectionSourceComponentId(d.component);
                         return sourceComponentId === source.component.id;
                     }).empty();
                     var destinationIncluded = !selection.filter(function (destination) {
-                        var destinationComponentId = nf.CanvasUtils.getConnectionDestinationComponentId(d.component);
+                        var destinationComponentId = this.getConnectionDestinationComponentId(d.component);
                         return destinationComponentId === destination.component.id;
                     }).empty();
                     return sourceIncluded && destinationIncluded;
                 } else {
-                    return nf.CanvasUtils.isProcessor(selected) || nf.CanvasUtils.isFunnel(selected) || nf.CanvasUtils.isLabel(selected) || nf.CanvasUtils.isProcessGroup(selected) || nf.CanvasUtils.isRemoteProcessGroup(selected) || nf.CanvasUtils.isInputPort(selected) || nf.CanvasUtils.isOutputPort(selected);
+                    return this.isProcessor(selected) || this.isFunnel(selected) || this.isLabel(selected) || this.isProcessGroup(selected) || this.isRemoteProcessGroup(selected) || this.isInputPort(selected) || this.isOutputPort(selected);
                 }
             });
 
@@ -979,25 +1006,25 @@ nf.CanvasUtils = (function () {
          * Determines if something is currently pastable.
          */
         isPastable: function () {
-            return nf.Clipboard.isCopied();
+            return nfClipboard.isCopied();
         },
         
         /**
          * Persists the current user view.
          */
         persistUserView: function () {
-            var name = config.storage.namePrefix + nf.Canvas.getGroupId();
+            var name = config.storage.namePrefix + nfCanvas.getGroupId();
 
             // create the item to store
-            var translate = nf.Canvas.View.translate();
+            var translate = nfCanvas.View.translate();
             var item = {
-                scale: nf.Canvas.View.scale(),
+                scale: nfCanvas.View.scale(),
                 translateX: translate[0],
                 translateY: translate[1]
             };
 
             // store the item
-            nf.Storage.setItem(name, item);
+            nfStorage.setItem(name, item);
         },
         
         /**
@@ -1006,9 +1033,9 @@ nf.CanvasUtils = (function () {
          * @param {object} connection
          */
         formatConnectionName: function (connection) {
-            if (!nf.Common.isBlank(connection.name)) {
+            if (!nfCommon.isBlank(connection.name)) {
                 return connection.name;
-            } else if (nf.Common.isDefinedAndNotNull(connection.selectedRelationships)) {
+            } else if (nfCommon.isDefinedAndNotNull(connection.selectedRelationships)) {
                 return connection.selectedRelationships.join(', ');
             }
             return '';
@@ -1021,32 +1048,32 @@ nf.CanvasUtils = (function () {
          * @param {string} destinationComponentId     The connection destination id
          */
         reloadConnectionSourceAndDestination: function (sourceComponentId, destinationComponentId) {
-            if (nf.Common.isBlank(sourceComponentId) === false) {
+            if (nfCommon.isBlank(sourceComponentId) === false) {
                 var source = d3.select('#id-' + sourceComponentId);
                 if (source.empty() === false) {
                     var sourceData = source.datum();
 
                     // update the source status if necessary
-                    if (nf.CanvasUtils.isProcessor(source)) {
-                        nf.Processor.reload(sourceData.component);
-                    } else if (nf.CanvasUtils.isInputPort(source)) {
-                        nf.Port.reload(sourceData.component);
-                    } else if (nf.CanvasUtils.isRemoteProcessGroup(source)) {
-                        nf.RemoteProcessGroup.reload(sourceData.component);
+                    if (this.isProcessor(source)) {
+                        nfProcessor.reload(sourceData.component);
+                    } else if (this.isInputPort(source)) {
+                        nfPort.reload(sourceData.component);
+                    } else if (this.isRemoteProcessGroup(source)) {
+                        nfRemoteProcessGroup.reload(sourceData.component);
                     }
                 }
             }
 
-            if (nf.Common.isBlank(destinationComponentId) === false) {
+            if (nfCommon.isBlank(destinationComponentId) === false) {
                 var destination = d3.select('#id-' + destinationComponentId);
                 if (destination.empty() === false) {
                     var destinationData = destination.datum();
 
                     // update the destination component accordingly
-                    if (nf.CanvasUtils.isProcessor(destination)) {
-                        nf.Processor.reload(destinationData.component);
-                    } else if (nf.CanvasUtils.isRemoteProcessGroup(destination)) {
-                        nf.RemoteProcessGroup.reload(destinationData.component);
+                    if (this.isProcessor(destination)) {
+                        nfProcessor.reload(destinationData.component);
+                    } else if (this.isRemoteProcessGroup(destination)) {
+                        nfRemoteProcessGroup.reload(destinationData.component);
                     }
                 }
             }
@@ -1061,7 +1088,7 @@ nf.CanvasUtils = (function () {
          */
         getConnectionSourceComponentId: function (connection) {
             var sourceId = connection.source.id;
-            if (connection.source.groupId !== nf.Canvas.getGroupId()) {
+            if (connection.source.groupId !== nfCanvas.getGroupId()) {
                 sourceId = connection.source.groupId;
             }
             return sourceId;
@@ -1076,7 +1103,7 @@ nf.CanvasUtils = (function () {
          */
         getConnectionDestinationComponentId: function (connection) {
             var destinationId = connection.destination.id;
-            if (connection.destination.groupId !== nf.Canvas.getGroupId()) {
+            if (connection.destination.groupId !== nfCanvas.getGroupId()) {
                 destinationId = connection.destination.groupId;
             }
             return destinationId;
@@ -1091,18 +1118,18 @@ nf.CanvasUtils = (function () {
 
             try {
                 // see if we can restore the view position from storage
-                var name = config.storage.namePrefix + nf.Canvas.getGroupId();
-                var item = nf.Storage.getItem(name);
+                var name = config.storage.namePrefix + nfCanvas.getGroupId();
+                var item = nfStorage.getItem(name);
 
                 // ensure the item is valid
-                if (nf.Common.isDefinedAndNotNull(item)) {
+                if (nfCommon.isDefinedAndNotNull(item)) {
                     if (isFinite(item.scale) && isFinite(item.translateX) && isFinite(item.translateY)) {
                         // restore previous view
-                        nf.Canvas.View.translate([item.translateX, item.translateY]);
-                        nf.Canvas.View.scale(item.scale);
+                        nfCanvas.View.translate([item.translateX, item.translateY]);
+                        nfCanvas.View.scale(item.scale);
 
                         // refresh the canvas
-                        nf.Canvas.View.refresh({
+                        nfCanvas.View.refresh({
                             transition: true
                         });
 
@@ -1124,27 +1151,27 @@ nf.CanvasUtils = (function () {
          */
         enterGroup: function (groupId) {
             // set the new group id
-            nf.Canvas.setGroupId(groupId);
+            nfCanvas.setGroupId(groupId);
 
             // clear the current components
-            nf.Graph.removeAll();
+            nfGraph.removeAll();
 
             // reload the graph
-            return nf.Canvas.reload().done(function () {
+            return nfCanvas.reload().done(function () {
                 // attempt to restore the view
-                var viewRestored = nf.CanvasUtils.restoreUserView();
+                var viewRestored = this.restoreUserView();
 
                 // if the view was not restore attempt to fit
                 if (viewRestored === false) {
-                    nf.Canvas.View.fit();
+                    nfCanvas.View.fit();
 
                     // refresh the canvas
-                    nf.Canvas.View.refresh({
+                    nfCanvas.View.refresh({
                         transition: true
                     });
                 }
             }).fail(function () {
-                nf.Dialog.showOkDialog({
+                nfDialog.showOkDialog({
                     dialogContent: 'Unable to enter the selected group.',
                     overlayBackground: false
                 });
@@ -1161,11 +1188,11 @@ nf.CanvasUtils = (function () {
 
             selection.each(function (d) {
                 var selected = d3.select(this);
-                if (!nf.CanvasUtils.isConnection(selected)) {
-                    if (nf.Common.isUndefined(origin.x) || d.component.position.x < origin.x) {
+                if (!this.isConnection(selected)) {
+                    if (nfCommon.isUndefined(origin.x) || d.component.position.x < origin.x) {
                         origin.x = d.component.position.x;
                     }
-                    if (nf.Common.isUndefined(origin.y) || d.component.position.y < origin.y) {
+                    if (nfCommon.isUndefined(origin.y) || d.component.position.y < origin.y) {
                         origin.y = d.component.position.y;
                     }
                 }
@@ -1180,11 +1207,11 @@ nf.CanvasUtils = (function () {
          * @param {selection} components
          */
         moveComponentsToParent: function (components) {
-            var groupId = nf.Canvas.getParentGroupId();
+            var groupId = nfCanvas.getParentGroupId();
             
             // if the group id is null, we're already in the top most group
             if (groupId === null) {
-                nf.Dialog.showOkDialog('Components are already in the topmost group.');
+                nfDialog.showOkDialog('Components are already in the topmost group.');
             } else {
                 moveComponents(components, groupId);
             }
@@ -1202,7 +1229,7 @@ nf.CanvasUtils = (function () {
             // move the components into the destination and...
             moveComponents(components, groupData.component.id).done(function () {
                 // reload the target group
-                nf.ProcessGroup.reload(groupData.component);
+                nfProcessGroup.reload(groupData.component);
             });
         },
         
@@ -1216,8 +1243,8 @@ nf.CanvasUtils = (function () {
         trimDanglingEdges: function (selection) {
             // returns whether the source and destination of the specified connection are present in the specified selection
             var keepConnection = function (connection) {
-                var sourceComponentId = nf.CanvasUtils.getConnectionSourceComponentId(connection);
-                var destinationComponentId = nf.CanvasUtils.getConnectionDestinationComponentId(connection);
+                var sourceComponentId = this.getConnectionSourceComponentId(connection);
+                var destinationComponentId = this.getConnectionDestinationComponentId(connection);
 
                 // determine if both source and destination are selected
                 var includesSource = false;
@@ -1268,7 +1295,7 @@ nf.CanvasUtils = (function () {
                 components.set(d.component.id, d.component);
 
                 // check all connections of this component
-                $.each(nf.Connection.getComponentConnections(d.component.id), function (_, connection) {
+                $.each(nfConnection.getComponentConnections(d.component.id), function (_, connection) {
                     if (!connections.has(connection.id)) {
                         isDisconnected = false;
                         return false;
@@ -1281,8 +1308,8 @@ nf.CanvasUtils = (function () {
                 connections.forEach(function (id, connection) {
                     if (isDisconnected) {
                         // determine whether this connection and its components are included within the selection
-                        isDisconnected = components.has(nf.CanvasUtils.getConnectionSourceComponentId(connection)) &&
-                                components.has(nf.CanvasUtils.getConnectionDestinationComponentId(connection));
+                        isDisconnected = components.has(this.getConnectionSourceComponentId(connection)) &&
+                                components.has(this.getConnectionDestinationComponentId(connection));
                     }
                 });
             }
@@ -1306,9 +1333,9 @@ nf.CanvasUtils = (function () {
             // separate out the component type accordingly
             selection.each(function (d) {
                 var selected = d3.select(this);
-                if (nf.CanvasUtils.isInputPort(selected)) {
+                if (this.isInputPort(selected)) {
                     inputPorts.push(selected.datum());
-                } else if (nf.CanvasUtils.isOutputPort(selected)) {
+                } else if (this.isOutputPort(selected)) {
                     outputPorts.push(selected.datum());
                 }
             });
@@ -1319,8 +1346,8 @@ nf.CanvasUtils = (function () {
                     var portConnectionCheck = function () {
                         return $.Deferred(function (portConnectionDeferred) {
                             // ports in the root group cannot be moved
-                            if (nf.Canvas.getParentGroupId() === null) {
-                                nf.Dialog.showOkDialog({
+                            if (nfCanvas.getParentGroupId() === null) {
+                                nfDialog.showOkDialog({
                                     dialogContent: 'Cannot move Ports out of the root group',
                                     overlayBackground: false
                                 });
@@ -1328,18 +1355,18 @@ nf.CanvasUtils = (function () {
                             } else {
                                 $.ajax({
                                     type: 'GET',
-                                    url: config.urls.controller + '/process-groups/' + encodeURIComponent(nf.Canvas.getParentGroupId()) + '/connections',
+                                    url: config.urls.controller + '/process-groups/' + encodeURIComponent(nfCanvas.getParentGroupId()) + '/connections',
                                     dataType: 'json'
                                 }).done(function (response) {
                                     var connections = response.connections;
                                     var conflictingPorts = [];
 
-                                    if (!nf.Common.isEmpty(connections)) {
+                                    if (!nfCommon.isEmpty(connections)) {
                                         // check the input ports
                                         $.each(inputPorts, function (i, inputPort) {
                                             $.each(connections, function (j, connection) {
                                                 if (inputPort.component.id === connection.destination.id) {
-                                                    conflictingPorts.push(nf.Common.escapeHtml(inputPort.component.name));
+                                                    conflictingPorts.push(nfCommon.escapeHtml(inputPort.component.name));
                                                 }
                                             });
                                         });
@@ -1348,7 +1375,7 @@ nf.CanvasUtils = (function () {
                                         $.each(outputPorts, function (i, outputPort) {
                                             $.each(connections, function (j, connection) {
                                                 if (outputPort.component.id === connection.source.id) {
-                                                    conflictingPorts.push(nf.Common.escapeHtml(outputPort.component.name));
+                                                    conflictingPorts.push(nfCommon.escapeHtml(outputPort.component.name));
                                                 }
                                             });
                                         });
@@ -1356,7 +1383,7 @@ nf.CanvasUtils = (function () {
 
                                     // inform the user of the conflicting ports
                                     if (conflictingPorts.length > 0) {
-                                        nf.Dialog.showOkDialog({
+                                        nfDialog.showOkDialog({
                                             dialogContent: 'The following ports are currently connected outside of this group: <b>' + conflictingPorts.join('</b>, <b>') + '</b>',
                                             overlayBackground: false
                                         });
@@ -1390,11 +1417,11 @@ nf.CanvasUtils = (function () {
 
                                 var conflictingPorts = [];
                                 var getConflictingPorts = function (selectedPorts, ports) {
-                                    if (selectedPorts.length > 0 && !nf.Common.isEmpty(ports)) {
+                                    if (selectedPorts.length > 0 && !nfCommon.isEmpty(ports)) {
                                         $.each(selectedPorts, function (i, selectedPort) {
                                             $.each(ports, function (j, port) {
                                                 if (selectedPort.component.name === port.name) {
-                                                    conflictingPorts.push(nf.Common.escapeHtml(port.name));
+                                                    conflictingPorts.push(nfCommon.escapeHtml(port.name));
                                                 }
                                             });
                                         });
@@ -1407,7 +1434,7 @@ nf.CanvasUtils = (function () {
 
                                 // inform the user of the conflicting ports
                                 if (conflictingPorts.length > 0) {
-                                    nf.Dialog.showOkDialog({
+                                    nfDialog.showOkDialog({
                                         dialogContent: 'The following ports already exist in the target process group: <b>' + conflictingPorts.join('</b>, <b>') + '</b>',
                                         overlayBackground: false
                                     });
@@ -1423,7 +1450,7 @@ nf.CanvasUtils = (function () {
 
                     // execute the checks in order
                     portConnectionCheck().done(function () {
-                        if (nf.Common.isDefinedAndNotNull(groupId)) {
+                        if (nfCommon.isDefinedAndNotNull(groupId)) {
                             $.when(portNameCheck()).done(function () {
                                 deferred.resolve();
                             }).fail(function () {
@@ -1452,9 +1479,9 @@ nf.CanvasUtils = (function () {
                 return false;
             }
 
-            return nf.CanvasUtils.isProcessor(selection) || nf.CanvasUtils.isProcessGroup(selection) ||
-                    nf.CanvasUtils.isRemoteProcessGroup(selection) || nf.CanvasUtils.isInputPort(selection) ||
-                    nf.CanvasUtils.isFunnel(selection);
+            return this.isProcessor(selection) || this.isProcessGroup(selection) ||
+                    this.isRemoteProcessGroup(selection) || this.isInputPort(selection) ||
+                    this.isFunnel(selection);
         },
         
         /**
@@ -1468,16 +1495,16 @@ nf.CanvasUtils = (function () {
                 return false;
             }
 
-            if (nf.CanvasUtils.isProcessGroup(selection) || nf.CanvasUtils.isRemoteProcessGroup(selection) ||
-                    nf.CanvasUtils.isOutputPort(selection) || nf.CanvasUtils.isFunnel(selection)) {
+            if (this.isProcessGroup(selection) || this.isRemoteProcessGroup(selection) ||
+                    this.isOutputPort(selection) || this.isFunnel(selection)) {
                 return true;
             }
 
             // if processor, ensure it supports input
-            if (nf.CanvasUtils.isProcessor(selection)) {
+            if (this.isProcessor(selection)) {
                 var destinationData = selection.datum();
                 return destinationData.component.inputRequirement !== 'INPUT_FORBIDDEN';
             }
         }
     };
-}());
+});

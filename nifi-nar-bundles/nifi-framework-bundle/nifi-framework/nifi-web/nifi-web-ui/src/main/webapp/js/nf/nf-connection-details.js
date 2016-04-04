@@ -17,7 +17,8 @@
 
 /* global nf */
 
-nf.ConnectionDetails = (function () {
+define(['nf-common'],
+    function (nfCommon) {
 
     /**
      * Initialize the details for the source of the connection.
@@ -53,7 +54,7 @@ nf.ConnectionDetails = (function () {
         }).done(function (response) {
             var processor = response.processor;
             var processorName = $('<div class="label"></div>').text(processor.name);
-            var processorType = $('<div></div>').text(nf.Common.substringAfterLast(processor.type, '.'));
+            var processorType = $('<div></div>').text(nfCommon.substringAfterLast(processor.type, '.'));
 
             // populate source processor details
             $('#read-only-connection-source-label').text('From processor');
@@ -178,7 +179,7 @@ nf.ConnectionDetails = (function () {
             }).done(function (response) {
                 var processor = response.processor;
                 var processorName = $('<div class="label"></div>').text(processor.name);
-                var processorType = $('<div></div>').text(nf.Common.substringAfterLast(processor.type, '.'));
+                var processorType = $('<div></div>').text(nfCommon.substringAfterLast(processor.type, '.'));
 
                 // populate destination processor details
                 $('#read-only-connection-target-label').text('To processor');
@@ -291,7 +292,7 @@ nf.ConnectionDetails = (function () {
          * @param {boolean} overlayBackground       Whether to overlay the background
          */
         init: function (overlayBackground) {
-            overlayBackground = nf.Common.isDefinedAndNotNull(overlayBackground) ? overlayBackground : true;
+            overlayBackground = nfCommon.isDefinedAndNotNull(overlayBackground) ? overlayBackground : true;
 
             // initialize the details tabs
             $('#connection-details-tabs').tabbs({
@@ -324,8 +325,8 @@ nf.ConnectionDetails = (function () {
                         $('#read-only-relationship-names').empty();
 
                         // clear the connection details
-                        nf.Common.clearField('read-only-connection-name');
-                        nf.Common.clearField('read-only-connection-id');
+                        nfCommon.clearField('read-only-connection-name');
+                        nfCommon.clearField('read-only-connection-id');
 
                         // clear the connection source details
                         $('#read-only-connection-source-label').text('');
@@ -383,7 +384,7 @@ nf.ConnectionDetails = (function () {
                 var groupResponse = groupResult[0];
                 var connectionResponse = connectionResult[0];
 
-                if (nf.Common.isDefinedAndNotNull(groupResponse.processGroup) && nf.Common.isDefinedAndNotNull(connectionResponse.connection)) {
+                if (nfCommon.isDefinedAndNotNull(groupResponse.processGroup) && nfCommon.isDefinedAndNotNull(connectionResponse.connection)) {
                     var processGroup = groupResponse.processGroup;
                     var connection = connectionResponse.connection;
 
@@ -400,7 +401,7 @@ nf.ConnectionDetails = (function () {
                         var selectedRelationships = connection.selectedRelationships;
 
                         // show the available relationship if applicable
-                        if (nf.Common.isDefinedAndNotNull(availableRelationships) || nf.Common.isDefinedAndNotNull(selectedRelationships)) {
+                        if (nfCommon.isDefinedAndNotNull(availableRelationships) || nfCommon.isDefinedAndNotNull(selectedRelationships)) {
                             // populate the available connections
                             $.each(availableRelationships, function (i, name) {
                                 createRelationshipOption(name);
@@ -433,17 +434,17 @@ nf.ConnectionDetails = (function () {
                         }
 
                         // set the connection details
-                        nf.Common.populateField('read-only-connection-name', connection.name);
-                        nf.Common.populateField('read-only-connection-id', connection.id);
-                        nf.Common.populateField('read-only-flow-file-expiration', connection.flowFileExpiration);
-                        nf.Common.populateField('read-only-back-pressure-object-threshold', connection.backPressureObjectThreshold);
-                        nf.Common.populateField('read-only-back-pressure-data-size-threshold', connection.backPressureDataSizeThreshold);
+                        nfCommon.populateField('read-only-connection-name', connection.name);
+                        nfCommon.populateField('read-only-connection-id', connection.id);
+                        nfCommon.populateField('read-only-flow-file-expiration', connection.flowFileExpiration);
+                        nfCommon.populateField('read-only-back-pressure-object-threshold', connection.backPressureObjectThreshold);
+                        nfCommon.populateField('read-only-back-pressure-data-size-threshold', connection.backPressureDataSizeThreshold);
 
                         // prioritizers
-                        if (nf.Common.isDefinedAndNotNull(connection.prioritizers) && connection.prioritizers.length > 0) {
+                        if (nfCommon.isDefinedAndNotNull(connection.prioritizers) && connection.prioritizers.length > 0) {
                             var prioritizerList = $('<ol></ol>').css('list-style', 'decimal inside none');
                             $.each(connection.prioritizers, function (i, type) {
-                                prioritizerList.append($('<li></li>').text(nf.Common.substringAfterLast(type, '.')));
+                                prioritizerList.append($('<li></li>').text(nfCommon.substringAfterLast(type, '.')));
                             });
                             $('#read-only-prioritizers').append(prioritizerList);
                         } else {
@@ -464,7 +465,7 @@ nf.ConnectionDetails = (function () {
                         }
                     });
                 }
-            }).fail(nf.Common.handleAjaxError);
+            }).fail(nfCommon.handleAjaxError);
         }
     };
-}());
+});

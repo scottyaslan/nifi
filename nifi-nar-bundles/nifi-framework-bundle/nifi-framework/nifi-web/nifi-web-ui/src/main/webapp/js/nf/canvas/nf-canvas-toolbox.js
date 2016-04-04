@@ -17,300 +17,319 @@
 
 /* global nf, Slick */
 
-nf.CanvasToolbox = (function () {
+define(['nf-context-menu',
+        'nf-canvas',
+        'nf-common',
+        'nf-dialog',
+        'nf-client',
+        'nf-graph',
+        'nf-birdseye',
+        'nf-label',
+        'slick.dataview',
+        'slick.rowselectionmodel',
+        'slick.autotooltips',
+        'jquery.tagcloud'],
+    function (nfContextMenu,
+              nfCanvas,
+              nfCommon,
+              nfDialog,
+              nfClient,
+              nfGraph,
+              nfBirdseye,
+              nfLabel) {
 
-    var config = {
-        filterText: 'Filter',
-        type: {
-            processor: 'Processor',
-            inputPort: 'Input Port',
-            outputPort: 'Output Port',
-            processGroup: 'Process Group',
-            remoteProcessGroup: 'Remote Process Group',
-            connection: 'Connection',
-            funnel: 'Funnel',
-            template: 'Template',
-            label: 'Label'
-        },
-        styles: {
-            filterList: 'filter-list'
-        },
-        urls: {
-            controller: '../nifi-api/controller',
-            processorTypes: '../nifi-api/controller/processor-types',
-            templates: '../nifi-api/controller/templates'
-        }
-    };
-
-    /**
-     * Creates a toolbox icon for dragging onto the graph.
-     * 
-     * @argument {string} type              The type of component
-     * @argument {jQuery} toolbox           The toolbox to add the icon to
-     * @argument {string} cls               The css class to apply to the icon
-     * @argument {string} hoverCls          The css class to apply when hovering
-     * @argument {string} dragCls           The css class to apply when dragging
-     * @argument {string} dropHandler       Callback to handle the drop event
-     */
-    var addToolboxIcon = function (type, toolbox, cls, hoverCls, dragCls, dropHandler) {
-        // generate the img id
-        var imgId = type + '-icon';
-
-        // create the image which is used as the toolbox icon (drag source)
-        $('<div/>').attr('id', imgId).attr('title', type).addClass(cls).addClass('pointer').addClass('toolbox-icon').hover(function () {
-            $(this).removeClass(cls).addClass(hoverCls);
-        }, function () {
-            $(this).removeClass(hoverCls).addClass(cls);
-        }).draggable({
-            'zIndex': 1011,
-            'helper': function () {
-                return $('<div class="toolbox-icon"></div>').addClass(dragCls).appendTo('body');
+        var config = {
+            filterText: 'Filter',
+            type: {
+                processor: 'Processor',
+                inputPort: 'Input Port',
+                outputPort: 'Output Port',
+                processGroup: 'Process Group',
+                remoteProcessGroup: 'Remote Process Group',
+                connection: 'Connection',
+                funnel: 'Funnel',
+                template: 'Template',
+                label: 'Label'
             },
-            'containment': 'body',
-            'start': function (e, ui) {
-                // hide the context menu if necessary
-                nf.ContextMenu.hide();
+            styles: {
+                filterList: 'filter-list'
             },
-            'stop': function (e, ui) {
-                var translate = nf.Canvas.View.translate();
-                var scale = nf.Canvas.View.scale();
+            urls: {
+                controller: '../nifi-api/controller',
+                processorTypes: '../nifi-api/controller/processor-types',
+                templates: '../nifi-api/controller/templates'
+            }
+        };
 
-                var mouseX = e.originalEvent.pageX;
-                var mouseY = e.originalEvent.pageY - nf.Canvas.CANVAS_OFFSET;
+        /**
+         * Creates a toolbox icon for dragging onto the graph.
+         *
+         * @argument {string} type              The type of component
+         * @argument {jQuery} toolbox           The toolbox to add the icon to
+         * @argument {string} cls               The css class to apply to the icon
+         * @argument {string} hoverCls          The css class to apply when hovering
+         * @argument {string} dragCls           The css class to apply when dragging
+         * @argument {string} dropHandler       Callback to handle the drop event
+         */
+        var addToolboxIcon = function (type, toolbox, cls, hoverCls, dragCls, dropHandler) {
+            // generate the img id
+            var imgId = type + '-icon';
 
-                // invoke the drop handler if we're over the canvas
-                if (mouseX >= 0 && mouseY >= 0) {
-                    // adjust the x and y coordinates accordingly
-                    var x = (mouseX / scale) - (translate[0] / scale);
-                    var y = (mouseY / scale) - (translate[1] / scale);
+            // create the image which is used as the toolbox icon (drag source)
+            $('<div/>').attr('id', imgId).attr('title', type).addClass(cls).addClass('pointer').addClass('toolbox-icon').hover(function () {
+                $(this).removeClass(cls).addClass(hoverCls);
+            }, function () {
+                $(this).removeClass(hoverCls).addClass(cls);
+            }).draggable({
+                'zIndex': 1011,
+                'helper': function () {
+                    return $('<div class="toolbox-icon"></div>').addClass(dragCls).appendTo('body');
+                },
+                'containment': 'body',
+                'start': function (e, ui) {
+                    // hide the context menu if necessary
+                    nfContextMenu.hide();
+                },
+                'stop': function (e, ui) {
+                    var translate = nfCanvas.View.translate();
+                    var scale = nfCanvas.View.scale();
 
-                    dropHandler({
-                        x: x,
-                        y: y
-                    });
+                    var mouseX = e.originalEvent.pageX;
+                    var mouseY = e.originalEvent.pageY - nfCanvas.CANVAS_OFFSET;
+
+                    // invoke the drop handler if we're over the canvas
+                    if (mouseX >= 0 && mouseY >= 0) {
+                        // adjust the x and y coordinates accordingly
+                        var x = (mouseX / scale) - (translate[0] / scale);
+                        var y = (mouseY / scale) - (translate[1] / scale);
+
+                        dropHandler({
+                            x: x,
+                            y: y
+                        });
+                    }
+                }
+            }).appendTo(toolbox);
+        };
+
+        /**
+         * Filters the processor type table.
+         */
+        var applyFilter = function () {
+            // get the dataview
+            var processorTypesGrid = $('#processor-types-table').data('gridInstance');
+
+            // ensure the grid has been initialized
+            if (nfCommon.isDefinedAndNotNull(processorTypesGrid)) {
+                var processorTypesData = processorTypesGrid.getData();
+
+                // update the search criteria
+                processorTypesData.setFilterArgs({
+                    searchString: getFilterText()
+                });
+                processorTypesData.refresh();
+
+                // update the selection if possible
+                if (processorTypesData.getLength() > 0) {
+                    processorTypesGrid.setSelectedRows([0]);
                 }
             }
-        }).appendTo(toolbox);
-    };
+        };
 
-    /**
-     * Filters the processor type table.
-     */
-    var applyFilter = function () {
-        // get the dataview
-        var processorTypesGrid = $('#processor-types-table').data('gridInstance');
+        /**
+         * Determines if the item matches the filter.
+         *
+         * @param {object} item     The item to filter
+         * @param {object} args     The filter criteria
+         * @returns {boolean}       Whether the item matches the filter
+         */
+        var matchesRegex = function (item, args) {
+            if (args.searchString === '') {
+                return true;
+            }
 
-        // ensure the grid has been initialized
-        if (nf.Common.isDefinedAndNotNull(processorTypesGrid)) {
-            var processorTypesData = processorTypesGrid.getData();
+            try {
+                // perform the row filtering
+                var filterExp = new RegExp(args.searchString, 'i');
+            } catch (e) {
+                // invalid regex
+                return false;
+            }
 
-            // update the search criteria
-            processorTypesData.setFilterArgs({
-                searchString: getFilterText()
+            // determine if the item matches the filter
+            var matchesLabel = item['label'].search(filterExp) >= 0;
+            var matchesTags = item['tags'].search(filterExp) >= 0;
+            return matchesLabel || matchesTags;
+        };
+
+        /**
+         * Performs the filtering.
+         *
+         * @param {object} item     The item subject to filtering
+         * @param {object} args     Filter arguments
+         * @returns {Boolean}       Whether or not to include the item
+         */
+        var filter = function (item, args) {
+            // determine if the item matches the filter
+            var matchesFilter = matchesRegex(item, args);
+
+            // determine if the row matches the selected tags
+            var matchesTags = true;
+            if (matchesFilter) {
+                var tagFilters = $('#processor-tag-cloud').tagcloud('getSelectedTags');
+                var hasSelectedTags = tagFilters.length > 0;
+                if (hasSelectedTags) {
+                    matchesTags = matchesSelectedTags(tagFilters, item['tags']);
+                }
+            }
+
+            // determine if this row should be visible
+            var matches = matchesFilter && matchesTags;
+
+            // if this row is currently selected and its being filtered
+            if (matches === false && $('#selected-processor-type').text() === item['type']) {
+                // clear the selected row
+                $('#processor-type-description').text('');
+                $('#processor-type-name').text('');
+                $('#selected-processor-name').text('');
+                $('#selected-processor-type').text('');
+
+                // clear the active cell the it can be reselected when its included
+                var processTypesGrid = $('#processor-types-table').data('gridInstance');
+                processTypesGrid.resetActiveCell();
+            }
+
+            return matches;
+        };
+
+        /**
+         * Determines if the specified tags match all the tags selected by the user.
+         *
+         * @argument {string[]} tagFilters      The tag filters
+         * @argument {string} tags              The tags to test
+         */
+        var matchesSelectedTags = function (tagFilters, tags) {
+            var selectedTags = [];
+            $.each(tagFilters, function (_, filter) {
+                selectedTags.push(filter);
             });
-            processorTypesData.refresh();
-            
-            // update the selection if possible
-            if (processorTypesData.getLength() > 0) {
-                processorTypesGrid.setSelectedRows([0]);
+
+            // normalize the tags
+            var normalizedTags = tags.toLowerCase();
+
+            var matches = true;
+            $.each(selectedTags, function (i, selectedTag) {
+                if (normalizedTags.indexOf(selectedTag) === -1) {
+                    matches = false;
+                    return false;
+                }
+            });
+
+            return matches;
+        };
+
+        /**
+         * Sorts the specified data using the specified sort details.
+         *
+         * @param {object} sortDetails
+         * @param {object} data
+         */
+        var sort = function (sortDetails, data) {
+            // defines a function for sorting
+            var comparer = function (a, b) {
+                var aString = nfCommon.isDefinedAndNotNull(a[sortDetails.columnId]) ? a[sortDetails.columnId] : '';
+                var bString = nfCommon.isDefinedAndNotNull(b[sortDetails.columnId]) ? b[sortDetails.columnId] : '';
+                return aString === bString ? 0 : aString > bString ? 1 : -1;
+            };
+
+            // perform the sort
+            data.sort(comparer, sortDetails.sortAsc);
+        };
+
+        /**
+         * Get the text out of the filter field. If the filter field doesn't
+         * have any text it will contain the text 'filter list' so this method
+         * accounts for that.
+         */
+        var getFilterText = function () {
+            var filterText = '';
+            var filterField = $('#processor-type-filter');
+            if (!filterField.hasClass(config.styles.filterList)) {
+                filterText = filterField.val();
             }
-        }
-    };
+            return filterText;
+        };
 
-    /**
-     * Determines if the item matches the filter.
-     * 
-     * @param {object} item     The item to filter
-     * @param {object} args     The filter criteria
-     * @returns {boolean}       Whether the item matches the filter
-     */
-    var matchesRegex = function (item, args) {
-        if (args.searchString === '') {
-            return true;
-        }
+        /**
+         * Resets the filtered processor types.
+         */
+        var resetProcessorDialog = function () {
+            // clear the selected tag cloud
+            $('#processor-tag-cloud').tagcloud('clearSelectedTags');
 
-        try {
-            // perform the row filtering
-            var filterExp = new RegExp(args.searchString, 'i');
-        } catch (e) {
-            // invalid regex
-            return false;
-        }
+            // clear any filter strings
+            $('#processor-type-filter').addClass(config.styles.filterList).val(config.filterText);
 
-        // determine if the item matches the filter
-        var matchesLabel = item['label'].search(filterExp) >= 0;
-        var matchesTags = item['tags'].search(filterExp) >= 0;
-        return matchesLabel || matchesTags;
-    };
+            // reapply the filter
+            applyFilter();
 
-    /**
-     * Performs the filtering.
-     * 
-     * @param {object} item     The item subject to filtering
-     * @param {object} args     Filter arguments
-     * @returns {Boolean}       Whether or not to include the item
-     */
-    var filter = function (item, args) {
-        // determine if the item matches the filter
-        var matchesFilter = matchesRegex(item, args);
-
-        // determine if the row matches the selected tags
-        var matchesTags = true;
-        if (matchesFilter) {
-            var tagFilters = $('#processor-tag-cloud').tagcloud('getSelectedTags');
-            var hasSelectedTags = tagFilters.length > 0;
-            if (hasSelectedTags) {
-                matchesTags = matchesSelectedTags(tagFilters, item['tags']);
-            }
-        }
-
-        // determine if this row should be visible
-        var matches = matchesFilter && matchesTags;
-
-        // if this row is currently selected and its being filtered
-        if (matches === false && $('#selected-processor-type').text() === item['type']) {
             // clear the selected row
             $('#processor-type-description').text('');
             $('#processor-type-name').text('');
             $('#selected-processor-name').text('');
             $('#selected-processor-type').text('');
 
-            // clear the active cell the it can be reselected when its included
+            // unselect any current selection
             var processTypesGrid = $('#processor-types-table').data('gridInstance');
+            processTypesGrid.setSelectedRows([]);
             processTypesGrid.resetActiveCell();
-        }
-
-        return matches;
-    };
-
-    /**
-     * Determines if the specified tags match all the tags selected by the user.
-     * 
-     * @argument {string[]} tagFilters      The tag filters
-     * @argument {string} tags              The tags to test
-     */
-    var matchesSelectedTags = function (tagFilters, tags) {
-        var selectedTags = [];
-        $.each(tagFilters, function (_, filter) {
-            selectedTags.push(filter);
-        });
-
-        // normalize the tags
-        var normalizedTags = tags.toLowerCase();
-
-        var matches = true;
-        $.each(selectedTags, function (i, selectedTag) {
-            if (normalizedTags.indexOf(selectedTag) === -1) {
-                matches = false;
-                return false;
-            }
-        });
-
-        return matches;
-    };
-
-    /**
-     * Sorts the specified data using the specified sort details.
-     * 
-     * @param {object} sortDetails
-     * @param {object} data
-     */
-    var sort = function (sortDetails, data) {
-        // defines a function for sorting
-        var comparer = function (a, b) {
-            var aString = nf.Common.isDefinedAndNotNull(a[sortDetails.columnId]) ? a[sortDetails.columnId] : '';
-            var bString = nf.Common.isDefinedAndNotNull(b[sortDetails.columnId]) ? b[sortDetails.columnId] : '';
-            return aString === bString ? 0 : aString > bString ? 1 : -1;
         };
 
-        // perform the sort
-        data.sort(comparer, sortDetails.sortAsc);
-    };
+        /**
+         * Prompts the user to select the type of new processor to create.
+         *
+         * @argument {object} pt        The point that the processor was dropped
+         */
+        var promptForProcessorType = function (pt) {
+            // handles adding the selected processor at the specified point
+            var addProcessor = function () {
+                // get the type of processor currently selected
+                var name = $('#selected-processor-name').text();
+                var processorType = $('#selected-processor-type').text();
 
-    /**
-     * Get the text out of the filter field. If the filter field doesn't
-     * have any text it will contain the text 'filter list' so this method
-     * accounts for that.
-     */
-    var getFilterText = function () {
-        var filterText = '';
-        var filterField = $('#processor-type-filter');
-        if (!filterField.hasClass(config.styles.filterList)) {
-            filterText = filterField.val();
-        }
-        return filterText;
-    };
+                // ensure something was selected
+                if (name === '' || processorType === '') {
+                    nfDialog.showOkDialog({
+                        dialogContent: 'The type of processor to create must be selected.',
+                        overlayBackground: false
+                    });
+                } else {
+                    // create the new processor
+                    createProcessor(name, processorType, pt);
+                }
 
-    /**
-     * Resets the filtered processor types.
-     */
-    var resetProcessorDialog = function () {
-        // clear the selected tag cloud
-        $('#processor-tag-cloud').tagcloud('clearSelectedTags');
-        
-        // clear any filter strings
-        $('#processor-type-filter').addClass(config.styles.filterList).val(config.filterText);
+                // hide the dialog
+                $('#new-processor-dialog').modal('hide');
+            };
 
-        // reapply the filter
-        applyFilter();
+            // get the grid reference
+            var grid = $('#processor-types-table').data('gridInstance');
 
-        // clear the selected row
-        $('#processor-type-description').text('');
-        $('#processor-type-name').text('');
-        $('#selected-processor-name').text('');
-        $('#selected-processor-type').text('');
-        
-        // unselect any current selection
-        var processTypesGrid = $('#processor-types-table').data('gridInstance');
-        processTypesGrid.setSelectedRows([]);
-        processTypesGrid.resetActiveCell();
-    };
+            // add the processor when its double clicked in the table
+            var gridDoubleClick = function (e, args) {
+                var processorType = grid.getDataItem(args.row);
 
-    /**
-     * Prompts the user to select the type of new processor to create.
-     * 
-     * @argument {object} pt        The point that the processor was dropped
-     */
-    var promptForProcessorType = function (pt) {
-        // handles adding the selected processor at the specified point
-        var addProcessor = function () {
-            // get the type of processor currently selected
-            var name = $('#selected-processor-name').text();
-            var processorType = $('#selected-processor-type').text();
+                $('#selected-processor-name').text(processorType.label);
+                $('#selected-processor-type').text(processorType.type);
 
-            // ensure something was selected
-            if (name === '' || processorType === '') {
-                nf.Dialog.showOkDialog({
-                    dialogContent: 'The type of processor to create must be selected.',
-                    overlayBackground: false
-                });
-            } else {
-                // create the new processor
-                createProcessor(name, processorType, pt);
-            }
+                addProcessor();
+            };
 
-            // hide the dialog
-            $('#new-processor-dialog').modal('hide');
-        };
+            // register a handler for double click events
+            grid.onDblClick.subscribe(gridDoubleClick);
 
-        // get the grid reference
-        var grid = $('#processor-types-table').data('gridInstance');
-
-        // add the processor when its double clicked in the table
-        var gridDoubleClick = function (e, args) {
-            var processorType = grid.getDataItem(args.row);
-
-            $('#selected-processor-name').text(processorType.label);
-            $('#selected-processor-type').text(processorType.type);
-
-            addProcessor();
-        };
-
-        // register a handler for double click events
-        grid.onDblClick.subscribe(gridDoubleClick);
-
-        // update the button model
-        $('#new-processor-dialog').modal('setButtonModel', [{
+            // update the button model
+            $('#new-processor-dialog').modal('setButtonModel', [{
                 buttonText: 'Add',
                 handler: {
                     click: addProcessor
@@ -324,95 +343,95 @@ nf.CanvasToolbox = (function () {
                 }
             }]);
 
-        // set a new handler for closing the the dialog
-        $('#new-processor-dialog').modal('setHandler', {
-            close: function () {
-                // remove the handler
-                grid.onDblClick.unsubscribe(gridDoubleClick);
+            // set a new handler for closing the the dialog
+            $('#new-processor-dialog').modal('setHandler', {
+                close: function () {
+                    // remove the handler
+                    grid.onDblClick.unsubscribe(gridDoubleClick);
 
-                // clear the current filters
-                resetProcessorDialog();
-            }
-        });
+                    // clear the current filters
+                    resetProcessorDialog();
+                }
+            });
 
-        // show the dialog
-        $('#new-processor-dialog').modal('show');
+            // show the dialog
+            $('#new-processor-dialog').modal('show');
 
-        // setup the filter
-        $('#processor-type-filter').focus().off('keyup').on('keyup', function (e) {
-            var code = e.keyCode ? e.keyCode : e.which;
-            if (code === $.ui.keyCode.ENTER) {
-                addProcessor();
-            } else {
-                applyFilter();
-            }
-        });
+            // setup the filter
+            $('#processor-type-filter').focus().off('keyup').on('keyup', function (e) {
+                var code = e.keyCode ? e.keyCode : e.which;
+                if (code === $.ui.keyCode.ENTER) {
+                    addProcessor();
+                } else {
+                    applyFilter();
+                }
+            });
 
-        // adjust the grid canvas now that its been rendered
-        grid.resizeCanvas();
-        grid.setSelectedRows([0]);
-    };
-
-    /**
-     * Create the processor and add to the graph.
-     * 
-     * @argument {string} name              The processor name
-     * @argument {string} processorType     The processor type
-     * @argument {object} pt                The point that the processor was dropped
-     */
-    var createProcessor = function (name, processorType, pt) {
-        var revision = nf.Client.getRevision();
-
-        // create a new processor of the defined type
-        $.ajax({
-            type: 'POST',
-            url: config.urls.controller + '/process-groups/' + encodeURIComponent(nf.Canvas.getGroupId()) + '/processors',
-            data: {
-                version: revision.version,
-                clientId: revision.clientId,
-                name: name,
-                type: processorType,
-                x: pt.x,
-                y: pt.y
-            },
-            dataType: 'json'
-        }).done(function (response) {
-            if (nf.Common.isDefinedAndNotNull(response.processor)) {
-                // update the revision
-                nf.Client.setRevision(response.revision);
-
-                // add the processor to the graph
-                nf.Graph.add({
-                    'processors': [response.processor]
-                }, true);
-
-                // update component visibility
-                nf.Canvas.View.updateVisibility();
-
-                // update the birdseye
-                nf.Birdseye.refresh();
-            }
-        }).fail(nf.Common.handleAjaxError);
-    };
-
-    /**
-     * Prompts the user to enter the name for the input port.
-     * 
-     * @argument {object} pt        The point that the input port was dropped
-     */
-    var promptForInputPortName = function (pt) {
-        var addInputPort = function () {
-            // get the name of the input port and clear the textfield
-            var portName = $('#new-port-name').val();
-            
-            // hide the dialog
-            $('#new-port-dialog').modal('hide');
-
-            // create the input port
-            createInputPort(portName, pt);
+            // adjust the grid canvas now that its been rendered
+            grid.resizeCanvas();
+            grid.setSelectedRows([0]);
         };
 
-        $('#new-port-dialog').modal('setButtonModel', [{
+        /**
+         * Create the processor and add to the graph.
+         *
+         * @argument {string} name              The processor name
+         * @argument {string} processorType     The processor type
+         * @argument {object} pt                The point that the processor was dropped
+         */
+        var createProcessor = function (name, processorType, pt) {
+            var revision = nfClient.getRevision();
+
+            // create a new processor of the defined type
+            $.ajax({
+                type: 'POST',
+                url: config.urls.controller + '/process-groups/' + encodeURIComponent(nfCanvas.getGroupId()) + '/processors',
+                data: {
+                    version: revision.version,
+                    clientId: revision.clientId,
+                    name: name,
+                    type: processorType,
+                    x: pt.x,
+                    y: pt.y
+                },
+                dataType: 'json'
+            }).done(function (response) {
+                if (nfCommon.isDefinedAndNotNull(response.processor)) {
+                    // update the revision
+                    nfClient.setRevision(response.revision);
+
+                    // add the processor to the graph
+                    nfGraph.add({
+                        'processors': [response.processor]
+                    }, true);
+
+                    // update component visibility
+                    nfCanvas.View.updateVisibility();
+
+                    // update the birdseye
+                    nfBirdseye.refresh();
+                }
+            }).fail(nfCommon.handleAjaxError);
+        };
+
+        /**
+         * Prompts the user to enter the name for the input port.
+         *
+         * @argument {object} pt        The point that the input port was dropped
+         */
+        var promptForInputPortName = function (pt) {
+            var addInputPort = function () {
+                // get the name of the input port and clear the textfield
+                var portName = $('#new-port-name').val();
+
+                // hide the dialog
+                $('#new-port-dialog').modal('hide');
+
+                // create the input port
+                createInputPort(portName, pt);
+            };
+
+            $('#new-port-dialog').modal('setButtonModel', [{
                 buttonText: 'Add',
                 handler: {
                     click: addInputPort
@@ -426,79 +445,79 @@ nf.CanvasToolbox = (function () {
                 }
             }]);
 
-        // update the port type
-        $('#new-port-type').text('Input');
+            // update the port type
+            $('#new-port-type').text('Input');
 
-        // show the dialog
-        $('#new-port-dialog').modal('show');
+            // show the dialog
+            $('#new-port-dialog').modal('show');
 
-        // set up the focus and key handlers
-        $('#new-port-name').focus().off('keyup').on('keyup', function (e) {
-            var code = e.keyCode ? e.keyCode : e.which;
-            if (code === $.ui.keyCode.ENTER) {
-                addInputPort();
-            }
-        });
-    };
-
-    /**
-     * Create the input port and add to the graph.
-     * 
-     * @argument {string} portName          The input port name
-     * @argument {object} pt                The point that the input port was dropped
-     */
-    var createInputPort = function (portName, pt) {
-        var revision = nf.Client.getRevision();
-
-        // create a new processor of the defined type
-        $.ajax({
-            type: 'POST',
-            url: config.urls.controller + '/process-groups/' + encodeURIComponent(nf.Canvas.getGroupId()) + '/input-ports',
-            data: {
-                version: revision.version,
-                clientId: revision.clientId,
-                name: portName,
-                x: pt.x,
-                y: pt.y
-            },
-            dataType: 'json'
-        }).done(function (response) {
-            if (nf.Common.isDefinedAndNotNull(response.inputPort)) {
-                // update the revision
-                nf.Client.setRevision(response.revision);
-
-                // add the port to the graph
-                nf.Graph.add({
-                    'inputPorts': [response.inputPort]
-                }, true);
-
-                // update component visibility
-                nf.Canvas.View.updateVisibility();
-
-                // update the birdseye
-                nf.Birdseye.refresh();
-            }
-        }).fail(nf.Common.handleAjaxError);
-    };
-
-    /**
-     * Prompts the user to enter the name for the output port.
-     * 
-     * @argument {object} pt        The point that the output port was dropped
-     */
-    var promptForOutputPortName = function (pt) {
-        var addOutputPort = function () {
-            // get the name of the output port and clear the textfield
-            var portName = $('#new-port-name').val();
-            
-            // hide the dialog
-            $('#new-port-dialog').modal('hide');
-
-            // create the output port
-            createOutputPort(portName, pt);
+            // set up the focus and key handlers
+            $('#new-port-name').focus().off('keyup').on('keyup', function (e) {
+                var code = e.keyCode ? e.keyCode : e.which;
+                if (code === $.ui.keyCode.ENTER) {
+                    addInputPort();
+                }
+            });
         };
 
-        $('#new-port-dialog').modal('setButtonModel', [{
+        /**
+         * Create the input port and add to the graph.
+         *
+         * @argument {string} portName          The input port name
+         * @argument {object} pt                The point that the input port was dropped
+         */
+        var createInputPort = function (portName, pt) {
+            var revision = nfClient.getRevision();
+
+            // create a new processor of the defined type
+            $.ajax({
+                type: 'POST',
+                url: config.urls.controller + '/process-groups/' + encodeURIComponent(nfCanvas.getGroupId()) + '/input-ports',
+                data: {
+                    version: revision.version,
+                    clientId: revision.clientId,
+                    name: portName,
+                    x: pt.x,
+                    y: pt.y
+                },
+                dataType: 'json'
+            }).done(function (response) {
+                if (nfCommon.isDefinedAndNotNull(response.inputPort)) {
+                    // update the revision
+                    nfClient.setRevision(response.revision);
+
+                    // add the port to the graph
+                    nfGraph.add({
+                        'inputPorts': [response.inputPort]
+                    }, true);
+
+                    // update component visibility
+                    nfCanvas.View.updateVisibility();
+
+                    // update the birdseye
+                    nfBirdseye.refresh();
+                }
+            }).fail(nfCommon.handleAjaxError);
+        };
+
+        /**
+         * Prompts the user to enter the name for the output port.
+         *
+         * @argument {object} pt        The point that the output port was dropped
+         */
+        var promptForOutputPortName = function (pt) {
+            var addOutputPort = function () {
+                // get the name of the output port and clear the textfield
+                var portName = $('#new-port-name').val();
+
+                // hide the dialog
+                $('#new-port-dialog').modal('hide');
+
+                // create the output port
+                createOutputPort(portName, pt);
+            };
+
+            $('#new-port-dialog').modal('setButtonModel', [{
                 buttonText: 'Add',
                 handler: {
                     click: addOutputPort
@@ -512,119 +531,119 @@ nf.CanvasToolbox = (function () {
                 }
             }]);
 
-        // update the port type
-        $('#new-port-type').text('Output');
+            // update the port type
+            $('#new-port-type').text('Output');
 
-        // set the focus and show the dialog
-        $('#new-port-dialog').modal('show');
+            // set the focus and show the dialog
+            $('#new-port-dialog').modal('show');
 
-        // set up the focus and key handlers
-        $('#new-port-name').focus().off('keyup').on('keyup', function (e) {
-            var code = e.keyCode ? e.keyCode : e.which;
-            if (code === $.ui.keyCode.ENTER) {
-                addOutputPort();
-            }
-        });
-    };
-
-    /**
-     * Create the input port and add to the graph.
-     * 
-     * @argument {string} portName          The output port name
-     * @argument {object} pt                The point that the output port was dropped
-     */
-    var createOutputPort = function (portName, pt) {
-        var revision = nf.Client.getRevision();
-
-        // create a new processor of the defined type
-        $.ajax({
-            type: 'POST',
-            url: config.urls.controller + '/process-groups/' + encodeURIComponent(nf.Canvas.getGroupId()) + '/output-ports',
-            data: {
-                version: revision.version,
-                clientId: revision.clientId,
-                name: portName,
-                x: pt.x,
-                y: pt.y
-            },
-            dataType: 'json'
-        }).done(function (response) {
-            if (nf.Common.isDefinedAndNotNull(response.outputPort)) {
-                // update the revision
-                nf.Client.setRevision(response.revision);
-
-                // add the port to the graph
-                nf.Graph.add({
-                    'outputPorts': [response.outputPort]
-                }, true);
-
-                // update component visibility
-                nf.Canvas.View.updateVisibility();
-
-                // update the birdseye
-                nf.Birdseye.refresh();
-            }
-        }).fail(nf.Common.handleAjaxError);
-    };
-
-    /**
-     * Create the group and add to the graph.
-     * 
-     * @argument {string} groupName The name of the group
-     * @argument {object} pt        The point that the group was dropped
-     */
-    var createGroup = function (groupName, pt) {
-        var revision = nf.Client.getRevision();
-
-        // create a new processor of the defined type
-        return $.ajax({
-            type: 'POST',
-            url: config.urls.controller + '/process-groups/' + encodeURIComponent(nf.Canvas.getGroupId()) + '/process-group-references',
-            data: {
-                version: revision.version,
-                clientId: revision.clientId,
-                name: groupName,
-                x: pt.x,
-                y: pt.y
-            },
-            dataType: 'json'
-        }).done(function (response) {
-            if (nf.Common.isDefinedAndNotNull(response.processGroup)) {
-                // update the revision
-                nf.Client.setRevision(response.revision);
-
-                // add the processor to the graph
-                nf.Graph.add({
-                    'processGroups': [response.processGroup]
-                }, true);
-
-                // update component visibility
-                nf.Canvas.View.updateVisibility();
-
-                // update the birdseye
-                nf.Birdseye.refresh();
-            }
-        }).fail(nf.Common.handleAjaxError);
-    };
-
-    /**
-     * Prompts the user to enter the URI for the remote process group.
-     * 
-     * @argument {object} pt        The point that the remote group was dropped
-     */
-    var promptForRemoteProcessGroupUri = function (pt) {
-        var addRemoteProcessGroup = function () {
-            // get the uri of the controller and clear the textfield
-            var remoteProcessGroupUri = $('#new-remote-process-group-uri').val();
-            
-            // hide the dialog
-            $('#new-remote-process-group-dialog').modal('hide');
-
-            // create the remote process group
-            createRemoteProcessGroup(remoteProcessGroupUri, pt);
+            // set up the focus and key handlers
+            $('#new-port-name').focus().off('keyup').on('keyup', function (e) {
+                var code = e.keyCode ? e.keyCode : e.which;
+                if (code === $.ui.keyCode.ENTER) {
+                    addOutputPort();
+                }
+            });
         };
 
-        $('#new-remote-process-group-dialog').modal('setButtonModel', [{
+        /**
+         * Create the input port and add to the graph.
+         *
+         * @argument {string} portName          The output port name
+         * @argument {object} pt                The point that the output port was dropped
+         */
+        var createOutputPort = function (portName, pt) {
+            var revision = nfClient.getRevision();
+
+            // create a new processor of the defined type
+            $.ajax({
+                type: 'POST',
+                url: config.urls.controller + '/process-groups/' + encodeURIComponent(nfCanvas.getGroupId()) + '/output-ports',
+                data: {
+                    version: revision.version,
+                    clientId: revision.clientId,
+                    name: portName,
+                    x: pt.x,
+                    y: pt.y
+                },
+                dataType: 'json'
+            }).done(function (response) {
+                if (nfCommon.isDefinedAndNotNull(response.outputPort)) {
+                    // update the revision
+                    nfClient.setRevision(response.revision);
+
+                    // add the port to the graph
+                    nfGraph.add({
+                        'outputPorts': [response.outputPort]
+                    }, true);
+
+                    // update component visibility
+                    nfCanvas.View.updateVisibility();
+
+                    // update the birdseye
+                    nfBirdseye.refresh();
+                }
+            }).fail(nfCommon.handleAjaxError);
+        };
+
+        /**
+         * Create the group and add to the graph.
+         *
+         * @argument {string} groupName The name of the group
+         * @argument {object} pt        The point that the group was dropped
+         */
+        var createGroup = function (groupName, pt) {
+            var revision = nfClient.getRevision();
+
+            // create a new processor of the defined type
+            return $.ajax({
+                type: 'POST',
+                url: config.urls.controller + '/process-groups/' + encodeURIComponent(nfCanvas.getGroupId()) + '/process-group-references',
+                data: {
+                    version: revision.version,
+                    clientId: revision.clientId,
+                    name: groupName,
+                    x: pt.x,
+                    y: pt.y
+                },
+                dataType: 'json'
+            }).done(function (response) {
+                if (nfCommon.isDefinedAndNotNull(response.processGroup)) {
+                    // update the revision
+                    nfClient.setRevision(response.revision);
+
+                    // add the processor to the graph
+                    nfGraph.add({
+                        'processGroups': [response.processGroup]
+                    }, true);
+
+                    // update component visibility
+                    nfCanvas.View.updateVisibility();
+
+                    // update the birdseye
+                    nfBirdseye.refresh();
+                }
+            }).fail(nfCommon.handleAjaxError);
+        };
+
+        /**
+         * Prompts the user to enter the URI for the remote process group.
+         *
+         * @argument {object} pt        The point that the remote group was dropped
+         */
+        var promptForRemoteProcessGroupUri = function (pt) {
+            var addRemoteProcessGroup = function () {
+                // get the uri of the controller and clear the textfield
+                var remoteProcessGroupUri = $('#new-remote-process-group-uri').val();
+
+                // hide the dialog
+                $('#new-remote-process-group-dialog').modal('hide');
+
+                // create the remote process group
+                createRemoteProcessGroup(remoteProcessGroupUri, pt);
+            };
+
+            $('#new-remote-process-group-dialog').modal('setButtonModel', [{
                 buttonText: 'Add',
                 handler: {
                     click: addRemoteProcessGroup
@@ -638,123 +657,123 @@ nf.CanvasToolbox = (function () {
                 }
             }]);
 
-        // show the dialog
-        $('#new-remote-process-group-dialog').modal('show');
+            // show the dialog
+            $('#new-remote-process-group-dialog').modal('show');
 
-        // set the focus and key handlers
-        $('#new-remote-process-group-uri').focus().off('keyup').on('keyup', function (e) {
-            var code = e.keyCode ? e.keyCode : e.which;
-            if (code === $.ui.keyCode.ENTER) {
-                addRemoteProcessGroup();
-            }
-        });
-    };
+            // set the focus and key handlers
+            $('#new-remote-process-group-uri').focus().off('keyup').on('keyup', function (e) {
+                var code = e.keyCode ? e.keyCode : e.which;
+                if (code === $.ui.keyCode.ENTER) {
+                    addRemoteProcessGroup();
+                }
+            });
+        };
 
-    /**
-     * Create the controller and add to the graph.
-     * 
-     * @argument {string} remoteProcessGroupUri         The remote group uri
-     * @argument {object} pt                            The point that the remote group was dropped
-     */
-    var createRemoteProcessGroup = function (remoteProcessGroupUri, pt) {
-        var revision = nf.Client.getRevision();
+        /**
+         * Create the controller and add to the graph.
+         *
+         * @argument {string} remoteProcessGroupUri         The remote group uri
+         * @argument {object} pt                            The point that the remote group was dropped
+         */
+        var createRemoteProcessGroup = function (remoteProcessGroupUri, pt) {
+            var revision = nfClient.getRevision();
 
-        // create a new processor of the defined type
-        $.ajax({
-            type: 'POST',
-            url: config.urls.controller + '/process-groups/' + encodeURIComponent(nf.Canvas.getGroupId()) + '/remote-process-groups',
-            data: {
-                version: revision.version,
-                clientId: revision.clientId,
-                uri: remoteProcessGroupUri,
-                x: pt.x,
-                y: pt.y
-            },
-            dataType: 'json'
-        }).done(function (response) {
-            if (nf.Common.isDefinedAndNotNull(response.remoteProcessGroup)) {
-                // update the revision
-                nf.Client.setRevision(response.revision);
+            // create a new processor of the defined type
+            $.ajax({
+                type: 'POST',
+                url: config.urls.controller + '/process-groups/' + encodeURIComponent(nfCanvas.getGroupId()) + '/remote-process-groups',
+                data: {
+                    version: revision.version,
+                    clientId: revision.clientId,
+                    uri: remoteProcessGroupUri,
+                    x: pt.x,
+                    y: pt.y
+                },
+                dataType: 'json'
+            }).done(function (response) {
+                if (nfCommon.isDefinedAndNotNull(response.remoteProcessGroup)) {
+                    // update the revision
+                    nfClient.setRevision(response.revision);
 
-                // add the processor to the graph
-                nf.Graph.add({
-                    'remoteProcessGroups': [response.remoteProcessGroup]
-                }, true);
+                    // add the processor to the graph
+                    nfGraph.add({
+                        'remoteProcessGroups': [response.remoteProcessGroup]
+                    }, true);
 
-                // update component visibility
-                nf.Canvas.View.updateVisibility();
+                    // update component visibility
+                    nfCanvas.View.updateVisibility();
 
-                // update the birdseye
-                nf.Birdseye.refresh();
-            }
-        }).fail(nf.Common.handleAjaxError);
-    };
+                    // update the birdseye
+                    nfBirdseye.refresh();
+                }
+            }).fail(nfCommon.handleAjaxError);
+        };
 
-    /**
-     * Creates a new funnel at the specified point.
-     * 
-     * @argument {object} pt        The point that the funnel was dropped
-     */
-    var createFunnel = function (pt) {
-        var revision = nf.Client.getRevision();
+        /**
+         * Creates a new funnel at the specified point.
+         *
+         * @argument {object} pt        The point that the funnel was dropped
+         */
+        var createFunnel = function (pt) {
+            var revision = nfClient.getRevision();
 
-        // create a new funnel
-        $.ajax({
-            type: 'POST',
-            url: config.urls.controller + '/process-groups/' + encodeURIComponent(nf.Canvas.getGroupId()) + '/funnels',
-            data: {
-                version: revision.version,
-                clientId: revision.clientId,
-                x: pt.x,
-                y: pt.y
-            },
-            dataType: 'json'
-        }).done(function (response) {
-            if (nf.Common.isDefinedAndNotNull(response.funnel)) {
-                // update the revision
-                nf.Client.setRevision(response.revision);
+            // create a new funnel
+            $.ajax({
+                type: 'POST',
+                url: config.urls.controller + '/process-groups/' + encodeURIComponent(nfCanvas.getGroupId()) + '/funnels',
+                data: {
+                    version: revision.version,
+                    clientId: revision.clientId,
+                    x: pt.x,
+                    y: pt.y
+                },
+                dataType: 'json'
+            }).done(function (response) {
+                if (nfCommon.isDefinedAndNotNull(response.funnel)) {
+                    // update the revision
+                    nfClient.setRevision(response.revision);
 
-                // add the funnel to the graph
-                nf.Graph.add({
-                    'funnels': [response.funnel]
-                }, true);
+                    // add the funnel to the graph
+                    nfGraph.add({
+                        'funnels': [response.funnel]
+                    }, true);
 
-                // update the birdseye
-                nf.Birdseye.refresh();
-            }
-        }).fail(nf.Common.handleAjaxError);
-    };
+                    // update the birdseye
+                    nfBirdseye.refresh();
+                }
+            }).fail(nfCommon.handleAjaxError);
+        };
 
-    /**
-     * Prompts the user to select a template.
-     * 
-     * @argument {object} pt        The point that the template was dropped
-     */
-    var promptForTemplate = function (pt) {
-        $.ajax({
-            type: 'GET',
-            url: config.urls.templates,
-            dataType: 'json'
-        }).done(function (response) {
-            var templates = response.templates;
-            if (nf.Common.isDefinedAndNotNull(templates) && templates.length > 0) {
-                var options = [];
-                $.each(templates, function (_, template) {
-                    options.push({
-                        text: template.name,
-                        value: template.id,
-                        description: nf.Common.escapeHtml(template.description)
+        /**
+         * Prompts the user to select a template.
+         *
+         * @argument {object} pt        The point that the template was dropped
+         */
+        var promptForTemplate = function (pt) {
+            $.ajax({
+                type: 'GET',
+                url: config.urls.templates,
+                dataType: 'json'
+            }).done(function (response) {
+                var templates = response.templates;
+                if (nfCommon.isDefinedAndNotNull(templates) && templates.length > 0) {
+                    var options = [];
+                    $.each(templates, function (_, template) {
+                        options.push({
+                            text: template.name,
+                            value: template.id,
+                            description: nfCommon.escapeHtml(template.description)
+                        });
                     });
-                });
 
-                // configure the templates combo
-                $('#available-templates').combo({
-                    maxHeight: 300,
-                    options: options
-                });
+                    // configure the templates combo
+                    $('#available-templates').combo({
+                        maxHeight: 300,
+                        options: options
+                    });
 
-                // update the button model
-                $('#instantiate-template-dialog').modal('setButtonModel', [{
+                    // update the button model
+                    $('#instantiate-template-dialog').modal('setButtonModel', [{
                         buttonText: 'Add',
                         handler: {
                             click: function () {
@@ -778,342 +797,342 @@ nf.CanvasToolbox = (function () {
                         }
                     }]);
 
-                // show the dialog
-                $('#instantiate-template-dialog').modal('show');
-            } else {
-                nf.Dialog.showOkDialog({
-                    headerText: 'Instantiate Template',
-                    dialogContent: 'No templates have been loaded into this NiFi.',
-                    overlayBackground: false
-                });
-            }
+                    // show the dialog
+                    $('#instantiate-template-dialog').modal('show');
+                } else {
+                    nfDialog.showOkDialog({
+                        headerText: 'Instantiate Template',
+                        dialogContent: 'No templates have been loaded into this NiFi.',
+                        overlayBackground: false
+                    });
+                }
 
-        }).fail(nf.Common.handleAjaxError);
-    };
+            }).fail(nfCommon.handleAjaxError);
+        };
 
-    /**
-     * Instantiates the specified template and 
-     * 
-     * @argument {string} templateId        The template id
-     * @argument {object} pt                The point that the template was dropped
-     */
-    var createTemplate = function (templateId, pt) {
-        var revision = nf.Client.getRevision();
+        /**
+         * Instantiates the specified template and
+         *
+         * @argument {string} templateId        The template id
+         * @argument {object} pt                The point that the template was dropped
+         */
+        var createTemplate = function (templateId, pt) {
+            var revision = nfClient.getRevision();
 
-        // create a new instance of the new template
-        $.ajax({
-            type: 'POST',
-            url: config.urls.controller + '/process-groups/' + encodeURIComponent(nf.Canvas.getGroupId()) + '/template-instance',
-            data: {
-                version: revision.version,
-                clientId: revision.clientId,
-                templateId: templateId,
-                originX: pt.x,
-                originY: pt.y
-            },
-            dataType: 'json'
-        }).done(function (response) {
-            // update the revision
-            nf.Client.setRevision(response.revision);
-
-            // populate the graph accordingly
-            nf.Graph.add(response.contents, true);
-
-            // update component visibility
-            nf.Canvas.View.updateVisibility();
-
-            // update the birdseye
-            nf.Birdseye.refresh();
-        }).fail(nf.Common.handleAjaxError);
-    };
-
-    /**
-     * Create the label and add to the graph.
-     * 
-     * @argument {object} pt        The point that the label was dropped
-     */
-    var createLabel = function (pt) {
-        var revision = nf.Client.getRevision();
-
-        // create a new label
-        $.ajax({
-            type: 'POST',
-            url: config.urls.controller + '/process-groups/' + encodeURIComponent(nf.Canvas.getGroupId()) + '/labels',
-            data: {
-                version: revision.version,
-                clientId: revision.clientId,
-                x: pt.x,
-                y: pt.y,
-                width: nf.Label.config.width,
-                height: nf.Label.config.height
-            },
-            dataType: 'json'
-        }).done(function (response) {
-            if (nf.Common.isDefinedAndNotNull(response.label)) {
+            // create a new instance of the new template
+            $.ajax({
+                type: 'POST',
+                url: config.urls.controller + '/process-groups/' + encodeURIComponent(nfCanvas.getGroupId()) + '/template-instance',
+                data: {
+                    version: revision.version,
+                    clientId: revision.clientId,
+                    templateId: templateId,
+                    originX: pt.x,
+                    originY: pt.y
+                },
+                dataType: 'json'
+            }).done(function (response) {
                 // update the revision
-                nf.Client.setRevision(response.revision);
+                nfClient.setRevision(response.revision);
 
-                // add the label to the graph
-                nf.Graph.add({
-                    'labels': [response.label]
-                }, true);
+                // populate the graph accordingly
+                nfGraph.add(response.contents, true);
+
+                // update component visibility
+                nfCanvas.View.updateVisibility();
 
                 // update the birdseye
-                nf.Birdseye.refresh();
-            }
-        }).fail(nf.Common.handleAjaxError);
-    };
+                nfBirdseye.refresh();
+            }).fail(nfCommon.handleAjaxError);
+        };
 
-    return {
         /**
-         * Initialize the canvas toolbox.
+         * Create the label and add to the graph.
+         *
+         * @argument {object} pt        The point that the label was dropped
          */
-        init: function () {
-            var toolbox = $('#toolbox');
+        var createLabel = function (pt) {
+            var revision = nfClient.getRevision();
 
-            // ensure the user can create graph components
-            if (nf.Common.isDFM()) {
+            // create a new label
+            $.ajax({
+                type: 'POST',
+                url: config.urls.controller + '/process-groups/' + encodeURIComponent(nfCanvas.getGroupId()) + '/labels',
+                data: {
+                    version: revision.version,
+                    clientId: revision.clientId,
+                    x: pt.x,
+                    y: pt.y,
+                    width: nfLabel.config.width,
+                    height: nfLabel.config.height
+                },
+                dataType: 'json'
+            }).done(function (response) {
+                if (nfCommon.isDefinedAndNotNull(response.label)) {
+                    // update the revision
+                    nfClient.setRevision(response.revision);
 
-                // create the draggable icons
-                addToolboxIcon(config.type.processor, toolbox, 'processor-icon', 'processor-icon-hover', 'processor-icon-drag', promptForProcessorType);
-                addToolboxIcon(config.type.inputPort, toolbox, 'input-port-icon', 'input-port-icon-hover', 'input-port-icon-drag', promptForInputPortName);
-                addToolboxIcon(config.type.outputPort, toolbox, 'output-port-icon', 'output-port-icon-hover', 'output-port-icon-drag', promptForOutputPortName);
-                addToolboxIcon(config.type.processGroup, toolbox, 'process-group-icon', 'process-group-icon-hover', 'process-group-icon-drag', nf.CanvasToolbox.promptForGroupName);
-                addToolboxIcon(config.type.remoteProcessGroup, toolbox, 'remote-process-group-icon', 'remote-process-group-icon-hover', 'remote-process-group-icon-drag', promptForRemoteProcessGroupUri);
-                addToolboxIcon(config.type.funnel, toolbox, 'funnel-icon', 'funnel-icon-hover', 'funnel-icon-drag', createFunnel);
-                addToolboxIcon(config.type.template, toolbox, 'template-icon', 'template-icon-hover', 'template-icon-drag', promptForTemplate);
-                addToolboxIcon(config.type.label, toolbox, 'label-icon', 'label-icon-hover', 'label-icon-drag', createLabel);
+                    // add the label to the graph
+                    nfGraph.add({
+                        'labels': [response.label]
+                    }, true);
 
-                // define the function for filtering the list
-                $('#processor-type-filter').focus(function () {
-                    if ($(this).hasClass(config.styles.filterList)) {
-                        $(this).removeClass(config.styles.filterList).val('');
-                    }
-                }).blur(function () {
-                    if ($(this).val() === '') {
-                        $(this).addClass(config.styles.filterList).val(config.filterText);
-                    }
-                }).addClass(config.styles.filterList).val(config.filterText);
+                    // update the birdseye
+                    nfBirdseye.refresh();
+                }
+            }).fail(nfCommon.handleAjaxError);
+        };
 
-                // initialize the processor type table
-                var processorTypesColumns = [
-                    {id: 'type', name: 'Type', field: 'label', sortable: true, resizable: true},
-                    {id: 'tags', name: 'Tags', field: 'tags', sortable: true, resizable: true}
-                ];
-                var processorTypesOptions = {
-                    forceFitColumns: true,
-                    enableTextSelectionOnCells: true,
-                    enableCellNavigation: true,
-                    enableColumnReorder: false,
-                    autoEdit: false,
-                    multiSelect: false
-                };
+        return {
+            /**
+             * Initialize the canvas toolbox.
+             */
+            init: function () {
+                var toolbox = $('#toolbox');
 
-                // initialize the dataview
-                var processorTypesData = new Slick.Data.DataView({
-                    inlineFilters: false
-                });
-                processorTypesData.setItems([]);
-                processorTypesData.setFilterArgs({
-                    searchString: getFilterText()
-                });
-                processorTypesData.setFilter(filter);
+                // ensure the user can create graph components
+                if (nfCommon.isDFM()) {
 
-                // initialize the sort
-                sort({
-                    columnId: 'type',
-                    sortAsc: true
-                }, processorTypesData);
+                    // create the draggable icons
+                    addToolboxIcon(config.type.processor, toolbox, 'processor-icon', 'processor-icon-hover', 'processor-icon-drag', promptForProcessorType);
+                    addToolboxIcon(config.type.inputPort, toolbox, 'input-port-icon', 'input-port-icon-hover', 'input-port-icon-drag', promptForInputPortName);
+                    addToolboxIcon(config.type.outputPort, toolbox, 'output-port-icon', 'output-port-icon-hover', 'output-port-icon-drag', promptForOutputPortName);
+                    addToolboxIcon(config.type.processGroup, toolbox, 'process-group-icon', 'process-group-icon-hover', 'process-group-icon-drag', this.promptForGroupName);
+                    addToolboxIcon(config.type.remoteProcessGroup, toolbox, 'remote-process-group-icon', 'remote-process-group-icon-hover', 'remote-process-group-icon-drag', promptForRemoteProcessGroupUri);
+                    addToolboxIcon(config.type.funnel, toolbox, 'funnel-icon', 'funnel-icon-hover', 'funnel-icon-drag', createFunnel);
+                    addToolboxIcon(config.type.template, toolbox, 'template-icon', 'template-icon-hover', 'template-icon-drag', promptForTemplate);
+                    addToolboxIcon(config.type.label, toolbox, 'label-icon', 'label-icon-hover', 'label-icon-drag', createLabel);
 
-                // initialize the grid
-                var processorTypesGrid = new Slick.Grid('#processor-types-table', processorTypesData, processorTypesColumns, processorTypesOptions);
-                processorTypesGrid.setSelectionModel(new Slick.RowSelectionModel());
-                processorTypesGrid.registerPlugin(new Slick.AutoTooltips());
-                processorTypesGrid.setSortColumn('type', true);
-                processorTypesGrid.onSort.subscribe(function (e, args) {
+                    // define the function for filtering the list
+                    $('#processor-type-filter').focus(function () {
+                        if ($(this).hasClass(config.styles.filterList)) {
+                            $(this).removeClass(config.styles.filterList).val('');
+                        }
+                    }).blur(function () {
+                        if ($(this).val() === '') {
+                            $(this).addClass(config.styles.filterList).val(config.filterText);
+                        }
+                    }).addClass(config.styles.filterList).val(config.filterText);
+
+                    // initialize the processor type table
+                    var processorTypesColumns = [
+                        {id: 'type', name: 'Type', field: 'label', sortable: true, resizable: true},
+                        {id: 'tags', name: 'Tags', field: 'tags', sortable: true, resizable: true}
+                    ];
+                    var processorTypesOptions = {
+                        forceFitColumns: true,
+                        enableTextSelectionOnCells: true,
+                        enableCellNavigation: true,
+                        enableColumnReorder: false,
+                        autoEdit: false,
+                        multiSelect: false
+                    };
+
+                    // initialize the dataview
+                    var processorTypesData = new Slick.Data.DataView({
+                        inlineFilters: false
+                    });
+                    processorTypesData.setItems([]);
+                    processorTypesData.setFilterArgs({
+                        searchString: getFilterText()
+                    });
+                    processorTypesData.setFilter(filter);
+
+                    // initialize the sort
                     sort({
-                        columnId: args.sortCol.field,
-                        sortAsc: args.sortAsc
+                        columnId: 'type',
+                        sortAsc: true
                     }, processorTypesData);
-                });
-                processorTypesGrid.onSelectedRowsChanged.subscribe(function (e, args) {
-                    if ($.isArray(args.rows) && args.rows.length === 1) {
-                        var processorTypeIndex = args.rows[0];
-                        var processorType = processorTypesGrid.getDataItem(processorTypeIndex);
 
-                        // set the processor type description
-                        if (nf.Common.isDefinedAndNotNull(processorType)) {
-                            if (nf.Common.isBlank(processorType.description)) {
-                                $('#processor-type-description').attr('title', '').html('<span class="unset">No description specified</span>');
-                            } else {
-                                $('#processor-type-description').html(processorType.description).ellipsis();
+                    // initialize the grid
+                    var processorTypesGrid = new Slick.Grid('#processor-types-table', processorTypesData, processorTypesColumns, processorTypesOptions);
+                    processorTypesGrid.setSelectionModel(new Slick.RowSelectionModel());
+                    processorTypesGrid.registerPlugin(new Slick.AutoTooltips());
+                    processorTypesGrid.setSortColumn('type', true);
+                    processorTypesGrid.onSort.subscribe(function (e, args) {
+                        sort({
+                            columnId: args.sortCol.field,
+                            sortAsc: args.sortAsc
+                        }, processorTypesData);
+                    });
+                    processorTypesGrid.onSelectedRowsChanged.subscribe(function (e, args) {
+                        if ($.isArray(args.rows) && args.rows.length === 1) {
+                            var processorTypeIndex = args.rows[0];
+                            var processorType = processorTypesGrid.getDataItem(processorTypeIndex);
+
+                            // set the processor type description
+                            if (nfCommon.isDefinedAndNotNull(processorType)) {
+                                if (nfCommon.isBlank(processorType.description)) {
+                                    $('#processor-type-description').attr('title', '').html('<span class="unset">No description specified</span>');
+                                } else {
+                                    $('#processor-type-description').html(processorType.description).ellipsis();
+                                }
+
+                                // populate the dom
+                                $('#processor-type-name').text(processorType.label).ellipsis();
+                                $('#selected-processor-name').text(processorType.label);
+                                $('#selected-processor-type').text(processorType.type);
                             }
-
-                            // populate the dom
-                            $('#processor-type-name').text(processorType.label).ellipsis();
-                            $('#selected-processor-name').text(processorType.label);
-                            $('#selected-processor-type').text(processorType.type);
                         }
-                    }
-                });
+                    });
 
-                // wire up the dataview to the grid
-                processorTypesData.onRowCountChanged.subscribe(function (e, args) {
-                    processorTypesGrid.updateRowCount();
-                    processorTypesGrid.render();
+                    // wire up the dataview to the grid
+                    processorTypesData.onRowCountChanged.subscribe(function (e, args) {
+                        processorTypesGrid.updateRowCount();
+                        processorTypesGrid.render();
 
-                    // update the total number of displayed processors
-                    $('#displayed-processor-types').text(args.current);
-                });
-                processorTypesData.onRowsChanged.subscribe(function (e, args) {
-                    processorTypesGrid.invalidateRows(args.rows);
-                    processorTypesGrid.render();
-                });
-                processorTypesData.syncGridSelection(processorTypesGrid, false);
+                        // update the total number of displayed processors
+                        $('#displayed-processor-types').text(args.current);
+                    });
+                    processorTypesData.onRowsChanged.subscribe(function (e, args) {
+                        processorTypesGrid.invalidateRows(args.rows);
+                        processorTypesGrid.render();
+                    });
+                    processorTypesData.syncGridSelection(processorTypesGrid, false);
 
-                // hold onto an instance of the grid
-                $('#processor-types-table').data('gridInstance', processorTypesGrid);
+                    // hold onto an instance of the grid
+                    $('#processor-types-table').data('gridInstance', processorTypesGrid);
 
-                // load the available processor types, this select is shown in the
-                // new processor dialog when a processor is dragged onto the screen
-                $.ajax({
-                    type: 'GET',
-                    url: config.urls.processorTypes,
-                    dataType: 'json'
-                }).done(function (response) {
-                    var tags = [];
+                    // load the available processor types, this select is shown in the
+                    // new processor dialog when a processor is dragged onto the screen
+                    $.ajax({
+                        type: 'GET',
+                        url: config.urls.processorTypes,
+                        dataType: 'json'
+                    }).done(function (response) {
+                        var tags = [];
 
-                    // begin the update
-                    processorTypesData.beginUpdate();
+                        // begin the update
+                        processorTypesData.beginUpdate();
 
-                    // go through each processor type
-                    $.each(response.processorTypes, function (i, documentedType) {
-                        var type = documentedType.type;
+                        // go through each processor type
+                        $.each(response.processorTypes, function (i, documentedType) {
+                            var type = documentedType.type;
 
-                        // create the row for the processor type
-                        processorTypesData.addItem({
-                            id: i,
-                            label: nf.Common.substringAfterLast(type, '.'),
-                            type: type,
-                            description: nf.Common.escapeHtml(documentedType.description),
-                            tags: documentedType.tags.join(', ')
+                            // create the row for the processor type
+                            processorTypesData.addItem({
+                                id: i,
+                                label: nfCommon.substringAfterLast(type, '.'),
+                                type: type,
+                                description: nfCommon.escapeHtml(documentedType.description),
+                                tags: documentedType.tags.join(', ')
+                            });
+
+                            // count the frequency of each tag for this type
+                            $.each(documentedType.tags, function (i, tag) {
+                                tags.push(tag.toLowerCase());
+                            });
                         });
 
-                        // count the frequency of each tag for this type
-                        $.each(documentedType.tags, function (i, tag) {
-                            tags.push(tag.toLowerCase());
+                        // end the udpate
+                        processorTypesData.endUpdate();
+
+                        // set the total number of processors
+                        $('#total-processor-types, #displayed-processor-types').text(response.processorTypes.length);
+
+                        // create the tag cloud
+                        $('#processor-tag-cloud').tagcloud({
+                            tags: tags,
+                            select: applyFilter,
+                            remove: applyFilter
                         });
+                    }).fail(nfCommon.handleAjaxError);
+
+                    // configure the new processor dialog
+                    $('#new-processor-dialog').modal({
+                        headerText: 'Add Processor',
+                        overlayBackground: false
+                    }).draggable({
+                        containment: 'parent',
+                        handle: '.dialog-header'
                     });
 
-                    // end the udpate
-                    processorTypesData.endUpdate();
-
-                    // set the total number of processors
-                    $('#total-processor-types, #displayed-processor-types').text(response.processorTypes.length);
-
-                    // create the tag cloud
-                    $('#processor-tag-cloud').tagcloud({
-                        tags: tags,
-                        select: applyFilter,
-                        remove: applyFilter
+                    // configure the new port dialog
+                    $('#new-port-dialog').modal({
+                        headerText: 'Add Port',
+                        overlayBackground: false,
+                        handler: {
+                            close: function () {
+                                $('#new-port-name').val('');
+                            }
+                        }
+                    }).draggable({
+                        containment: 'parent',
+                        handle: '.dialog-header'
                     });
-                }).fail(nf.Common.handleAjaxError);
 
-                // configure the new processor dialog
-                $('#new-processor-dialog').modal({
-                    headerText: 'Add Processor',
-                    overlayBackground: false
-                }).draggable({
-                    containment: 'parent',
-                    handle: '.dialog-header'
-                });
-
-                // configure the new port dialog
-                $('#new-port-dialog').modal({
-                    headerText: 'Add Port',
-                    overlayBackground: false,
-                    handler: {
-                        close: function () {
-                            $('#new-port-name').val('');
+                    // configure the new process group dialog
+                    $('#new-process-group-dialog').modal({
+                        headerText: 'Add Process Group',
+                        overlayBackground: false,
+                        handler: {
+                            close: function () {
+                                $('#new-process-group-name').val('');
+                            }
                         }
-                    }
-                }).draggable({
-                    containment: 'parent',
-                    handle: '.dialog-header'
-                });
-
-                // configure the new process group dialog
-                $('#new-process-group-dialog').modal({
-                    headerText: 'Add Process Group',
-                    overlayBackground: false,
-                    handler: {
-                        close: function () {
-                            $('#new-process-group-name').val('');
-                        }
-                    }
-                }).draggable({
-                    containment: 'parent',
-                    handle: '.dialog-header'
-                });
-
-                // configure the new remote process group dialog
-                $('#new-remote-process-group-dialog').modal({
-                    headerText: 'Add Remote Process Group',
-                    overlayBackground: false,
-                    handler: {
-                        close: function () {
-                            $('#new-remote-process-group-uri').val('');
-                        }
-                    }
-                }).draggable({
-                    containment: 'parent',
-                    handle: '.dialog-header'
-                });
-
-                // configure the instantiate template dialog
-                $('#instantiate-template-dialog').modal({
-                    headerText: 'Instantiate Template',
-                    overlayBackgroud: false
-                }).draggable({
-                    containment: 'parent',
-                    handle: '.dialog-header'
-                });
-            } else {
-                // add disabled icons
-                $('<div/>').attr('title', config.type.processor).addClass('processor-icon-disable').addClass('toolbox-icon').appendTo(toolbox);
-                $('<div/>').attr('title', config.type.inputPort).addClass('input-port-icon-disable').addClass('toolbox-icon').appendTo(toolbox);
-                $('<div/>').attr('title', config.type.outputPort).addClass('output-port-icon-disable').addClass('toolbox-icon').appendTo(toolbox);
-                $('<div/>').attr('title', config.type.processGroup).addClass('process-group-icon-disable').addClass('toolbox-icon').appendTo(toolbox);
-                $('<div/>').attr('title', config.type.remoteProcessGroup).addClass('remote-process-group-icon-disable').addClass('toolbox-icon').appendTo(toolbox);
-                $('<div/>').attr('title', config.type.funnel).addClass('funnel-icon-disable').addClass('toolbox-icon').appendTo(toolbox);
-                $('<div/>').attr('title', config.type.template).addClass('template-icon-disable').addClass('toolbox-icon').appendTo(toolbox);
-                $('<div/>').attr('title', config.type.label).addClass('label-icon-disable').addClass('toolbox-icon').appendTo(toolbox);
-            }
-        },
-        
-        /**
-         * Prompts the user to enter the name for the group.
-         * 
-         * @argument {object} pt        The point that the group was dropped
-         */
-        promptForGroupName: function (pt) {
-            return $.Deferred(function (deferred) {
-                var addGroup = function () {
-                    // get the name of the group and clear the textfield
-                    var groupName = $('#new-process-group-name').val();
-
-                    // hide the dialog
-                    $('#new-process-group-dialog').modal('hide');
-
-                    // create the group and resolve the deferred accordingly
-                    createGroup(groupName, pt).done(function (response) {
-                        deferred.resolve(response.processGroup);
-                    }).fail(function () {
-                        deferred.reject();
+                    }).draggable({
+                        containment: 'parent',
+                        handle: '.dialog-header'
                     });
-                };
 
-                $('#new-process-group-dialog').modal('setButtonModel', [{
+                    // configure the new remote process group dialog
+                    $('#new-remote-process-group-dialog').modal({
+                        headerText: 'Add Remote Process Group',
+                        overlayBackground: false,
+                        handler: {
+                            close: function () {
+                                $('#new-remote-process-group-uri').val('');
+                            }
+                        }
+                    }).draggable({
+                        containment: 'parent',
+                        handle: '.dialog-header'
+                    });
+
+                    // configure the instantiate template dialog
+                    $('#instantiate-template-dialog').modal({
+                        headerText: 'Instantiate Template',
+                        overlayBackgroud: false
+                    }).draggable({
+                        containment: 'parent',
+                        handle: '.dialog-header'
+                    });
+                } else {
+                    // add disabled icons
+                    $('<div/>').attr('title', config.type.processor).addClass('processor-icon-disable').addClass('toolbox-icon').appendTo(toolbox);
+                    $('<div/>').attr('title', config.type.inputPort).addClass('input-port-icon-disable').addClass('toolbox-icon').appendTo(toolbox);
+                    $('<div/>').attr('title', config.type.outputPort).addClass('output-port-icon-disable').addClass('toolbox-icon').appendTo(toolbox);
+                    $('<div/>').attr('title', config.type.processGroup).addClass('process-group-icon-disable').addClass('toolbox-icon').appendTo(toolbox);
+                    $('<div/>').attr('title', config.type.remoteProcessGroup).addClass('remote-process-group-icon-disable').addClass('toolbox-icon').appendTo(toolbox);
+                    $('<div/>').attr('title', config.type.funnel).addClass('funnel-icon-disable').addClass('toolbox-icon').appendTo(toolbox);
+                    $('<div/>').attr('title', config.type.template).addClass('template-icon-disable').addClass('toolbox-icon').appendTo(toolbox);
+                    $('<div/>').attr('title', config.type.label).addClass('label-icon-disable').addClass('toolbox-icon').appendTo(toolbox);
+                }
+            },
+
+            /**
+             * Prompts the user to enter the name for the group.
+             *
+             * @argument {object} pt        The point that the group was dropped
+             */
+            promptForGroupName: function (pt) {
+                return $.Deferred(function (deferred) {
+                    var addGroup = function () {
+                        // get the name of the group and clear the textfield
+                        var groupName = $('#new-process-group-name').val();
+
+                        // hide the dialog
+                        $('#new-process-group-dialog').modal('hide');
+
+                        // create the group and resolve the deferred accordingly
+                        createGroup(groupName, pt).done(function (response) {
+                            deferred.resolve(response.processGroup);
+                        }).fail(function () {
+                            deferred.reject();
+                        });
+                    };
+
+                    $('#new-process-group-dialog').modal('setButtonModel', [{
                         buttonText: 'Add',
                         handler: {
                             click: addGroup
@@ -1131,17 +1150,17 @@ nf.CanvasToolbox = (function () {
                         }
                     }]);
 
-                // show the dialog
-                $('#new-process-group-dialog').modal('show');
+                    // show the dialog
+                    $('#new-process-group-dialog').modal('show');
 
-                // set up the focus and key handlers
-                $('#new-process-group-name').focus().off('keyup').on('keyup', function (e) {
-                    var code = e.keyCode ? e.keyCode : e.which;
-                    if (code === $.ui.keyCode.ENTER) {
-                        addGroup();
-                    }
-                });
-            }).promise();
-        }
-    };
-}());
+                    // set up the focus and key handlers
+                    $('#new-process-group-name').focus().off('keyup').on('keyup', function (e) {
+                        var code = e.keyCode ? e.keyCode : e.which;
+                        if (code === $.ui.keyCode.ENTER) {
+                            addGroup();
+                        }
+                    });
+                }).promise();
+            }
+        };
+    });

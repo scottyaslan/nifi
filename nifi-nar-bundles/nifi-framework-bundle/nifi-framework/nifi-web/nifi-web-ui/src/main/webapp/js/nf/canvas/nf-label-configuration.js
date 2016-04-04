@@ -17,7 +17,14 @@
 
 /* global nf */
 
-nf.LabelConfiguration = (function () {
+define(['nf-client',
+        'nf-label',
+        'nf-common',
+        'nf-canvas-utils'],
+    function (nfClient,
+              nfLabel,
+              nfCommon,
+              nfCanvasUtils) {
 
     var labelUri = '';
 
@@ -33,7 +40,7 @@ nf.LabelConfiguration = (function () {
                     buttonText: 'Apply',
                     handler: {
                         click: function () {
-                            var revision = nf.Client.getRevision();
+                            var revision = nfClient.getRevision();
 
                             // get the new values
                             var labelValue = $('#label-value').val();
@@ -52,11 +59,11 @@ nf.LabelConfiguration = (function () {
                                 dataType: 'json'
                             }).done(function (response) {
                                 // update the revision
-                                nf.Client.setRevision(response.revision);
+                                nfClient.setRevision(response.revision);
 
                                 // get the label out of the response
-                                nf.Label.set(response.label);
-                            }).fail(nf.Common.handleAjaxError);
+                                nfLabel.set(response.label);
+                            }).fail(nfCommon.handleAjaxError);
 
                             // reset and hide the dialog
                             this.modal('hide');
@@ -114,18 +121,18 @@ nf.LabelConfiguration = (function () {
          * @argument {selection} selection      The selection
          */
         showConfiguration: function (selection) {
-            if (nf.CanvasUtils.isLabel(selection)) {
+            if (nfCanvasUtils.isLabel(selection)) {
                 var selectionData = selection.datum();
 
                 // get the label value
                 var labelValue = '';
-                if (nf.Common.isDefinedAndNotNull(selectionData.component.label)) {
+                if (nfCommon.isDefinedAndNotNull(selectionData.component.label)) {
                     labelValue = selectionData.component.label;
                 }
 
                 // get the font size
                 var fontSize = '12px';
-                if (nf.Common.isDefinedAndNotNull(selectionData.component.style['font-size'])) {
+                if (nfCommon.isDefinedAndNotNull(selectionData.component.style['font-size'])) {
                     fontSize = selectionData.component.style['font-size'];
                 }
 
@@ -143,4 +150,4 @@ nf.LabelConfiguration = (function () {
             }
         }
     };
-}());
+});

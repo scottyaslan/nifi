@@ -17,7 +17,10 @@
 
 /* global nf */
 
-nf.ProcessGroupDetails = (function () {
+define(['nf-common',
+        'nf-canvas-utils'],
+    function (nfCommon,
+              nfCanvasUtils) {
 
     return {
         init: function () {
@@ -37,9 +40,9 @@ nf.ProcessGroupDetails = (function () {
                 handler: {
                     close: function () {
                         // clear the processor details
-                        nf.Common.clearField('read-only-process-group-id');
-                        nf.Common.clearField('read-only-process-group-name');
-                        nf.Common.clearField('read-only-process-group-comments');
+                        nfCommon.clearField('read-only-process-group-id');
+                        nfCommon.clearField('read-only-process-group-name');
+                        nfCommon.clearField('read-only-process-group-comments');
                     }
                 }
             }).draggable({
@@ -50,17 +53,17 @@ nf.ProcessGroupDetails = (function () {
         
         showDetails: function (selection) {
             // if the specified selection is a process group
-            if (nf.CanvasUtils.isProcessGroup(selection)) {
+            if (nfCanvasUtils.isProcessGroup(selection)) {
                 var selectionData = selection.datum();
 
                 // populate the port settings
-                nf.Common.populateField('read-only-process-group-id', selectionData.component.id);
-                nf.Common.populateField('read-only-process-group-name', selectionData.component.name);
-                nf.Common.populateField('read-only-process-group-comments', selectionData.component.comments);
+                nfCommon.populateField('read-only-process-group-id', selectionData.component.id);
+                nfCommon.populateField('read-only-process-group-name', selectionData.component.name);
+                nfCommon.populateField('read-only-process-group-comments', selectionData.component.comments);
 
                 // show the details
                 $('#process-group-details').modal('show');
             }
         }
     };
-}());
+});

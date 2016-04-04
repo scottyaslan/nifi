@@ -17,7 +17,12 @@
 
 /* global nf, d3 */
 
-nf.Selectable = (function () {
+define(['nf-canvas-toolbar',
+        'nf-context-menu',
+        'nf-selectable'],
+    function (nfCanvasToolbar,
+              nfContextMenu,
+              nfSelectable) {
 
     return {
         init: function () {
@@ -26,7 +31,7 @@ nf.Selectable = (function () {
         
         select: function (g) {
             // hide any context menus as necessary
-            nf.ContextMenu.hide();
+            nfContextMenu.hide();
 
             // only need to update selection if necessary
             if (!g.classed('selected')) {
@@ -45,7 +50,7 @@ nf.Selectable = (function () {
             }
 
             // update the toolbar
-            nf.CanvasToolbar.refresh();
+            nfCanvasToolbar.refresh();
 
             // stop propagation
             d3.event.stopPropagation();
@@ -54,8 +59,8 @@ nf.Selectable = (function () {
         activate: function (components) {
             components.on('mousedown.selection', function () {
                 // get the clicked component to update selection
-                nf.Selectable.select(d3.select(this));
+                nfSelectable.select(d3.select(this));
             });
         }
     };
-}());
+});

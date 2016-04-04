@@ -17,7 +17,18 @@
 
 /* global nf, d3 */
 
-nf.ProcessGroup = (function () {
+define(['nf-common',
+        'nf-canvas-utils',
+        'nf-selectable',
+        'nf-context-menu',
+        'nf-draggable',
+        'nf-connectable'],
+    function (nfCommon,
+              nfCanvasUtils,
+              nfSelectable,
+              nfContextMenu,
+              nfDraggable,
+              nfConnectable) {
 
     var PREVIEW_NAME_LENGTH = 30;
 
@@ -48,7 +59,7 @@ nf.ProcessGroup = (function () {
      * @param {object} d    
      */
     var getProcessGroupComments = function (d) {
-        if (nf.Common.isBlank(d.component.comments)) {
+        if (nfCommon.isBlank(d.component.comments)) {
             return 'No comments specified';
         } else {
             return d.component.comments;
@@ -83,7 +94,7 @@ nf.ProcessGroup = (function () {
                     'class': 'process-group component'
                 })
                 .classed('selected', selected)
-                .call(nf.CanvasUtils.position);
+                .call(nfCanvasUtils.position);
 
         // ----
         // body
@@ -139,7 +150,7 @@ nf.ProcessGroup = (function () {
 
         // process group preview
         processGroup.append('image')
-                .call(nf.CanvasUtils.disableImageHref)
+                .call(nfCanvasUtils.disableImageHref)
                 .attr({
                     'xlink:href': 'images/bgProcessGroupDetailsArea.png',
                     'width': 352,
@@ -152,12 +163,12 @@ nf.ProcessGroup = (function () {
         // always support selecting and navigation
         processGroup.on('dblclick', function (d) {
                     // enter this group on double click
-                    nf.CanvasUtils.enterGroup(d.component.id);
+                    nfCanvasUtils.enterGroup(d.component.id);
                 })
-                .call(nf.Selectable.activate).call(nf.ContextMenu.activate);
+                .call(nfSelectable.activate).call(nfContextMenu.activate);
 
         // only support dragging, connection, and drag and drop if appropriate
-        if (nf.Common.isDFM()) {
+        if (nfCommon.isDFM()) {
             processGroup
                     // Using mouseover/out to workaround chrome issue #122746
                     .on('mouseover.drop', function (d) {
@@ -170,7 +181,7 @@ nf.ProcessGroup = (function () {
                             var drag = d3.select('rect.drag-selection');
                             if (!drag.empty()) {
                                 // filter the current selection by this group
-                                var selection = nf.CanvasUtils.getSelection().filter(function(d) {
+                                var selection = nfCanvasUtils.getSelection().filter(function(d) {
                                     return targetData.component.id === d.component.id;
                                 });
                                 
@@ -179,7 +190,7 @@ nf.ProcessGroup = (function () {
                                     // mark that we are hovering over a drop area if appropriate 
                                     target.classed('drop', function () {
                                         // get the current selection and ensure its disconnected
-                                        return nf.CanvasUtils.isDisconnected(nf.CanvasUtils.getSelection());
+                                        return nfCanvasUtils.isDisconnected(nfCanvasUtils.getSelection());
                                     });
                                 }
                             }
@@ -189,8 +200,8 @@ nf.ProcessGroup = (function () {
                         // mark that we are no longer hovering over a drop area unconditionally
                         d3.select(this).classed('drop', false);
                     })
-                    .call(nf.Draggable.activate)
-                    .call(nf.Connectable.activate);
+                    .call(nfDraggable.activate)
+                    .call(nfConnectable.activate);
         }
 
         // call update to trigger some rendering
@@ -263,7 +274,7 @@ nf.ProcessGroup = (function () {
 
                     // input ports icon
                     details.append('image')
-                            .call(nf.CanvasUtils.disableImageHref)
+                            .call(nfCanvasUtils.disableImageHref)
                             .attr({
                                 'xlink:href': 'images/iconInputPortSmall.png',
                                 'width': 16,
@@ -282,7 +293,7 @@ nf.ProcessGroup = (function () {
 
                     // output ports icon
                     details.append('image')
-                            .call(nf.CanvasUtils.disableImageHref)
+                            .call(nfCanvasUtils.disableImageHref)
                             .attr({
                                 'xlink:href': 'images/iconOutputPortSmall.png',
                                 'width': 16,
@@ -300,7 +311,7 @@ nf.ProcessGroup = (function () {
 
                     // transmitting icon
                     details.append('image')
-                            .call(nf.CanvasUtils.disableImageHref)
+                            .call(nfCanvasUtils.disableImageHref)
                             .attr({
                                 'xlink:href': 'images/iconTransmissionActive.png',
                                 'width': 16,
@@ -318,7 +329,7 @@ nf.ProcessGroup = (function () {
 
                     // not transmitting icon
                     details.append('image')
-                            .call(nf.CanvasUtils.disableImageHref)
+                            .call(nfCanvasUtils.disableImageHref)
                             .attr({
                                 'xlink:href': 'images/iconTransmissionInactive.png',
                                 'width': 16,
@@ -336,7 +347,7 @@ nf.ProcessGroup = (function () {
 
                     // running icon
                     details.append('image')
-                            .call(nf.CanvasUtils.disableImageHref)
+                            .call(nfCanvasUtils.disableImageHref)
                             .attr({
                                 'xlink:href': 'images/iconRun.png',
                                 'width': 16,
@@ -354,7 +365,7 @@ nf.ProcessGroup = (function () {
 
                     // stopped icon
                     details.append('image')
-                            .call(nf.CanvasUtils.disableImageHref)
+                            .call(nfCanvasUtils.disableImageHref)
                             .attr({
                                 'xlink:href': 'images/iconStop.png',
                                 'width': 16,
@@ -372,7 +383,7 @@ nf.ProcessGroup = (function () {
 
                     // invalid icon
                     details.append('image')
-                            .call(nf.CanvasUtils.disableImageHref)
+                            .call(nfCanvasUtils.disableImageHref)
                             .attr({
                                 'xlink:href': 'images/iconAlert.png',
                                 'width': 16,
@@ -390,7 +401,7 @@ nf.ProcessGroup = (function () {
 
                     // disabled icon
                     details.append('image')
-                            .call(nf.CanvasUtils.disableImageHref)
+                            .call(nfCanvasUtils.disableImageHref)
                             .attr({
                                 'xlink:href': 'images/iconDisable.png',
                                 'width': 16,
@@ -590,7 +601,7 @@ nf.ProcessGroup = (function () {
 
                     // bulletin icon
                     details.append('image')
-                            .call(nf.CanvasUtils.disableImageHref)
+                            .call(nfCanvasUtils.disableImageHref)
                             .attr({
                                 'class': 'bulletin-icon',
                                 'xlink:href': 'images/iconBulletin.png',
@@ -731,9 +742,9 @@ nf.ProcessGroup = (function () {
                             processGroupComments.text(null).selectAll('tspan, title').remove();
 
                             // apply ellipsis to the port name as necessary
-                            nf.CanvasUtils.multilineEllipsis(processGroupComments, 2, getProcessGroupComments(d));
+                            nfCanvasUtils.multilineEllipsis(processGroupComments, 2, getProcessGroupComments(d));
                         }).classed('unset', function (d) {
-                    return nf.Common.isBlank(d.component.comments);
+                    return nfCommon.isBlank(d.component.comments);
                 }).append('title').text(function (d) {
                     return getProcessGroupComments(d);
                 });
@@ -747,7 +758,7 @@ nf.ProcessGroup = (function () {
                             processGroupName.text(null).selectAll('title').remove();
 
                             // apply ellipsis to the process group name as necessary
-                            nf.CanvasUtils.ellipsis(processGroupName, d.component.name);
+                            nfCanvasUtils.ellipsis(processGroupName, d.component.name);
                         }).append('title').text(function (d) {
                     return d.component.name;
                 });
@@ -796,7 +807,7 @@ nf.ProcessGroup = (function () {
         // queued value
         updated.select('text.process-group-queued')
                 .text(function (d) {
-                    if (nf.Common.isDefinedAndNotNull(d.status)) {
+                    if (nfCommon.isDefinedAndNotNull(d.status)) {
                         return d.status.queued;
                     } else {
                         return '- / -';
@@ -806,7 +817,7 @@ nf.ProcessGroup = (function () {
         // in value
         updated.select('text.process-group-in')
                 .text(function (d) {
-                    if (nf.Common.isDefinedAndNotNull(d.status)) {
+                    if (nfCommon.isDefinedAndNotNull(d.status)) {
                         return d.status.input;
                     } else {
                         return '- / -';
@@ -816,7 +827,7 @@ nf.ProcessGroup = (function () {
         // read/write value
         updated.select('text.process-group-read-write')
                 .text(function (d) {
-                    if (nf.Common.isDefinedAndNotNull(d.status)) {
+                    if (nfCommon.isDefinedAndNotNull(d.status)) {
                         return d.status.read + ' / ' + d.status.written;
                     } else {
                         return '- / -';
@@ -826,7 +837,7 @@ nf.ProcessGroup = (function () {
         // out value
         updated.select('text.process-group-out')
                 .text(function (d) {
-                    if (nf.Common.isDefinedAndNotNull(d.status)) {
+                    if (nfCommon.isDefinedAndNotNull(d.status)) {
                         return d.status.output;
                     } else {
                         return '- / -';
@@ -841,7 +852,7 @@ nf.ProcessGroup = (function () {
             // active thread count
             // -------------------
 
-            nf.CanvasUtils.activeThreadCount(processGroup, d, function (off) {
+            nfCanvasUtils.activeThreadCount(processGroup, d, function (off) {
                 offset = off;
             });
 
@@ -849,7 +860,7 @@ nf.ProcessGroup = (function () {
             // bulletins
             // ---------
 
-            nf.CanvasUtils.bulletins(processGroup, d, function () {
+            nfCanvasUtils.bulletins(processGroup, d, function () {
                 return d3.select('#process-group-tooltips');
             }, offset);
         });
@@ -902,7 +913,7 @@ nf.ProcessGroup = (function () {
          * @argument {boolean} selectAll                Whether or not to select the new contents
          */
         add: function (processGroups, selectAll) {
-            selectAll = nf.Common.isDefinedAndNotNull(selectAll) ? selectAll : false;
+            selectAll = nfCommon.isDefinedAndNotNull(selectAll) ? selectAll : false;
 
             var add = function (processGroup) {
                 // add the process group
@@ -933,7 +944,7 @@ nf.ProcessGroup = (function () {
          * @param {string} id
          */
         get: function (id) {
-            if (nf.Common.isUndefined(id)) {
+            if (nfCommon.isUndefined(id)) {
                 return processGroupMap.values();
             } else {
                 return processGroupMap.get(id);
@@ -947,7 +958,7 @@ nf.ProcessGroup = (function () {
          * @param {string} id      Optional
          */
         refresh: function (id) {
-            if (nf.Common.isDefinedAndNotNull(id)) {
+            if (nfCommon.isDefinedAndNotNull(id)) {
                 d3.select('#id-' + id).call(updateProcessGroups);
             } else {
                 d3.selectAll('g.process-group').call(updateProcessGroups);
@@ -974,7 +985,7 @@ nf.ProcessGroup = (function () {
                     url: processGroup.uri,
                     dataType: 'json'
                 }).done(function (response) {
-                    nf.ProcessGroup.set(response.processGroup);
+                    this.set(response.processGroup);
                 });
             }
         },
@@ -985,7 +996,7 @@ nf.ProcessGroup = (function () {
          * @param {string} id   The id
          */
         position: function (id) {
-            d3.select('#id-' + id).call(nf.CanvasUtils.position);
+            d3.select('#id-' + id).call(nfCanvasUtils.position);
         },
         
         /**
@@ -1023,7 +1034,7 @@ nf.ProcessGroup = (function () {
          * @param {array} processGroupStatus       Process group status
          */
         setStatus: function (processGroupStatus) {
-            if (nf.Common.isEmpty(processGroupStatus)) {
+            if (nfCommon.isEmpty(processGroupStatus)) {
                 return;
             }
 
@@ -1061,7 +1072,7 @@ nf.ProcessGroup = (function () {
          * Removes all process groups.
          */
         removeAll: function () {
-            nf.ProcessGroup.remove(processGroupMap.keys());
+            this.remove(processGroupMap.keys());
         }
     };
-}());
+});

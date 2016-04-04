@@ -17,7 +17,10 @@
 
 /* global nf */
 
-nf.PortDetails = (function () {
+define(['nf-common',
+        'nf-canvas-utils'],
+    function (nfCommon,
+              nfCanvasUtils) {
 
     return {
         init: function () {
@@ -37,9 +40,9 @@ nf.PortDetails = (function () {
                 handler: {
                     close: function () {
                         // clear the processor details
-                        nf.Common.clearField('read-only-port-name');
-                        nf.Common.clearField('read-only-port-id');
-                        nf.Common.clearField('read-only-port-comments');
+                        nfCommon.clearField('read-only-port-name');
+                        nfCommon.clearField('read-only-port-id');
+                        nfCommon.clearField('read-only-port-comments');
                     }
                 }
             }).draggable({
@@ -50,17 +53,17 @@ nf.PortDetails = (function () {
         
         showDetails: function (selection) {
             // if the specified component is a processor, load its properties
-            if (nf.CanvasUtils.isInputPort(selection) || nf.CanvasUtils.isOutputPort(selection)) {
+            if (nfCanvasUtils.isInputPort(selection) || nfCanvasUtils.isOutputPort(selection)) {
                 var selectionData = selection.datum();
 
                 // populate the port settings
-                nf.Common.populateField('read-only-port-name', selectionData.component.name);
-                nf.Common.populateField('read-only-port-id', selectionData.component.id);
-                nf.Common.populateField('read-only-port-comments', selectionData.component.comments);
+                nfCommon.populateField('read-only-port-name', selectionData.component.name);
+                nfCommon.populateField('read-only-port-id', selectionData.component.id);
+                nfCommon.populateField('read-only-port-comments', selectionData.component.comments);
 
                 // show the details
                 $('#port-details').modal('show');
             }
         }
     };
-}());
+});
