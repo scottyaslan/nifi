@@ -18,10 +18,8 @@
 /* global nf, d3 */
 
 define(['nf-client',
-        'nf-canvas',
         'nf-common'],
     function (nfClient,
-              nfCanvas,
               nfCommon) {
 
     var config = {

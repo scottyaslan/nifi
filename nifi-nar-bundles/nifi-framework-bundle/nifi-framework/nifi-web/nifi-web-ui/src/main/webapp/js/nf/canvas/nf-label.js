@@ -21,13 +21,11 @@ define(['nf-selectable',
         'nf-context-menu',
         'nf-common',
         'nf-draggable',
-        'nf-canvas',
         'nf-client'],
     function (nfSelectable,
               nfContextMenu,
               nfCommon,
               nfDraggable,
-              nfCanvas,
               nfClient) {
 
     var dimensions = {

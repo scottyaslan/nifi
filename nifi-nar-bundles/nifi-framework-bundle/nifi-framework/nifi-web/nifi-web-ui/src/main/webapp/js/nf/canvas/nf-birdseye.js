@@ -17,14 +17,12 @@
 
 /* global nf, d3 */
 
-define(['nf-canvas',
-        'nf-label',
+define(['nf-label',
         'nf-common',
         'nf-processor',
         'nf-graph',
         'nf-context-menu'],
-    function (nfCanvas,
-              nfLabel,
+    function (nfLabel,
               nfCommon,
               nfProcessor,
               nfGraph,

@@ -17,19 +17,15 @@
 
 /* global nf */
 
-define(['nf-canvas',
-        'nf-dialog',
+define(['nf-dialog',
         'nf-common',
         'nf-client',
-        'nf-connection',
         'nf-universal-capture',
         'nf-processor',
         'nf-custom-ui'],
-    function (nfCanvas,
-              nfDialog,
+    function (nfDialog,
               nfCommon,
               nfClient,
-              nfConnection,
               nfUniversalCapture,
               nfProcessor,
               nfCustomUi) {

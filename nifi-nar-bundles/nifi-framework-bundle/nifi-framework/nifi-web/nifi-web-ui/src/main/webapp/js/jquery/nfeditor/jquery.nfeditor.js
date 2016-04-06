@@ -35,8 +35,8 @@
  *
  * @param {type} $
  */
-define([],
-    function () {
+define(['jquery', 'nfel'],
+    function ($) {
         var isUndefined = function (obj) {
             return typeof obj === 'undefined';
         };

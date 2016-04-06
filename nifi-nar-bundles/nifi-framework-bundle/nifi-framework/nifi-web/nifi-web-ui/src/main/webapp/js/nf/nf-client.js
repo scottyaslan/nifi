@@ -17,10 +17,8 @@
 
 /* global nf */
 
-define(['nf-common',
-        'nf-client'],
-    function(nfCommon,
-             nfClient) {
+define(['nf-common'],
+    function(nfCommon) {
         function Client() {
             this.version = -1;
             this.clientId = null;

@@ -45,13 +45,11 @@
 define(['nf-common',
         'nf-dialog',
         'nf-client',
-        'nf-canvas',
         'nf-settings',
         'nf-universal-capture'],
     function (nfCommon,
               nfDialog,
               nfClient,
-              nfCanvas,
               nfSettings,
               nfUniversalCapture) {
         var languageId = 'nfel';

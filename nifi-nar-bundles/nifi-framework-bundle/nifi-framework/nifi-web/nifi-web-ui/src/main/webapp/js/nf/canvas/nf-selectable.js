@@ -17,12 +17,8 @@
 
 /* global nf, d3 */
 
-define(['nf-canvas-toolbar',
-        'nf-context-menu',
-        'nf-selectable'],
-    function (nfCanvasToolbar,
-              nfContextMenu,
-              nfSelectable) {
+define([],
+    function () {
 
     return {
         init: function () {
@@ -59,7 +55,7 @@ define(['nf-canvas-toolbar',
         activate: function (components) {
             components.on('mousedown.selection', function () {
                 // get the clicked component to update selection
-                nfSelectable.select(d3.select(this));
+                this.select(d3.select(this));
             });
         }
     };

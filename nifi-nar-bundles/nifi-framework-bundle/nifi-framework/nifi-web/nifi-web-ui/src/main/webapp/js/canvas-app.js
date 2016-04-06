@@ -1,5 +1,4 @@
-define(['require',
-        'nf-storage',
+define(['nf-storage',
         'nf-common',
         'nf-canvas',
         'nf-universal-capture',
@@ -8,8 +7,7 @@ define(['require',
         'jquery.modal',
         'jquery-ui',
         'jquery.nfeditor'],
-    function(require,
-             nfStorage,
+    function(nfStorage,
              nfCommon,
              nfCanvas,
              nfUniversalCapture,
@@ -245,7 +243,7 @@ define(['require',
 
         if (nfCanvas.SUPPORTS_SVG) {
             // initialize the NiFi
-            nfCanvas.init();
+            nfCanvas.init(nfStorage);
         } else {
             $('#message-title').text('Unsupported Browser');
             $('#message-content').text('Flow graphs are shown using SVG. Please use a browser that supports rendering SVG.');

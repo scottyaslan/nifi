@@ -20,15 +20,11 @@
 define(['nf-client',
         'nf-dialog',
         'nf-common',
-        'nf-connection',
-        'nf-canvas-utils',
-        'nf-canvas'],
+        'nf-canvas-utils'],
     function (nfClient,
               nfDialog,
               nfCommon,
-              nfConnection,
-              nfCanvasUtils,
-              nfCanvas) {
+              nfCanvasUtils) {
 
     var drag;
 

@@ -18,7 +18,6 @@
 /* global nf, Slick */
 
 define(['nf-context-menu',
-        'nf-canvas',
         'nf-common',
         'nf-dialog',
         'nf-client',
@@ -30,7 +29,6 @@ define(['nf-context-menu',
         'slick.autotooltips',
         'jquery.tagcloud'],
     function (nfContextMenu,
-              nfCanvas,
               nfCommon,
               nfDialog,
               nfClient,

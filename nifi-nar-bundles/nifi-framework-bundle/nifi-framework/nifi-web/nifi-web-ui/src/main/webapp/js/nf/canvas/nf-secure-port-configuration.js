@@ -17,13 +17,11 @@
 define(['nf-client',
         'nf-common',
         'nf-port',
-        'nf-canvas-utils',
-        'nf-canvas'],
+        'nf-canvas-utils'],
     function (nfClient,
               nfCommon,
               nfPort,
-              nfCanvasUtils,
-              nfCanvas) {
+              nfCanvasUtils) {
 
     var portUri = '';
 

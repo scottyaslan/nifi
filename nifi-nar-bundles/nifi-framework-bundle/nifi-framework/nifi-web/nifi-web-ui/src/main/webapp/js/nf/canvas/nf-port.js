@@ -18,16 +18,12 @@
 /* global nf, d3 */
 
 define(['nf-canvas-utils',
-        'nf-canvas',
         'nf-selectable',
-        'nf-context-menu',
         'nf-common',
         'nf-draggable',
         'nf-connectable'],
     function (nfCanvasUtils,
-              nfCanvas,
               nfSelectable,
-              nfContextMenu,
               nfCommon,
               nfDraggable,
               nfConnectable) {

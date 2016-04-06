@@ -52,15 +52,16 @@ define(['nf-common',
         'nf-canvas-view',
         'nf-canvas-toolbox',
         'nf-canvas-toolbar',
+        'nf-toolbar-action',
         'nf-canvas-header',
-        'nf-graph-control'],
+        'nf-graph-control',
+        'nf-connection'],
     function (nfCommon,
               nfContextMenu,
               nfClient,
               nfSettings,
               nfActions,
               nfGraph,
-              nfStorage,
               nfSearch,
               nfQueueListing,
               nfComponentState,
@@ -89,8 +90,10 @@ define(['nf-common',
               nfCanvasView,
               nfCanvasToolbox,
               nfCanvasToolbar,
+              nfToolbarAction,
               nfCanvasHeader,
-              nfGraphControl) {
+              nfGraphControl,
+              nfConnection) {
 
         var SCALE = 1;
         var TRANSLATE = [0, 0];
@@ -1036,11 +1039,11 @@ define(['nf-common',
             /**
              * Initialize NiFi.
              */
-            init: function () {
+            init: function (storage) {
                 var self = this;
                 // attempt kerberos authentication
                 var ticketExchange = $.Deferred(function (deferred) {
-                    if (nfStorage.hasItem('jwt')) {
+                    if (storage.hasItem('jwt')) {
                         deferred.resolve();
                     } else {
                         $.ajax({
@@ -1051,7 +1054,7 @@ define(['nf-common',
                             // get the payload and store the token with the appropriate expiration
                             var token = nfCommon.getJwtPayload(jwt);
                             var expiration = parseInt(token['exp'], 10) * nfCommon.MILLIS_PER_SECOND;
-                            nfStorage.setItem('jwt', jwt, expiration);
+                            storage.setItem('jwt', jwt, expiration);
                             deferred.resolve();
                         }).fail(function () {
                             deferred.reject();
@@ -1091,7 +1094,7 @@ define(['nf-common',
                                 $('#current-user').text(identityResponse.identity).show();
 
                                 // render the logout button if there is a token locally
-                                if (nfStorage.getItem('jwt') !== null) {
+                                if (storage.getItem('jwt') !== null) {
                                     $('#logout-link-container').show();
                                 }
                             } else {
@@ -1170,7 +1173,7 @@ define(['nf-common',
 
                             // load d3
                             loadD3().done(function () {
-                                nfStorage.init();
+                                storage.init();
 
                                 // initialize the application
                                 initCanvas();

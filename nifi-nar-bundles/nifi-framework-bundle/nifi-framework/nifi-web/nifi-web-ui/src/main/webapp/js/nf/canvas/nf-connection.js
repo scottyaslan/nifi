@@ -18,13 +18,11 @@
 /* global nf, d3 */
 
 define(['nf-common',
-        'nf-canvas',
         'nf-selectable',
         'nf-context-menu',
         'nf-dialog',
         'nf-client'],
     function (nfCommon,
-              nfCanvas,
               nfSelectable,
               nfContextMenu,
               nfDialog,

@@ -21,11 +21,9 @@
  * Handles the upstream/downstream dialogs.
  */
 define(['nf-canvas-utils',
-        'nf-common',
-        'nf-canvas'],
+        'nf-common'],
     function (nfCanvasUtils,
-              nfCommon,
-              nfCanvas) {
+              nfCommon) {
 
     var config = {
         urls: {

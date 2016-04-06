@@ -18,10 +18,8 @@
 /* global nf */
 
 define(['nf-common',
-        'nf-canvas',
         'nf-context-menu'],
     function (nfCommon,
-              nfCanvas,
               nfContextMenu) {
 
     var config = {

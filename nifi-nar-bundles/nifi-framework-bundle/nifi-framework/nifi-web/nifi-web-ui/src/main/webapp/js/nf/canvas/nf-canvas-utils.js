@@ -19,32 +19,16 @@
 
 define(['nf-common',
         'nf-snippet',
-        'nf-birdseye',
-        'nf-canvas',
         'nf-dialog',
         'nf-actions',
         'nf-clipboard',
-        'nf-connection',
-        'nf-storage',
-        'nf-processor',
-        'nf-port',
-        'nf-remote-process-group',
-        'nf-graph',
-        'nf-process-group'],
+        'nf-storage'],
     function (nfCommon,
               nfSnippet,
-              nfBirdseye,
-              nfCanvas,
               nfDialog,
-              nfActions,
               nfClipboard,
-              nfConnection,
               nfStorage,
-              nfProcessor,
-              nfPort,
-              nfRemoteProcessGroup,
-              nfGraph,
-              nfProcessGroup) {
+              nfGraph) {
 
     var config = {
         storage: {

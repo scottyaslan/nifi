@@ -20,13 +20,11 @@
 define(['nf-client',
         'nf-common',
         'nf-canvas-utils',
-        'nf-canvas',
         'nf-port',
         'nf-dialog'],
     function (nfClient,
               nfCommon,
               nfCanvasUtils,
-              nfCanvas,
               nfPort,
               nfDialog) {
 

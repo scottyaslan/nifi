@@ -18,7 +18,7 @@
 /* global nf, d3 */
 
 define(['nf-common',
-        'nf-dialog',],
+        'nf-dialog'],
     function (nfCommon,
               nfDialog) {
     var config = {

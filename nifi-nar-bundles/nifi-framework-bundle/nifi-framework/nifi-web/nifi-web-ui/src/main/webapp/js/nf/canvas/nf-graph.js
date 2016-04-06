@@ -23,16 +23,14 @@ define(['nf-common',
         'nf-port',
         'nf-remote-process-group',
         'nf-process-group',
-        'nf-processor',
-        'nf-connection'],
+        'nf-processor'],
     function (nfCommon,
               nfLabel,
               nfFunnel,
               nfPort,
               nfRemoteProcessGroup,
               nfProcessGroup,
-              nfProcessor,
-              nfConnection) {
+              nfProcessor) {
 
         var combinePorts = function (contents) {
             if (nfCommon.isDefinedAndNotNull(contents.inputPorts) && nfCommon.isDefinedAndNotNull(contents.outputPorts)) {
@@ -59,7 +57,7 @@ define(['nf-common',
         };
 
         return {
-            init: function (canvas, canvasUtils) {
+            init: function (canvas) {
 
                 // initialize the object responsible for each type of component
                 nfLabel.init();
@@ -71,7 +69,7 @@ define(['nf-common',
                 nfConnection.init();
 
                 // load the graph
-                return canvasUtils.enterGroup(canvas.getGroupId(), this, canvas);
+                return nfCanvasUtils.enterGroup(canvas.getGroupId(), this, canvas);
             },
 
             /**
@@ -80,7 +78,7 @@ define(['nf-common',
              * @argument {object} processGroupContents      The contents of the process group
              * @argument {boolean} selectAll                Whether or not to select the new contents
              */
-            add: function (processGroupContents, selectAll, canvasUtils) {
+            add: function (processGroupContents, selectAll) {
                 selectAll = nfCommon.isDefinedAndNotNull(selectAll) ? selectAll : false;
 
                 // if we are going to select the new components, deselect the previous selection

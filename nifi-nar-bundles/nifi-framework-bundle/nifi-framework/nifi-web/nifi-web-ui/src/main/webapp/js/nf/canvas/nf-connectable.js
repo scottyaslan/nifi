@@ -17,10 +17,8 @@
 
 /* global nf, d3 */
 
-define(['nf-canvas-utils',
-        'nf-connection'],
-    function (nfCanvasUtils,
-              nfConnection) {
+define(['nf-canvas-utils'],
+    function (nfCanvasUtils) {
 
     var connect;
     var canvas;

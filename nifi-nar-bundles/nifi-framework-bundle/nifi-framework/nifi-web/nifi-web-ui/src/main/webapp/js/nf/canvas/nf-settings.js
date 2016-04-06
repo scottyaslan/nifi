@@ -20,19 +20,15 @@
 define(['nf-client',
         'nf-common',
         'nf-dialog',
-        'nf-controller-service',
         'nf-component-state',
         'nf-shell',
-        'nf-reporting-task',
         'nf-canvas-utils',
         'jquery.tabbs'],
     function (nfClient,
               nfCommon,
               nfDialog,
-              nfControllerService,
               nfComponentState,
               nfShell,
-              nfReportingTask,
               nfCanvasUtils) {
 
         var config = {

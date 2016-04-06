@@ -17,11 +17,9 @@
 
 /* global nf, d3 */
 
-define(['nf-canvas',
-        'nf-common',
+define(['nf-common',
         'nf-actions'],
-    function (nfCanvas,
-              nfCommon,
+    function (nfCommon,
               nfActions) {
 
     /**

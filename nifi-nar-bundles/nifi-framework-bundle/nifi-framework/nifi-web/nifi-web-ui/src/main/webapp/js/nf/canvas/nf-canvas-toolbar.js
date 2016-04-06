@@ -17,12 +17,10 @@
 
 /* global nf, d3 */
 
-define(['nf-toolbar-action',
-        'nf-common',
+define(['nf-common',
         'nf-clipboard',
         'nf-canvas-utils'],
-    function (nfToolbarAction,
-              nfCommon,
+    function (nfCommon,
               nfClipboard,
               nfCanvasUtils) {
 

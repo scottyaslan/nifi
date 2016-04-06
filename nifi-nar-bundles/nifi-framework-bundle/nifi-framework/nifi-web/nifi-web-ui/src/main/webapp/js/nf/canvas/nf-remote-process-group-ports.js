@@ -25,7 +25,8 @@ define(['nf-client',
     function (nfClient,
               nfDialog,
               nfCommon,
-              nfCanvasUtils) {
+              nfCanvasUtils,
+              nfRemoteProcessGroup) {
 
     /**
      * Initializes the remote port configuration dialog.

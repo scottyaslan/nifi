@@ -20,15 +20,15 @@
 define(['nf-common',
         'nf-canvas-utils',
         'nf-selectable',
-        'nf-context-menu',
         'nf-draggable',
-        'nf-connectable'],
+        'nf-connectable',
+        'nf-context-menu'],
     function (nfCommon,
               nfCanvasUtils,
               nfSelectable,
-              nfContextMenu,
               nfDraggable,
-              nfConnectable) {
+              nfConnectable,
+              nfContextMenu) {
 
     var PREVIEW_NAME_LENGTH = 30;
 
