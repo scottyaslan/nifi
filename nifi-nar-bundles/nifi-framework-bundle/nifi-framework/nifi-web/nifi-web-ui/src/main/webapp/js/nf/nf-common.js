@@ -17,65 +17,6 @@
 
 /* global nf, parseFloat */
 
-$(document).ready(function () {
-    // preload the image for the error page - this is preloaded because the system
-    // may be unavailable to return the image when the error page is rendered
-    var imgSrc = 'images/bg-error.png';
-    $('<img/>').attr('src', imgSrc).on('load', function () {
-        $('div.message-pane').css('background-image', imgSrc);
-    });
-
-    // mouse over for links
-    $(document).on('mouseenter', 'span.link', function () {
-        $(this).addClass('link-over');
-    }).on('mouseleave', 'span.link', function () {
-        $(this).removeClass('link-over');
-    });
-
-    // setup custom checkbox
-    $(document).on('click', 'div.nf-checkbox', function () {
-        var checkbox = $(this);
-        if (checkbox.hasClass('checkbox-unchecked')) {
-            checkbox.removeClass('checkbox-unchecked').addClass('checkbox-checked');
-        } else {
-            checkbox.removeClass('checkbox-checked').addClass('checkbox-unchecked');
-        }
-    });
-
-    // show the loading icon when appropriate
-    $(document).ajaxStart(function () {
-        // show the loading indicator 
-        $('div.loading-container').addClass('ajax-loading');
-    }).ajaxStop(function () {
-        // hide the loading indicator 
-        $('div.loading-container').removeClass('ajax-loading');
-    });
-    
-    // initialize the tooltips
-    $('img.setting-icon').qtip(nf.Common.config.tooltipConfig);
-    
-    // shows the logout link in the message-pane when appropriate and schedule token refresh
-    if (nf.Storage.getItem('jwt') !== null) {
-        $('#user-logout-container').css('display', 'block');
-        nf.Common.scheduleTokenRefresh();
-    }
-    
-    // handle logout
-    $('#user-logout').on('click', function () {
-        nf.Storage.removeItem('jwt');
-        window.location = '/nifi/login';
-    });
-    
-    // handle home
-    $('#user-home').on('click', function () {
-        if (top !== window) {
-            parent.window.location = '/nifi';
-        } else {
-            window.location = '/nifi';
-        }
-    });
-});
-
 // Define a common utility class used across the entire application.
 nf.Common = (function () {
     // interval for cancelling token refresh when necessary
@@ -1172,3 +1113,62 @@ nf.Common = (function () {
         }
     };
 }());
+
+$(document).ready(function () {
+    // preload the image for the error page - this is preloaded because the system
+    // may be unavailable to return the image when the error page is rendered
+    var imgSrc = 'images/bg-error.png';
+    $('<img/>').attr('src', imgSrc).on('load', function () {
+        $('div.message-pane').css('background-image', imgSrc);
+    });
+
+    // mouse over for links
+    $(document).on('mouseenter', 'span.link', function () {
+        $(this).addClass('link-over');
+    }).on('mouseleave', 'span.link', function () {
+        $(this).removeClass('link-over');
+    });
+
+    // setup custom checkbox
+    $(document).on('click', 'div.nf-checkbox', function () {
+        var checkbox = $(this);
+        if (checkbox.hasClass('checkbox-unchecked')) {
+            checkbox.removeClass('checkbox-unchecked').addClass('checkbox-checked');
+        } else {
+            checkbox.removeClass('checkbox-checked').addClass('checkbox-unchecked');
+        }
+    });
+
+    // show the loading icon when appropriate
+    $(document).ajaxStart(function () {
+        // show the loading indicator
+        $('div.loading-container').addClass('ajax-loading');
+    }).ajaxStop(function () {
+        // hide the loading indicator
+        $('div.loading-container').removeClass('ajax-loading');
+    });
+
+    // initialize the tooltips
+    $('img.setting-icon').qtip(nf.Common.config.tooltipConfig);
+
+    // shows the logout link in the message-pane when appropriate and schedule token refresh
+    if (nf.Storage.getItem('jwt') !== null) {
+        $('#user-logout-container').css('display', 'block');
+        nf.Common.scheduleTokenRefresh();
+    }
+
+    // handle logout
+    $('#user-logout').on('click', function () {
+        nf.Storage.removeItem('jwt');
+        window.location = '/nifi/login';
+    });
+
+    // handle home
+    $('#user-home').on('click', function () {
+        if (top !== window) {
+            parent.window.location = '/nifi';
+        } else {
+            window.location = '/nifi';
+        }
+    });
+});

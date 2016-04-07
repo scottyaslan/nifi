@@ -17,21 +17,7 @@
 
 /* global nf, d3 */
 
-$(document).ready(function () {
-    if (nf.Canvas.SUPPORTS_SVG) {
-        // initialize the NiFi
-        nf.Canvas.init();
-    } else {
-        $('#message-title').text('Unsupported Browser');
-        $('#message-content').text('Flow graphs are shown using SVG. Please use a browser that supports rendering SVG.');
 
-        // show the error pane
-        $('#message-pane').show();
-
-        // hide the splash screen
-        nf.Canvas.hideSplash();
-    }
-});
 
 nf.Canvas = (function () {
 
@@ -1646,3 +1632,19 @@ nf.Canvas = (function () {
         }())
     };
 }());
+
+$(document).ready(function () {
+    if (nf.Canvas.SUPPORTS_SVG) {
+        // initialize the NiFi
+        nf.Canvas.init();
+    } else {
+        $('#message-title').text('Unsupported Browser');
+        $('#message-content').text('Flow graphs are shown using SVG. Please use a browser that supports rendering SVG.');
+
+        // show the error pane
+        $('#message-pane').show();
+
+        // hide the splash screen
+        nf.Canvas.hideSplash();
+    }
+});

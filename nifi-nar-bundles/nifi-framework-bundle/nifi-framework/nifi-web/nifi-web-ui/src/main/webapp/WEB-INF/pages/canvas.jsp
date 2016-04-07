@@ -37,38 +37,9 @@
         <link rel="stylesheet" href="js/jquery/minicolors/jquery.minicolors.css" type="text/css" />
         <link rel="stylesheet" href="js/jquery/slickgrid/css/slick.grid.css" type="text/css" />
         <link rel="stylesheet" href="js/jquery/slickgrid/css/slick-default-theme.css" type="text/css" />
-        <script type="text/javascript" src="js/codemirror/lib/codemirror-compressed.js"></script>
-        <script type="text/javascript" src="js/jquery/jquery-2.1.1.min.js"></script>
-        <script type="text/javascript" src="js/jquery/ui-smoothness/jquery-ui-1.10.4.min.js"></script>
-        <script type="text/javascript" src="js/jquery/jquery.base64.js"></script>
-        <script type="text/javascript" src="js/jquery/jquery.center.js"></script>
-        <script type="text/javascript" src="js/jquery/jquery.ellipsis.js"></script>
-        <script type="text/javascript" src="js/jquery/jquery.each.js"></script>
-        <script type="text/javascript" src="js/jquery/jquery.tab.js"></script>
-        <script type="text/javascript" src="js/jquery/tabbs/jquery.tabbs.js?${project.version}"></script>
-        <script type="text/javascript" src="js/jquery/combo/jquery.combo.js?${project.version}"></script>
-        <script type="text/javascript" src="js/jquery/propertytable/jquery.propertytable.js?${project.version}"></script>
-        <script type="text/javascript" src="js/jquery/tagcloud/jquery.tagcloud.js?${project.version}"></script>
-        <script type="text/javascript" src="js/jquery/modal/jquery.modal.js?${project.version}"></script>
-        <script type="text/javascript" src="js/jquery/minicolors/jquery.minicolors.min.js"></script>
-        <script type="text/javascript" src="js/jquery/qtip2/jquery.qtip.min.js"></script>
-        <script type="text/javascript" src="js/jquery/jquery.event.drag-2.2.min.js"></script>
-        <script type="text/javascript" src="js/jquery/slickgrid/plugins/slick.cellrangeselector.js"></script>
-        <script type="text/javascript" src="js/jquery/slickgrid/plugins/slick.cellselectionmodel.js"></script>
-        <script type="text/javascript" src="js/jquery/slickgrid/plugins/slick.rowselectionmodel.js"></script>
-        <script type="text/javascript" src="js/jquery/slickgrid/plugins/slick.autotooltips.js"></script>
-        <script type="text/javascript" src="js/jquery/slickgrid/slick.formatters.js"></script>
-        <script type="text/javascript" src="js/jquery/slickgrid/slick.editors.js"></script>
-        <script type="text/javascript" src="js/jquery/slickgrid/slick.dataview.js"></script>
-        <script type="text/javascript" src="js/jquery/slickgrid/slick.core.js"></script>
-        <script type="text/javascript" src="js/jquery/slickgrid/slick.grid.js"></script>
-        <script type="text/javascript" src="js/json2.js"></script>
-        <script type="text/javascript" src="js/nf/nf-namespace.js?${project.version}"></script>
-        ${nf.canvas.script.tags}
-        <script type="text/javascript" src="js/jquery/nfeditor/languages/nfel.js?${project.version}"></script>
-        <script type="text/javascript" src="js/jquery/nfeditor/jquery.nfeditor.js?${project.version}"></script>
+        <link rel="stylesheet" href="js/lib/angular/angular-material/angular-material.css" type="text/css" />
     </head>
-    <body id="canvas-body">
+    <body ng-controller="NifiCanvasAppCtrl" id="canvas-body">
         <div id="splash">
             <img id="splash-img" src="images/loadAnimation.gif" alt="Loading..."/>
         </div>
@@ -129,4 +100,16 @@
         <div id="context-menu" class="unselectable"></div>
         <span id="nifi-content-viewer-url" class="hidden"></span>
     </body>
+    <script type="text/javascript" src="js/lib/require/require.min.js"></script>
+    <script>
+        //Load common code that includes config, then load the app
+        //logic for this page. Do the requirejs calls here instead of
+        //a separate file so after a build there are only 2 HTTP
+        //requests instead of three.
+        requirejs(['js/require-nifiCfg'], function (common) {
+            //js/require-nifiCfg sets the baseUrl to be js/ so
+            //can just ask for 'canvas-app' here
+            requirejs(['canvas-app']);
+        });
+    </script>
 </html>
