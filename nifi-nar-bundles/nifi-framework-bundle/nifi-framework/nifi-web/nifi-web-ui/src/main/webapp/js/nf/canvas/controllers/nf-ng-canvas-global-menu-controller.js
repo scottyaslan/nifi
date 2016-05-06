@@ -19,7 +19,7 @@
 
 nf.ng.Canvas.GlobalMenuCtrl = (function () {
 
-    function GlobalMenuCtrl(serviceProvider) {
+    function GlobalMenuCtrl($mdDialog, $mdMedia, serviceProvider, $sanitize) {
 
         var config = {
             urls: {
@@ -267,7 +267,7 @@ nf.ng.Canvas.GlobalMenuCtrl = (function () {
                  * The about menu item's modal.
                  */
                 modal: {
-                    
+
                     /**
                      * Gets the modal element.
                      *
@@ -291,21 +291,21 @@ nf.ng.Canvas.GlobalMenuCtrl = (function () {
                             var aboutDetails = response.about;
                             // set the document title and the about title
                             document.title = aboutDetails.title;
-                            $('#nf-version').text(aboutDetails.version);
+                            self.nfVersion = $sanitize(aboutDetails.version);
                         }).fail(nf.Common.handleAjaxError);
 
                         // configure the about dialog
-                        this.getElement().modal({
-                            overlayBackground: true,
-                            buttons: [{
-                                buttonText: 'Ok',
-                                handler: {
-                                    click: function () {
-                                        self.hide();
-                                    }
-                                }
-                            }]
-                        });
+                        // this.getElement().modal({
+                        //     overlayBackground: true,
+                        //     buttons: [{
+                        //         buttonText: 'Ok',
+                        //         handler: {
+                        //             click: function () {
+                        //                 self.hide();
+                        //             }
+                        //         }
+                        //     }]
+                        // });
                     },
 
                     /**
@@ -321,8 +321,22 @@ nf.ng.Canvas.GlobalMenuCtrl = (function () {
                     /**
                      * Show the modal
                      */
-                    show: function () {
-                        this.getElement().modal('show');
+                    show: function (ev) {
+                        // this.getElement().modal('show');
+                        // dialogCtrl.openDialog('About', 'views/nf-ng-about-dialog-view.html', ev)
+                        $mdDialog.show({
+                                controller: 'dialogCtrl',
+                                templateUrl: 'views/nf-ng-about-dialog-view.html',
+                                parent: angular.element(document.body),
+                                targetEvent: ev,
+                                clickOutsideToClose: true,
+                                fullscreen: ($mdMedia('sm') || $mdMedia('xs'))
+                            })
+                            .then(function (answer) {
+                                // Do something if accepted
+                            }, function () {
+                                // Do something if cancelled
+                            });
                     },
 
                     /**
@@ -338,7 +352,7 @@ nf.ng.Canvas.GlobalMenuCtrl = (function () {
         return globalMenuCtrl;
     }
 
-    GlobalMenuCtrl.$inject = ['serviceProvider'];
+    GlobalMenuCtrl.$inject = ['$mdDialog', '$mdMedia', 'serviceProvider', '$sanitize'];
 
     return GlobalMenuCtrl;
 }());

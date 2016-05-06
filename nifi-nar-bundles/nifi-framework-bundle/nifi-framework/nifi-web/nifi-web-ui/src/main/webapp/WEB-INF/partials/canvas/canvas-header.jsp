@@ -132,7 +132,7 @@
                     </md-menu-item>
                     <md-menu-item layout-align="space-around center">
                         <a id="about-link"
-                           ng-click="appCtrl.serviceProvider.headerCtrl.globalMenuCtrl.about.modal.show();"><i
+                           ng-click="appCtrl.serviceProvider.headerCtrl.globalMenuCtrl.about.modal.show($event);"><i
                                 class="fa fa-info-circle"></i>About</a>
                     </md-menu-item>
                 </md-menu-content>

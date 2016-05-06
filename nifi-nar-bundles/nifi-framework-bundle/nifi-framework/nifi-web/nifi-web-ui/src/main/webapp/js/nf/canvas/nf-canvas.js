@@ -27,31 +27,32 @@ $(document).ready(function () {
 
         //App Controllers
         app.controller('ngCanvasAppCtrl', nf.ng.Canvas.AppCtrl);
+        app.controller('dialogCtrl', nf.ng.DialogCtrl);
 
         //App Services
-        app.factory('serviceProvider', nf.ng.ServiceProvider);
-        app.factory('breadcrumbsCtrl', nf.ng.BreadcrumbsCtrl);
-        app.factory('headerCtrl', nf.ng.Canvas.HeaderCtrl);
-        app.factory('globalMenuCtrl', nf.ng.Canvas.GlobalMenuCtrl);
-        app.factory('toolboxCtrl', nf.ng.Canvas.ToolboxCtrl);
-        app.factory('processorComponent', nf.ng.ProcessorComponent);
-        app.factory('inputPortComponent', nf.ng.InputPortComponent);
-        app.factory('outputPortComponent', nf.ng.OutputPortComponent);
-        app.factory('groupComponent', nf.ng.GroupComponent);
-        app.factory('remoteGroupComponent', nf.ng.RemoteProcessGroupComponent);
-        app.factory('funnelComponent', nf.ng.FunnelComponent);
-        app.factory('templateComponent', nf.ng.TemplateComponent);
-        app.factory('labelComponent', nf.ng.LabelComponent);
-        app.factory('graphControlsCtrl', nf.ng.Canvas.GraphControlsCtrl);
-        app.factory('navigateCtrl', nf.ng.Canvas.NavigateCtrl);
-        app.factory('operateCtrl', nf.ng.Canvas.OperateCtrl);
+        app.service('serviceProvider', nf.ng.ServiceProvider);
+        app.service('breadcrumbsCtrl', nf.ng.BreadcrumbsCtrl);
+        app.service('headerCtrl', nf.ng.Canvas.HeaderCtrl);
+        app.service('globalMenuCtrl', nf.ng.Canvas.GlobalMenuCtrl);
+        app.service('toolboxCtrl', nf.ng.Canvas.ToolboxCtrl);
+        app.service('processorComponent', nf.ng.ProcessorComponent);
+        app.service('inputPortComponent', nf.ng.InputPortComponent);
+        app.service('outputPortComponent', nf.ng.OutputPortComponent);
+        app.service('groupComponent', nf.ng.GroupComponent);
+        app.service('remoteGroupComponent', nf.ng.RemoteProcessGroupComponent);
+        app.service('funnelComponent', nf.ng.FunnelComponent);
+        app.service('templateComponent', nf.ng.TemplateComponent);
+        app.service('labelComponent', nf.ng.LabelComponent);
+        app.service('graphControlsCtrl', nf.ng.Canvas.GraphControlsCtrl);
+        app.service('navigateCtrl', nf.ng.Canvas.NavigateCtrl);
+        app.service('operateCtrl', nf.ng.Canvas.OperateCtrl);
 
         //App Directives
         app.directive('nfBreadcrumbs', nf.ng.BreadcrumbsDirective);
         app.directive('nfDraggable', nf.ng.DraggableDirective);
 
         //Manually Boostrap App
-        angular.bootstrap($('body'), ['ngCanvasApp'], { strictDi: true });
+        angular.bootstrap($('body'), ['ngCanvasApp'], {strictDi: true});
 
         // initialize the NiFi
         nf.Canvas.init();
@@ -107,7 +108,7 @@ nf.Canvas = (function () {
             d3Script: 'js/d3/d3.min.js'
         }
     };
-    
+
     /**
      * Starts polling for the revision.
      *
@@ -538,7 +539,7 @@ nf.Canvas = (function () {
         // define a function for update the flow status dimensions
         var updateFlowStatusContainerSize = function () {
             $('#flow-status-container').css({
-                'width': ((($('#nifi-logo').width() + $('#component-container').width())/$(window).width())*100)*2 + '%'
+                'width': ((($('#nifi-logo').width() + $('#component-container').width()) / $(window).width()) * 100) * 2 + '%'
             });
         };
         updateFlowStatusContainerSize();
@@ -734,7 +735,7 @@ nf.Canvas = (function () {
                 }
                 if (nf.Common.isDefinedAndNotNull(controllerStatus.invalidCount)) {
                     $('#controller-invalid-count').text(controllerStatus.invalidCount);
-                    if(controllerStatus.invalidCount > 0) {
+                    if (controllerStatus.invalidCount > 0) {
                         $('#controller-invalid-count').parent().css('color', '#BA554A');
                     } else {
                         $('#controller-invalid-count').parent().css('color', '#728E9B');
@@ -1049,7 +1050,7 @@ nf.Canvas = (function () {
                     url: config.urls.about,
                     dataType: 'json'
                 }).done(function (response) {
-                    
+
                 }).fail(nf.Common.handleAjaxError);
 
                 // get the login config
@@ -1091,11 +1092,11 @@ nf.Canvas = (function () {
                     var configDetails = configResponse.config;
                     var loginDetails = loginResponse.config;
                     var aboutDetails = aboutResponse.about;
-                    
+
                     // set the document title and the about title
                     document.title = aboutDetails.title;
                     $('#nf-version').text(aboutDetails.version);
-                    
+
                     // store the content viewer url if available
                     if (!nf.Common.isBlank(aboutDetails.contentViewerUrl)) {
                         $('#nifi-content-viewer-url').text(aboutDetails.contentViewerUrl);

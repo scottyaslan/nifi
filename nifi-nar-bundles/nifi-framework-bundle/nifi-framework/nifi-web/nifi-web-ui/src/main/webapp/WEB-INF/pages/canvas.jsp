@@ -90,7 +90,6 @@
         <jsp:include page="/WEB-INF/partials/banners-main.jsp"/>
         <jsp:include page="/WEB-INF/partials/canvas/canvas-header.jsp"/>
         <jsp:include page="/WEB-INF/partials/canvas/flow-status.jsp"/>
-        <jsp:include page="/WEB-INF/partials/canvas/about-dialog.jsp"/>
         <jsp:include page="/WEB-INF/partials/ok-dialog.jsp"/>
         <jsp:include page="/WEB-INF/partials/yes-no-dialog.jsp"/>
         <jsp:include page="/WEB-INF/partials/status-history-dialog.jsp"/>
