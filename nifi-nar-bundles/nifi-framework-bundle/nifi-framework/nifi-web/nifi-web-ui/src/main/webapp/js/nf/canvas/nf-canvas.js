@@ -505,6 +505,19 @@ nf.Canvas = (function () {
         };
         updateFlowStatusContainerSize();
 
+        $('body').on('GoTo:Policy', function (e, item) {
+            //close shell
+            $('#shell-close-button').click();
+
+            //select the element on the canvas
+            nf.CanvasUtils.showComponent(item.component.resource, item.component.id);
+
+            if(nf.Common.canAccessPolicies()) {
+                //open policy management dialog for the given item
+                nf.Actions['managePolicies'](nf.CanvasUtils.getSelection());
+            }
+        });
+
         // listen for browser resize events to reset the graph size
         $(window).on('resize', function (e) {
             if (e.target === window) {
