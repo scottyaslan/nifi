@@ -470,6 +470,146 @@ nf.UsersTable = (function () {
     };
 
     /**
+     * Initializes the user policies dialog.
+     */
+    var initUserPoliciesDialog = function () {
+        $('#user-policies-dialog').modal({
+            headerText: 'User Policies',
+            buttons: [{
+                buttonText: 'Ok',
+                color: {
+                    base: '#728E9B',
+                    hover: '#004849',
+                    text: '#ffffff'
+                },
+                handler: {
+                    click: function () {
+                        //TODO: some work
+
+                        $('#user-policies-dialog').modal('hide');
+                    }
+                }
+            }, {
+                buttonText: 'Cancel',
+                color: {
+                    base: '#E3E8EB',
+                    hover: '#C7D2D7',
+                    text: '#004849'
+                },
+                handler: {
+                    click: function () {
+                        $('#user-policies-dialog').modal('hide');
+                    }
+                }
+            }]
+        });
+    };
+
+    /**
+     * Initializes the user policies table.
+     */
+    var initUserPoliciesTable = function () {
+
+        // function for formatting the user identity
+        var identityFormatter = function (row, cell, value, columnDef, dataContext) {
+            return dataContext.component.id;
+        };
+
+        // function for formatting the user read permissions
+        var readFormatter = function (row, cell, value, columnDef, dataContext) {
+            return dataContext.permissions.canRead;
+        };
+
+        // function for formatting the user write permissions
+        var writeFormatter = function (row, cell, value, columnDef, dataContext) {
+            return dataContext.permissions.canWrite;
+        };
+
+        // function for formatting the actions column
+        var actionFormatter = function (row, cell, value, columnDef, dataContext) {
+            var markup = '';
+
+            markup += '<div title="Go To Policy" class="pointer go-to-user-policies fa fa-long-arrow-right" style="float: right;"></div>';
+
+            return markup;
+        };
+
+        var userPoliciesColumns = [
+            {id: 'id', name: 'Component', sortable: true, resizable: true, formatter: identityFormatter, width: 200, maxWidth: 200},
+            {id: 'canRead', name: 'Can Read', sortable: true, defaultSortAsc: false, resizable: true, formatter: readFormatter},
+            {id: 'canWrite', name: 'Can Write', sortable: true, defaultSortAsc: false, resizable: true, formatter: writeFormatter}
+        ];
+
+        // add the actions if we're in the shell
+        if ((top !== window) && nf.Common.canAccessPolicies()) {
+            userPoliciesColumns.push({id: 'actions', name: '&nbsp;', sortable: false, resizable: false, formatter: actionFormatter, width: 100, maxWidth: 100});
+        }
+
+        var userPoliciesOptions = {
+            forceFitColumns: true,
+            enableTextSelectionOnCells: true,
+            enableCellNavigation: true,
+            enableColumnReorder: false,
+            autoEdit: false
+        };
+
+        // initialize the dataview
+        var userPoliciesData = new Slick.Data.DataView({
+            inlineFilters: false
+        });
+        userPoliciesData.setItems([]);
+
+        // initialize the sort
+        userPolicySort({
+            columnId: 'id',
+            sortAsc: true
+        }, userPoliciesData);
+
+        // initialize the grid
+        var userPoliciesGrid = new Slick.Grid('#user-policies-table', userPoliciesData, userPoliciesColumns, userPoliciesOptions);
+        userPoliciesGrid.setSelectionModel(new Slick.RowSelectionModel());
+        userPoliciesGrid.registerPlugin(new Slick.AutoTooltips());
+        userPoliciesGrid.setSortColumn('id', true);
+        userPoliciesGrid.onSort.subscribe(function (e, args) {
+            userPolicySort({
+                columnId: args.sortCol.id,
+                sortAsc: args.sortAsc
+            }, userPoliciesData);
+        });
+
+        // configure a click listener
+        userPoliciesGrid.onClick.subscribe(function (e, args) {
+            var target = $(e.target);
+
+            // get the node at this row
+            var item = userPoliciesData.getItem(args.row);
+
+            // determine the desired action
+            if (userPoliciesGrid.getColumns()[args.cell].id === 'actions') {
+                if (target.hasClass('go-to-user-policies')) {
+                    // trigger GoTo action in parent window if we're in the shell
+                    if (top !== window) {
+                        parent.$('body').trigger('GoTo:Policy', item);
+                    }
+                }
+            }
+        });
+
+        // wire up the dataview to the grid
+        userPoliciesData.onRowCountChanged.subscribe(function (e, args) {
+            userPoliciesGrid.updateRowCount();
+            userPoliciesGrid.render();
+        });
+        userPoliciesData.onRowsChanged.subscribe(function (e, args) {
+            userPoliciesGrid.invalidateRows(args.rows);
+            userPoliciesGrid.render();
+        });
+
+        // hold onto an instance of the grid
+        $('#user-policies-table').data('gridInstance', userPoliciesGrid);
+    };
+
+    /**
      * Initializes the processor list.
      */
     var initUsersTable = function () {
@@ -524,6 +664,10 @@ nf.UsersTable = (function () {
                 markup += '<div title="Remove" class="pointer delete-user fa fa-trash"></div>';
             }
 
+            if (nf.Common.canAccessPolicies()) {
+                markup += '<div title="View User Policies" class="pointer view-user-policies fa fa-key" style="margin-left: 3px;"></div>';
+            }
+
             return markup;
         };
 
@@ -553,7 +697,7 @@ nf.UsersTable = (function () {
         usersData.setFilter(filter);
 
         // initialize the sort
-        sort({
+        userSort({
             columnId: 'identity',
             sortAsc: true
         }, usersData);
@@ -564,7 +708,7 @@ nf.UsersTable = (function () {
         usersGrid.registerPlugin(new Slick.AutoTooltips());
         usersGrid.setSortColumn('identity', true);
         usersGrid.onSort.subscribe(function (e, args) {
-            sort({
+            userSort({
                 columnId: args.sortCol.id,
                 sortAsc: args.sortAsc
             }, usersData);
@@ -581,6 +725,8 @@ nf.UsersTable = (function () {
             if (usersGrid.getColumns()[args.cell].id === 'actions') {
                 if (target.hasClass('edit-user')) {
                     editUser(item);
+                } else if (target.hasClass('view-user-policies')) {
+                    viewUserPolicies(item);
                 } else if (target.hasClass('delete-user')) {
                     deleteUser(item);
                 }
@@ -613,13 +759,48 @@ nf.UsersTable = (function () {
      * @param {object} sortDetails
      * @param {object} data
      */
-    var sort = function (sortDetails, data) {
+    var userSort = function (sortDetails, data) {
         // defines a function for sorting
         var comparer = function (a, b) {
             if(a.permissions.canRead && b.permissions.canRead) {
                 var aString = nf.Common.isDefinedAndNotNull(a.component[sortDetails.columnId]) ? a.component[sortDetails.columnId] : '';
                 var bString = nf.Common.isDefinedAndNotNull(b.component[sortDetails.columnId]) ? b.component[sortDetails.columnId] : '';
                 return aString === bString ? 0 : aString > bString ? 1 : -1;
+            } else {
+                if (!a.permissions.canRead && !b.permissions.canRead){
+                    return 0;
+                }
+                if(a.permissions.canRead){
+                    return 1;
+                } else {
+                    return -1;
+                }
+            }
+        };
+
+        // perform the sort
+        data.sort(comparer, sortDetails.sortAsc);
+    };
+
+    /**
+     * Sorts the specified data using the specified sort details.
+     *
+     * @param {object} sortDetails
+     * @param {object} data
+     */
+    var userPolicySort = function (sortDetails, data) {
+        // defines a function for sorting
+        var comparer = function (a, b) {
+            if(a.permissions.canRead && b.permissions.canRead) {
+                if (sortDetails.columnId === 'canRead' || sortDetails.columnId === 'canWrite') {
+                    var aString = nf.Common.isDefinedAndNotNull(a.permissions[sortDetails.columnId]) ? a.permissions[sortDetails.columnId] : '';
+                    var bString = nf.Common.isDefinedAndNotNull(b.permissions[sortDetails.columnId]) ? b.permissions[sortDetails.columnId] : '';
+                    return aString === bString ? 0 : aString > bString ? 1 : -1;
+                } else if (sortDetails.columnId === 'id') {
+                    var aString = nf.Common.isDefinedAndNotNull(a.component[sortDetails.columnId]) ? a.component[sortDetails.columnId] : '';
+                    var bString = nf.Common.isDefinedAndNotNull(b.component[sortDetails.columnId]) ? b.component[sortDetails.columnId] : '';
+                    return aString === bString ? 0 : aString > bString ? 1 : -1;
+                }
             } else {
                 if (!a.permissions.canRead && !b.permissions.canRead){
                     return 0;
@@ -814,9 +995,39 @@ nf.UsersTable = (function () {
         $('#user-delete-dialog').modal('show');
     };
 
+    /**
+     * Open's a view of the specified user's policies.
+     *
+     * @argument {object} user        The user item
+     */
+    var viewUserPolicies = function (user) {
+        var userPoliciesGrid = $('#user-policies-table').data('gridInstance');
+        var userPoliciesData = userPoliciesGrid.getData();
+
+        // begin the update
+        userPoliciesData.beginUpdate();
+
+        // set the rows
+        userPoliciesData.setItems(user.component.accessPolicies);
+
+        // end the update
+        userPoliciesData.endUpdate();
+
+        // re-sort and clear selection after updating
+        userPoliciesData.reSort();
+        userPoliciesGrid.invalidate();
+        userPoliciesGrid.getSelectionModel().setSelectedRows([]);
+
+        // show the dialog
+        $('#user-policies-dialog').modal('show');
+        userPoliciesGrid.resizeCanvas();
+    };
+
     return {
         init: function () {
             initUserDialog();
+            initUserPoliciesDialog();
+            initUserPoliciesTable();
             initUserDeleteDialog();
             initUsersTable();
 
@@ -852,7 +1063,7 @@ nf.UsersTable = (function () {
         },
 
         /**
-         * Load the processor status table.
+         * Load the users table.
          */
         loadUsersTable: function () {
             var users = $.ajax({

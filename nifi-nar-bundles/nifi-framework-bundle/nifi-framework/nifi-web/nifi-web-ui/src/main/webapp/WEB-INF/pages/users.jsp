@@ -64,6 +64,7 @@
         <jsp:include page="/WEB-INF/partials/banners-utility.jsp"/>
         <jsp:include page="/WEB-INF/partials/ok-dialog.jsp"/>
         <jsp:include page="/WEB-INF/partials/users/user-dialog.jsp"/>
+        <jsp:include page="/WEB-INF/partials/users/user-policies-dialog.jsp"/>
         <jsp:include page="/WEB-INF/partials/users/user-delete-dialog.jsp"/>
         <jsp:include page="/WEB-INF/partials/users/users-content.jsp"/>
     </body>
