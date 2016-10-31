@@ -95,6 +95,7 @@ import org.apache.nifi.web.api.dto.BulletinQueryDTO;
 import org.apache.nifi.web.api.dto.ClusterDTO;
 import org.apache.nifi.web.api.dto.ComponentDTO;
 import org.apache.nifi.web.api.dto.ComponentHistoryDTO;
+import org.apache.nifi.web.api.dto.ComponentReferenceDTO;
 import org.apache.nifi.web.api.dto.ComponentStateDTO;
 import org.apache.nifi.web.api.dto.ConnectionDTO;
 import org.apache.nifi.web.api.dto.ControllerConfigurationDTO;
@@ -154,6 +155,7 @@ import org.apache.nifi.web.api.entity.AccessPolicyEntity;
 import org.apache.nifi.web.api.entity.AccessPolicySummaryEntity;
 import org.apache.nifi.web.api.entity.ActionEntity;
 import org.apache.nifi.web.api.entity.BulletinEntity;
+import org.apache.nifi.web.api.entity.ComponentReferenceEntity;
 import org.apache.nifi.web.api.entity.ConnectionEntity;
 import org.apache.nifi.web.api.entity.ConnectionStatusEntity;
 import org.apache.nifi.web.api.entity.ControllerBulletinsEntity;
@@ -485,7 +487,8 @@ public class StandardNiFiServiceFacade implements NiFiServiceFacade {
                 accessPolicy -> {
                     final Set<TenantEntity> users = accessPolicy.getUsers().stream().map(mapUserIdToTenantEntity()).collect(Collectors.toSet());
                     final Set<TenantEntity> userGroups = accessPolicy.getGroups().stream().map(mapUserGroupIdToTenantEntity()).collect(Collectors.toSet());
-                    return dtoFactory.createAccessPolicyDto(accessPolicy, userGroups, users);
+                    final ComponentReferenceEntity componentReference = createComponentReferenceEntity(accessPolicy.getResource());
+                    return dtoFactory.createAccessPolicyDto(accessPolicy, userGroups, users, componentReference);
                 });
 
         final PermissionsDTO permissions = dtoFactory.createPermissionsDto(authorizable);
@@ -993,6 +996,7 @@ public class StandardNiFiServiceFacade implements NiFiServiceFacade {
     @Override
     public AccessPolicyEntity deleteAccessPolicy(final Revision revision, final String accessPolicyId) {
         final AccessPolicy accessPolicy = accessPolicyDAO.getAccessPolicy(accessPolicyId);
+        final ComponentReferenceEntity componentReference = createComponentReferenceEntity(accessPolicy.getResource());
         final PermissionsDTO permissions = dtoFactory.createPermissionsDto(authorizableLookup.getAccessPolicyById(accessPolicyId));
         final Set<TenantEntity> userGroups = accessPolicy != null ? accessPolicy.getGroups().stream().map(mapUserGroupIdToTenantEntity()).collect(Collectors.toSet()) : null;
         final Set<TenantEntity> users = accessPolicy != null ? accessPolicy.getUsers().stream().map(mapUserIdToTenantEntity()).collect(Collectors.toSet()) : null;
@@ -1011,8 +1015,7 @@ public class StandardNiFiServiceFacade implements NiFiServiceFacade {
                 },
                 () -> accessPolicyDAO.deleteAccessPolicy(accessPolicyId),
                 false, // no need to clean up any policies as it's already been removed above
-                dtoFactory.createAccessPolicyDto(accessPolicy, userGroups,
-                        users));
+                dtoFactory.createAccessPolicyDto(accessPolicy, userGroups, users, componentReference));
 
         return entityFactory.createAccessPolicyEntity(snapshot, null, permissions);
     }
@@ -1350,13 +1353,14 @@ public class StandardNiFiServiceFacade implements NiFiServiceFacade {
         final String creator = NiFiUserUtils.getNiFiUserIdentity();
 
         final AccessPolicy newAccessPolicy = accessPolicyDAO.createAccessPolicy(accessPolicyDTO);
+        final ComponentReferenceEntity componentReference = createComponentReferenceEntity(newAccessPolicy.getResource());
         final AccessPolicyDTO newAccessPolicyDto = dtoFactory.createAccessPolicyDto(newAccessPolicy,
                 newAccessPolicy.getGroups().stream().map(mapUserGroupIdToTenantEntity()).collect(Collectors.toSet()),
                 newAccessPolicy.getUsers().stream().map(userId -> {
                     final RevisionDTO userRevision = dtoFactory.createRevisionDTO(revisionManager.getRevision(userId));
                     return entityFactory.createTenantEntity(dtoFactory.createTenantDTO(userDAO.getUser(userId)), userRevision,
                             dtoFactory.createPermissionsDto(tenantAuthorizable));
-                }).collect(Collectors.toSet()));
+                }).collect(Collectors.toSet()), componentReference);
 
         final PermissionsDTO permissions = dtoFactory.createPermissionsDto(authorizableLookup.getAccessPolicyById(accessPolicyDTO.getId()));
         return entityFactory.createAccessPolicyEntity(newAccessPolicyDto, dtoFactory.createRevisionDTO(new FlowModification(revision, creator)), permissions);
@@ -1376,8 +1380,26 @@ public class StandardNiFiServiceFacade implements NiFiServiceFacade {
         return entityFactory.createUserEntity(newUserDto, dtoFactory.createRevisionDTO(new FlowModification(revision, creator)), permissions);
     }
 
+    private ComponentReferenceEntity createComponentReferenceEntity(final String resource) {
+        ComponentReferenceEntity componentReferenceEntity = null;
+        try {
+            final Authorizable componentAuthorizable = authorizableLookup.getAuthorizableFromResource(resource);
+            final ComponentReferenceDTO componentReference = dtoFactory.createComponentReferenceDto(componentAuthorizable);
+            if (componentReference != null) {
+                final PermissionsDTO componentReferencePermissions = dtoFactory.createPermissionsDto(componentAuthorizable);
+                final RevisionDTO componentReferenceRevision = dtoFactory.createRevisionDTO(revisionManager.getRevision(componentReference.getId()));
+                componentReferenceEntity = entityFactory.createComponentReferenceEntity(componentReference, componentReferenceRevision, componentReferencePermissions);
+            }
+        } catch (final ResourceNotFoundException e) {
+            // component not found for the specified resource
+        }
+
+        return componentReferenceEntity;
+    }
+
     private AccessPolicySummaryEntity createAccessPolicySummaryEntity(final AccessPolicy ap) {
-        final AccessPolicySummaryDTO apSummary = dtoFactory.createAccessPolicySummaryDto(ap);
+        final ComponentReferenceEntity componentReference = createComponentReferenceEntity(ap.getResource());
+        final AccessPolicySummaryDTO apSummary = dtoFactory.createAccessPolicySummaryDto(ap, componentReference);
         final PermissionsDTO apPermissions = dtoFactory.createPermissionsDto(authorizableLookup.getAccessPolicyById(ap.getIdentifier()));
         final RevisionDTO apRevision = dtoFactory.createRevisionDTO(revisionManager.getRevision(ap.getIdentifier()));
         return entityFactory.createAccessPolicySummaryEntity(apSummary, apRevision, apPermissions);
@@ -2657,10 +2679,11 @@ public class StandardNiFiServiceFacade implements NiFiServiceFacade {
     private AccessPolicyEntity createAccessPolicyEntity(final AccessPolicy accessPolicy) {
         final RevisionDTO revision = dtoFactory.createRevisionDTO(revisionManager.getRevision(accessPolicy.getIdentifier()));
         final PermissionsDTO permissions = dtoFactory.createPermissionsDto(authorizableLookup.getAccessPolicyById(accessPolicy.getIdentifier()));
+        final ComponentReferenceEntity componentReference = createComponentReferenceEntity(accessPolicy.getResource());
         return entityFactory.createAccessPolicyEntity(
                 dtoFactory.createAccessPolicyDto(accessPolicy,
                         accessPolicy.getGroups().stream().map(mapUserGroupIdToTenantEntity()).collect(Collectors.toSet()),
-                        accessPolicy.getUsers().stream().map(mapUserIdToTenantEntity()).collect(Collectors.toSet())),
+                        accessPolicy.getUsers().stream().map(mapUserIdToTenantEntity()).collect(Collectors.toSet()), componentReference),
                 revision, permissions);
     }
 
