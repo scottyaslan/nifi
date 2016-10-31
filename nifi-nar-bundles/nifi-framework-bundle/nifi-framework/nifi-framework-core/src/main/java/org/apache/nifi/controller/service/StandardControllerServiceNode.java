@@ -434,7 +434,7 @@ public class StandardControllerServiceNode extends AbstractConfiguredComponent i
     }
 
     @Override
-    protected String getProcessGroupIdentifier() {
+    public String getProcessGroupIdentifier() {
         final ProcessGroup procGroup = getProcessGroup();
         return procGroup == null ? null : procGroup.getIdentifier();
     }

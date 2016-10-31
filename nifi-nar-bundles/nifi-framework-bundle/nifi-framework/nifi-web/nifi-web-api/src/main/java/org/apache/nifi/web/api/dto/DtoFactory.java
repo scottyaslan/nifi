@@ -42,6 +42,7 @@ import org.apache.nifi.authorization.RequestAction;
 import org.apache.nifi.authorization.Resource;
 import org.apache.nifi.authorization.User;
 import org.apache.nifi.authorization.resource.Authorizable;
+import org.apache.nifi.authorization.resource.ComponentAuthorizable;
 import org.apache.nifi.authorization.user.NiFiUserUtils;
 import org.apache.nifi.cluster.coordination.heartbeat.NodeHeartbeat;
 import org.apache.nifi.cluster.coordination.node.NodeConnectionStatus;
@@ -142,6 +143,7 @@ import org.apache.nifi.web.api.dto.status.RemoteProcessGroupStatusSnapshotDTO;
 import org.apache.nifi.web.api.entity.AccessPolicySummaryEntity;
 import org.apache.nifi.web.api.entity.AllowableValueEntity;
 import org.apache.nifi.web.api.entity.BulletinEntity;
+import org.apache.nifi.web.api.entity.ComponentReferenceEntity;
 import org.apache.nifi.web.api.entity.ConnectionStatusSnapshotEntity;
 import org.apache.nifi.web.api.entity.FlowBreadcrumbEntity;
 import org.apache.nifi.web.api.entity.PortStatusSnapshotEntity;
@@ -1582,7 +1584,20 @@ public final class DtoFactory {
         return dto;
     }
 
-    public AccessPolicySummaryDTO createAccessPolicySummaryDto(final AccessPolicy accessPolicy) {
+    public ComponentReferenceDTO createComponentReferenceDto(final Authorizable authorizable) {
+        if (authorizable == null || !(authorizable instanceof ComponentAuthorizable)) {
+            return null;
+        }
+
+        final ComponentAuthorizable connectable = (ComponentAuthorizable) authorizable;
+        final ComponentReferenceDTO dto = new ComponentReferenceDTO();
+        dto.setId(connectable.getIdentifier());
+        dto.setParentGroupId(connectable.getProcessGroupIdentifier());
+        dto.setName(authorizable.getResource().getName());
+        return dto;
+    }
+
+    public AccessPolicySummaryDTO createAccessPolicySummaryDto(final AccessPolicy accessPolicy, final ComponentReferenceEntity componentReference) {
         if (accessPolicy == null) {
             return null;
         }
@@ -1591,10 +1606,13 @@ public final class DtoFactory {
         dto.setId(accessPolicy.getIdentifier());
         dto.setResource(accessPolicy.getResource());
         dto.setAction(accessPolicy.getAction().toString());
+        dto.setComponentReference(componentReference);
         return dto;
     }
 
-    public AccessPolicyDTO createAccessPolicyDto(final AccessPolicy accessPolicy, Set<TenantEntity> userGroups, Set<TenantEntity> users) {
+    public AccessPolicyDTO createAccessPolicyDto(final AccessPolicy accessPolicy, final Set<TenantEntity> userGroups,
+                                                 final Set<TenantEntity> users, final ComponentReferenceEntity componentReference) {
+
         if (accessPolicy == null) {
             return null;
         }
@@ -1605,6 +1623,7 @@ public final class DtoFactory {
         dto.setId(accessPolicy.getIdentifier());
         dto.setResource(accessPolicy.getResource());
         dto.setAction(accessPolicy.getAction().toString());
+        dto.setComponentReference(componentReference);
         return dto;
     }
 
