@@ -476,7 +476,7 @@ nf.UsersTable = (function () {
         $('#user-policies-dialog').modal({
             headerText: 'User Policies',
             buttons: [{
-                buttonText: 'Ok',
+                buttonText: 'Close',
                 color: {
                     base: '#728E9B',
                     hover: '#004849',
@@ -489,18 +489,6 @@ nf.UsersTable = (function () {
                         $('#user-policies-dialog').modal('hide');
                     }
                 }
-            }, {
-                buttonText: 'Cancel',
-                color: {
-                    base: '#E3E8EB',
-                    hover: '#C7D2D7',
-                    text: '#004849'
-                },
-                handler: {
-                    click: function () {
-                        $('#user-policies-dialog').modal('hide');
-                    }
-                }
             }]
         });
     };
@@ -510,17 +498,25 @@ nf.UsersTable = (function () {
      */
     var initUserPoliciesTable = function () {
 
-        // function for formatting the user identity
-        var identityFormatter = function (row, cell, value, columnDef, dataContext) {
+        // function for formatting the access policy name
+        var nameFormatter = function (row, cell, value, columnDef, dataContext) {
+            if (nf.Common.isDefinedAndNotNull(dataContext.component.componentReference)) {
+                return dataContext.component.componentReference.component.name;
+            }
             return dataContext.component.id;
         };
 
-        // function for formatting the user read permissions
+        // function for formatting the policy action type
+        var policyActionFormatter = function (row, cell, value, columnDef, dataContext) {
+            return dataContext.component.action;
+        };
+
+        // function for formatting the policy read permissions
         var readFormatter = function (row, cell, value, columnDef, dataContext) {
             return dataContext.permissions.canRead;
         };
 
-        // function for formatting the user write permissions
+        // function for formatting the policy write permissions
         var writeFormatter = function (row, cell, value, columnDef, dataContext) {
             return dataContext.permissions.canWrite;
         };
@@ -529,20 +525,24 @@ nf.UsersTable = (function () {
         var actionFormatter = function (row, cell, value, columnDef, dataContext) {
             var markup = '';
 
-            markup += '<div title="Go To Policy" class="pointer go-to-user-policies fa fa-long-arrow-right" style="float: right;"></div>';
+            if (nf.Common.isDefinedAndNotNull(dataContext.component.componentReference)) {
+                markup += '<div title="Go To" class="pointer go-to-user-policies fa fa-long-arrow-right" style="float: right;"></div>';
+                markup += '<div title="Edit Policy" class="pointer edit-user-policies fa fa-pencil" style="float: right;"></div>';
+            }
 
             return markup;
         };
 
         var userPoliciesColumns = [
-            {id: 'id', name: 'Component', sortable: true, resizable: true, formatter: identityFormatter, width: 200, maxWidth: 200},
-            {id: 'canRead', name: 'Can Read', sortable: true, defaultSortAsc: false, resizable: true, formatter: readFormatter},
-            {id: 'canWrite', name: 'Can Write', sortable: true, defaultSortAsc: false, resizable: true, formatter: writeFormatter}
+            {id: 'id', name: 'Policy', sortable: true, resizable: true, formatter: nameFormatter, width: 250},
+            {id: 'action', name: 'Action', sortable: true, defaultSortAsc: false, resizable: false, formatter: policyActionFormatter, width: 100},
+            {id: 'canRead', name: 'Can Read', sortable: true, defaultSortAsc: false, resizable: false, formatter: readFormatter, width: 100},
+            {id: 'canWrite', name: 'Can Write', sortable: true, defaultSortAsc: false, resizable: false, formatter: writeFormatter, width: 100}
         ];
 
         // add the actions if we're in the shell
         if ((top !== window) && nf.Common.canAccessPolicies()) {
-            userPoliciesColumns.push({id: 'actions', name: '&nbsp;', sortable: false, resizable: false, formatter: actionFormatter, width: 100, maxWidth: 100});
+            userPoliciesColumns.push({id: 'actions', name: '&nbsp;', sortable: false, resizable: false, formatter: actionFormatter, width: 50});
         }
 
         var userPoliciesOptions = {
@@ -590,6 +590,11 @@ nf.UsersTable = (function () {
                     // trigger GoTo action in parent window if we're in the shell
                     if (top !== window) {
                         parent.$('body').trigger('GoTo:Policy', item);
+                    }
+                } else if (target.hasClass('edit-user-policies')) {
+                    // trigger GoTo action in parent window if we're in the shell
+                    if (top !== window) {
+                        parent.$('body').trigger('edit:Policy', item);
                     }
                 }
             }

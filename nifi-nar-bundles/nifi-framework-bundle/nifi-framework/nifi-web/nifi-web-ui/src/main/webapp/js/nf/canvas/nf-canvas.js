@@ -509,12 +509,88 @@ nf.Canvas = (function () {
             //close shell
             $('#shell-close-button').click();
 
-            //select the element on the canvas
-            nf.CanvasUtils.showComponent(item.component.resource, item.component.id);
+            if (nf.Common.isDefinedAndNotNull(item.component.componentReference.component.parentGroupId)) {
+                nf.CanvasUtils.showComponent(item.component.componentReference.component.parentGroupId, item.component.componentReference.component.id);
+                nf.ng.Bridge.injector.get('navigateCtrl').zoomActualSize();
+            } else {
+                // load a different group if necessary
+                if (item.component.componentReference.component.id !== nf.Canvas.getGroupId()) {
+                    // set the new group id
+                    nf.Canvas.setGroupId(item.component.componentReference.component.id);
 
-            if(nf.Common.canAccessPolicies()) {
-                //open policy management dialog for the given item
-                nf.Actions['managePolicies'](nf.CanvasUtils.getSelection());
+                    // reload
+                    nf.Canvas.reload().done(function () {
+                        nf.ng.Bridge.injector.get('navigateCtrl').zoomFit();
+                    }).fail(function () {
+                        nf.Dialog.showOkDialog({
+                            headerText: 'Process Group',
+                            dialogContent: 'Unable to load the group for the specified component.'
+                        });
+                    });
+                }
+            }
+        });
+
+        $('body').on('edit:Policy', function (e, item) {
+            //empty the shell
+            $('#shell').empty();
+
+            var groupId;
+            if (nf.Common.isDefinedAndNotNull(item.component.componentReference.component.parentGroupId)) {
+                groupId = item.component.componentReference.component.parentGroupId;
+            } else {
+                groupId = item.component.componentReference.component.id
+            }
+
+            // initiate a graph refresh
+            var refreshGraph = $.Deferred(function (deferred) {
+                // load a different group if necessary
+                if (groupId !== nf.Canvas.getGroupId()) {
+                    // set the new group id
+                    nf.Canvas.setGroupId(groupId);
+
+                    // reload
+                    nf.Canvas.reload().done(function () {
+                        nf.ng.Bridge.injector.get('navigateCtrl').zoomFit();
+                        deferred.resolve();
+                    }).fail(function () {
+                        nf.Dialog.showOkDialog({
+                            headerText: 'Process Group',
+                            dialogContent: 'Unable to load the group for the specified component.'
+                        });
+                        deferred.reject();
+                    });
+                } else {
+                    deferred.resolve();
+                }
+            }).promise();
+
+            if (nf.Common.isDefinedAndNotNull(item.component.componentReference.component.parentGroupId)) {
+                // when the refresh has completed, select the match
+                refreshGraph.done(function () {
+                    // attempt to locate the corresponding component
+                    var component = d3.select('#id-' + item.component.componentReference.component.id);
+                    if (!component.empty()) {
+                        nf.Actions.show(component);
+
+                        nf.Canvas.reload();
+
+                        if (nf.Common.canAccessPolicies()) {
+                            //open policy management dialog for the selected item
+                            nf.Actions['managePolicies'](nf.CanvasUtils.getSelection());
+                        }
+                    } else {
+                        nf.Dialog.showOkDialog({
+                            headerText: 'Process Group',
+                            dialogContent: 'Unable to find the specified component.'
+                        });
+                    }
+                });
+            } else {
+                if (nf.Common.canAccessPolicies()) {
+                    //open policy management dialog for the selected item
+                    nf.Actions['managePolicies'](nf.CanvasUtils.getSelection());
+                }
             }
         });
 
