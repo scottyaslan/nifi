@@ -1589,10 +1589,10 @@ public final class DtoFactory {
             return null;
         }
 
-        final ComponentAuthorizable connectable = (ComponentAuthorizable) authorizable;
+        final ComponentAuthorizable componentAuthorizable = (ComponentAuthorizable) authorizable;
         final ComponentReferenceDTO dto = new ComponentReferenceDTO();
-        dto.setId(connectable.getIdentifier());
-        dto.setParentGroupId(connectable.getProcessGroupIdentifier());
+        dto.setId(componentAuthorizable.getIdentifier());
+        dto.setParentGroupId(componentAuthorizable.getProcessGroupIdentifier());
         dto.setName(authorizable.getResource().getName());
         return dto;
     }

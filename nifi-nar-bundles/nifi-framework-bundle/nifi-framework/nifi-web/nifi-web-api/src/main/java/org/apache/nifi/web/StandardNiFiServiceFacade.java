@@ -37,6 +37,7 @@ import org.apache.nifi.authorization.Resource;
 import org.apache.nifi.authorization.User;
 import org.apache.nifi.authorization.UserContextKeys;
 import org.apache.nifi.authorization.resource.Authorizable;
+import org.apache.nifi.authorization.resource.EnforcePolicyPermissionsThroughBaseResource;
 import org.apache.nifi.authorization.resource.ResourceFactory;
 import org.apache.nifi.authorization.user.NiFiUser;
 import org.apache.nifi.authorization.user.NiFiUserUtils;
@@ -1383,7 +1384,15 @@ public class StandardNiFiServiceFacade implements NiFiServiceFacade {
     private ComponentReferenceEntity createComponentReferenceEntity(final String resource) {
         ComponentReferenceEntity componentReferenceEntity = null;
         try {
-            final Authorizable componentAuthorizable = authorizableLookup.getAuthorizableFromResource(resource);
+            // get the component authorizable
+            Authorizable componentAuthorizable = authorizableLookup.getAuthorizableFromResource(resource);
+
+            // if this represents an authorizable whose policy permissions are enforced through the base resource,
+            // get the underlying base authorizable for the component reference
+            if (componentAuthorizable instanceof EnforcePolicyPermissionsThroughBaseResource) {
+                componentAuthorizable = ((EnforcePolicyPermissionsThroughBaseResource) componentAuthorizable).getBaseAuthorizable();
+            }
+
             final ComponentReferenceDTO componentReference = dtoFactory.createComponentReferenceDto(componentAuthorizable);
             if (componentReference != null) {
                 final PermissionsDTO componentReferencePermissions = dtoFactory.createPermissionsDto(componentAuthorizable);
