@@ -19,30 +19,33 @@ package org.apache.nifi.cluster.protocol.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
+import java.security.cert.CertificateException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
-import javax.net.ssl.SSLSocket;
-import javax.security.cert.X509Certificate;
-
+import org.apache.nifi.cluster.protocol.NodeIdentifier;
 import org.apache.nifi.cluster.protocol.ProtocolContext;
 import org.apache.nifi.cluster.protocol.ProtocolException;
 import org.apache.nifi.cluster.protocol.ProtocolHandler;
 import org.apache.nifi.cluster.protocol.ProtocolListener;
 import org.apache.nifi.cluster.protocol.ProtocolMessageMarshaller;
 import org.apache.nifi.cluster.protocol.ProtocolMessageUnmarshaller;
+import org.apache.nifi.cluster.protocol.message.ConnectionRequestMessage;
+import org.apache.nifi.cluster.protocol.message.DisconnectMessage;
+import org.apache.nifi.cluster.protocol.message.FlowRequestMessage;
+import org.apache.nifi.cluster.protocol.message.HeartbeatMessage;
 import org.apache.nifi.cluster.protocol.message.ProtocolMessage;
+import org.apache.nifi.cluster.protocol.message.ReconnectionRequestMessage;
 import org.apache.nifi.events.BulletinFactory;
 import org.apache.nifi.io.socket.ServerSocketConfiguration;
 import org.apache.nifi.io.socket.SocketListener;
-import org.apache.nifi.logging.NiFiLog;
 import org.apache.nifi.reporting.Bulletin;
 import org.apache.nifi.reporting.BulletinRepository;
+import org.apache.nifi.security.util.CertificateUtils;
 import org.apache.nifi.util.StopWatch;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +55,7 @@ import org.slf4j.LoggerFactory;
  */
 public class SocketProtocolListener extends SocketListener implements ProtocolListener {
 
-    private static final Logger logger = new NiFiLog(LoggerFactory.getLogger(SocketProtocolListener.class));
+    private static final Logger logger = LoggerFactory.getLogger(SocketProtocolListener.class);
     private final ProtocolContext<ProtocolMessage> protocolContext;
     private final Collection<ProtocolHandler> handlers = new CopyOnWriteArrayList<>();
     private volatile BulletinRepository bulletinRepository;
@@ -125,41 +128,31 @@ public class SocketProtocolListener extends SocketListener implements ProtocolLi
             final StopWatch stopWatch = new StopWatch(true);
             hostname = socket.getInetAddress().getHostName();
             final String requestId = UUID.randomUUID().toString();
-            logger.info("Received request {} from {}", requestId, hostname);
+            logger.debug("Received request {} from {}", requestId, hostname);
 
-            String requestorDn = null;
-            if (socket instanceof SSLSocket) {
-                final SSLSocket sslSocket = (SSLSocket) socket;
-                try {
-                    final X509Certificate[] certChains = sslSocket.getSession().getPeerCertificateChain();
-                    if (certChains != null && certChains.length > 0) {
-                        requestorDn = certChains[0].getSubjectDN().getName();
-                    }
-                } catch (final ProtocolException pe) {
-                    throw pe;
-                } catch (final Exception e) {
-                    throw new ProtocolException(e);
-                }
-            }
+            String requestorDn = getRequestorDN(socket);
 
             // unmarshall message
             final ProtocolMessageUnmarshaller<ProtocolMessage> unmarshaller = protocolContext.createUnmarshaller();
             final InputStream inStream = socket.getInputStream();
             final CopyingInputStream copyingInputStream = new CopyingInputStream(inStream, maxMsgBuffer); // don't copy more than 1 MB
-            logger.debug("Request {} has a message length of {}", requestId, copyingInputStream.getNumberOfBytesCopied());
 
             final ProtocolMessage request;
             try {
                 request = unmarshaller.unmarshal(copyingInputStream);
             } finally {
                 receivedMessage = copyingInputStream.getBytesRead();
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Received message: " + new String(receivedMessage));
+                }
             }
 
             request.setRequestorDN(requestorDn);
 
             // dispatch message to handler
             ProtocolHandler desiredHandler = null;
-            for (final ProtocolHandler handler : getHandlers()) {
+            final Collection<ProtocolHandler> handlers = getHandlers();
+            for (final ProtocolHandler handler : handlers) {
                 if (handler.canHandle(request)) {
                     desiredHandler = handler;
                     break;
@@ -168,6 +161,7 @@ public class SocketProtocolListener extends SocketListener implements ProtocolLi
 
             // if no handler found, throw exception; otherwise handle request
             if (desiredHandler == null) {
+                logger.error("Received request of type {} but none of the following Protocol Handlers were able to process the request: {}", request.getType(), handlers);
                 throw new ProtocolException("No handler assigned to handle message type: " + request.getType());
             } else {
                 final ProtocolMessage response = desiredHandler.handle(request);
@@ -185,20 +179,46 @@ public class SocketProtocolListener extends SocketListener implements ProtocolLi
             }
 
             stopWatch.stop();
-            logger.info("Finished processing request {} (type={}, length={} bytes) in {} millis", requestId, request.getType(), receivedMessage.length, stopWatch.getDuration(TimeUnit.MILLISECONDS));
-        } catch (final IOException e) {
+            final NodeIdentifier nodeId = getNodeIdentifier(request);
+            final String from = nodeId == null ? hostname : nodeId.toString();
+            logger.info("Finished processing request {} (type={}, length={} bytes) from {} in {} millis",
+                requestId, request.getType(), receivedMessage.length, from, stopWatch.getDuration(TimeUnit.MILLISECONDS));
+        } catch (final IOException | ProtocolException e) {
             logger.warn("Failed processing protocol message from " + hostname + " due to " + e, e);
 
             if (bulletinRepository != null) {
                 final Bulletin bulletin = BulletinFactory.createBulletin("Clustering", "WARNING", String.format("Failed to process protocol message from %s due to: %s", hostname, e.toString()));
                 bulletinRepository.addBulletin(bulletin);
             }
-        } catch (final ProtocolException e) {
-            logger.warn("Failed processing protocol message from " + hostname + " due to " + e, e);
-            if (bulletinRepository != null) {
-                final Bulletin bulletin = BulletinFactory.createBulletin("Clustering", "WARNING", String.format("Failed to process protocol message from %s due to: %s", hostname, e.toString()));
-                bulletinRepository.addBulletin(bulletin);
-            }
+        }
+    }
+
+    private NodeIdentifier getNodeIdentifier(final ProtocolMessage message) {
+        if (message == null) {
+            return null;
+        }
+
+        switch (message.getType()) {
+            case CONNECTION_REQUEST:
+                return ((ConnectionRequestMessage) message).getConnectionRequest().getProposedNodeIdentifier();
+            case HEARTBEAT:
+                return ((HeartbeatMessage) message).getHeartbeat().getNodeIdentifier();
+            case DISCONNECTION_REQUEST:
+                return ((DisconnectMessage) message).getNodeId();
+            case FLOW_REQUEST:
+                return ((FlowRequestMessage) message).getNodeId();
+            case RECONNECTION_REQUEST:
+                return ((ReconnectionRequestMessage) message).getNodeId();
+            default:
+                return null;
+        }
+    }
+
+    private String getRequestorDN(Socket socket) {
+        try {
+            return CertificateUtils.extractPeerDNFromSSLSocket(socket);
+        } catch (CertificateException e) {
+            throw new ProtocolException(e);
         }
     }
 }

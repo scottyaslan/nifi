@@ -16,13 +16,14 @@
  */
 package org.apache.nifi.controller;
 
-import java.util.Collection;
-import java.util.Map;
-
+import org.apache.nifi.authorization.resource.ComponentAuthorizable;
 import org.apache.nifi.components.PropertyDescriptor;
 import org.apache.nifi.components.ValidationResult;
 
-public interface ConfiguredComponent {
+import java.util.Collection;
+import java.util.Map;
+
+public interface ConfiguredComponent extends ComponentAuthorizable {
 
     public String getIdentifier();
 
@@ -64,4 +65,14 @@ public interface ConfiguredComponent {
      * @return the any validation errors for this connectable
      */
     Collection<ValidationResult> getValidationErrors();
+
+    /**
+     * @return the type of the component. I.e., the class name of the implementation
+     */
+    String getComponentType();
+
+    /**
+     * @return the Canonical Class Name of the component
+     */
+    String getCanonicalClassName();
 }
