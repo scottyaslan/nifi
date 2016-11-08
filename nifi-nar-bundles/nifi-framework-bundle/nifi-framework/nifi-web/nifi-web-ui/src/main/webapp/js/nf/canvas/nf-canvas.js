@@ -505,6 +505,29 @@ nf.Canvas = (function () {
         };
         updateFlowStatusContainerSize();
 
+        $('body').on('GoTo:Policy', function (e, item) {
+            //close shell
+            $('#shell-close-button').click();
+
+            if (nf.Common.isDefinedAndNotNull(item.component.componentReference.component.parentGroupId)) {
+                nf.CanvasUtils.showComponent(item.component.componentReference.component.parentGroupId, item.component.componentReference.component.id);
+                nf.ng.Bridge.injector.get('navigateCtrl').zoomActualSize();
+            } else {
+                // set the new group id
+                nf.Canvas.setGroupId(item.component.componentReference.component.id);
+
+                // reload
+                nf.Canvas.reload().done(function () {
+                    nf.ng.Bridge.injector.get('navigateCtrl').zoomFit();
+                }).fail(function () {
+                    nf.Dialog.showOkDialog({
+                        headerText: 'Process Group',
+                        dialogContent: 'Unable to load the group for the specified component.'
+                    });
+                });
+            }
+        });
+
         // listen for browser resize events to reset the graph size
         $(window).on('resize', function (e) {
             if (e.target === window) {

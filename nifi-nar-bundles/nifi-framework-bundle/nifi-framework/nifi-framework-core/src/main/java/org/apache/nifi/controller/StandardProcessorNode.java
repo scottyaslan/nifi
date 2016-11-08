@@ -1421,7 +1421,7 @@ public class StandardProcessorNode extends ProcessorNode implements Connectable 
     }
 
     @Override
-    protected String getProcessGroupIdentifier() {
+    public String getProcessGroupIdentifier() {
         final ProcessGroup group = getProcessGroup();
         return group == null ? null : group.getIdentifier();
     }
