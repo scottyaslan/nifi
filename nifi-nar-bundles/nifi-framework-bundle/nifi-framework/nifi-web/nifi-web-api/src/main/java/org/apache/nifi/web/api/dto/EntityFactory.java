@@ -301,6 +301,7 @@ public final class EntityFactory {
         if (dto != null) {
             entity.setPermissions(permissions);
             entity.setId(dto.getId());
+            entity.setParentGroupId(dto.getParentGroupId());
 
             if (permissions != null && permissions.getCanRead()) {
                 entity.setComponent(dto);

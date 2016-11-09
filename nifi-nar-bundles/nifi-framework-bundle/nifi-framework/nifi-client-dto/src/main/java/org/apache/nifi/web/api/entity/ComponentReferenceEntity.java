@@ -16,6 +16,7 @@
  */
 package org.apache.nifi.web.api.entity;
 
+import com.wordnik.swagger.annotations.ApiModelProperty;
 import org.apache.nifi.web.api.dto.ComponentReferenceDTO;
 
 import javax.xml.bind.annotation.XmlRootElement;
@@ -27,7 +28,22 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "componentReferenceEntity")
 public class ComponentReferenceEntity extends ComponentEntity {
 
+    private String parentGroupId;
     private ComponentReferenceDTO component;
+
+    /**
+     * @return id for the parent group of this component if applicable, null otherwise
+     */
+    @ApiModelProperty(
+            value = "The id of parent process group of this component if applicable."
+    )
+    public String getParentGroupId() {
+        return parentGroupId;
+    }
+
+    public void setParentGroupId(String parentGroupId) {
+        this.parentGroupId = parentGroupId;
+    }
 
     /**
      * The {@link ComponentReferenceDTO} that is being serialized.
