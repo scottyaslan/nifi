@@ -359,75 +359,48 @@ nf.StatusHistory = (function () {
             // main chart
             // ----------
 
-            // the container for the main chart
-            var chartContainer = $('#status-history-chart-container').empty();
-            if (chartContainer.hasClass('ui-resizable')) {
-                chartContainer.resizable('destroy');
-                chartContainer.removeAttr( "style" );
-            }
-
             // calculate the dimensions
-            chartContainer.height(getChartMinHeight());
+            var chartContainer = $('#status-history-chart-container-rndr').empty().height(getChartMinHeight());
 
             // determine the new width/height
-            var width = chartContainer.outerWidth() - margin.left - margin.right;
-            var height = chartContainer.outerHeight() - margin.top - margin.bottom;
+            var width = chartContainer.outerWidth();
+            var height = chartContainer.outerHeight();
 
-            maxWidth = $('#status-history-container').width();
+            var maxWidth = $('#status-history-container').width();
             if (width > maxWidth) {
                 width = maxWidth;
             }
 
-            maxHeight = getChartMaxHeight();
+            var maxHeight = getChartMaxHeight();
             if (height > maxHeight) {
                 height = maxHeight;
             }
 
-            // define the x axis for the main chart
-            var x = d3.time.scale()
-                .range([0, width]);
+            var opts = {
+                height: height,
+                width: width,
+                color: color,
+                selectedDescriptor: selectedDescriptor,
+                customTimeFormat: customTimeFormat,
+                margin: margin
+            };
 
-            var xAxis = d3.svg.axis()
-                .scale(x)
-                .ticks(5)
-                .tickFormat(customTimeFormat)
-                .orient('bottom');
+            var result = render(statusData, opts);
 
-            // define the y axis
-            var y = d3.scale.linear()
-                .range([height, 0]);
+            var x = result.x;
+            var y = result.y;
+            var status = result.status;
+            var line = result.line;
+            var chart = result.chart;
+            var xAxis = result.xAxis;
+            var yAxis = result.yAxis;
 
-            var yAxis = d3.svg.axis()
-                .scale(y)
-                .tickFormat(formatters[selectedDescriptor.formatter])
-                .orient('left');
-
-
-            // status line
-            var line = d3.svg.line()
-                .interpolate('monotone')
-                .x(function (d) {
-                    return x(d.timestamp);
-                })
-                .y(function (d) {
-                    return y(d.value);
-                });
-
-            // build the chart svg
-            var chartSvg = d3.select('#status-history-chart-container').append('svg')
-                .attr('style', 'pointer-events: none;')
-                .attr('width', chartContainer.parent().width())
-                .attr('height', chartContainer.innerHeight());
-            // define a clip the path
-            var clipPath = chartSvg.append('defs').append('clipPath')
-                .attr('id', 'clip')
-                .append('rect')
-                .attr('width', width)
-                .attr('height', height);
-
-            // build the chart
-            var chart = chartSvg.append('g')
-                .attr('transform', 'translate(' + margin.left + ', ' + margin.top + ')');
+            // the container for the main chart
+            chartContainer.append(result.html);
+            if (chartContainer.hasClass('ui-resizable')) {
+                chartContainer.resizable('destroy');
+                chartContainer.removeAttr( "style" );
+            }
 
             // determine the min/max date
             var minDate = d3.min(statusData, function (d) {
@@ -440,103 +413,9 @@ nf.StatusHistory = (function () {
                     return s.timestamp;
                 });
             });
+
             addDetailItem(detailsContainer, 'Start', nf.Common.formatDateTime(minDate));
             addDetailItem(detailsContainer, 'End', nf.Common.formatDateTime(maxDate));
-
-            // determine the x axis range
-            x.domain([minDate, maxDate]);
-
-            // determine the y axis range
-            y.domain([getMinValue(statusData), getMaxValue(statusData)]);
-
-            // build the x axis
-            chart.append('g')
-                .attr('class', 'x axis')
-                .attr('transform', 'translate(0, ' + height + ')')
-                .call(xAxis);
-
-            // build the y axis
-            chart.append('g')
-                .attr('class', 'y axis')
-                .call(yAxis)
-                .append('text')
-                .attr('transform', 'rotate(-90)')
-                .attr('y', 6)
-                .attr('dy', '.71em')
-                .attr('text-anchor', 'end')
-                .text(selectedDescriptor.label);
-
-            // build the chart
-            var status = chart.selectAll('.status')
-                .data(statusData)
-                .enter()
-                .append('g')
-                .attr('clip-path', 'url(#clip)')
-                .attr('class', 'status');
-
-            // draw the lines
-            status.append('path')
-                .attr('class', function (d) {
-                    return 'chart-line chart-line-' + d.id;
-                })
-                .attr('d', function (d) {
-                    return line(d.values);
-                })
-                .attr('stroke', function (d) {
-                    return color(d.label);
-                })
-                .classed('hidden', function (d) {
-                    return d.visible === false;
-                })
-                .append('title')
-                .text(function (d) {
-                    return d.label;
-                });
-
-            // draw the control points for each line
-            status.each(function (d) {
-                // create a group for the control points
-                var markGroup = d3.select(this).append('g')
-                    .attr('class', function () {
-                        return 'mark-group mark-group-' + d.id;
-                    })
-                    .classed('hidden', function (d) {
-                        return d.visible === false;
-                    });
-
-                // draw the control points
-                markGroup.selectAll('circle.mark')
-                    .data(d.values)
-                    .enter()
-                    .append('circle')
-                    .attr('style', 'pointer-events: all;')
-                    .attr('class', 'mark')
-                    .attr('cx', function (v) {
-                        return x(v.timestamp);
-                    })
-                    .attr('cy', function (v) {
-                        return y(v.value);
-                    })
-                    .attr('fill', function () {
-                        return color(d.label);
-                    })
-                    .attr('r', 1.5)
-                    .append('title')
-                    .text(function (v) {
-                        return d.label + ' -- ' + formatters[selectedDescriptor.formatter](v.value);
-                    });
-            });
-
-            // update the size of the chart
-            chartSvg.attr('width', chartContainer.parent().width())
-                .attr('height', chartContainer.innerHeight());
-
-            // update the size of the clipper
-            clipPath.attr('width', width)
-                .attr('height', height);
-
-            // update the position of the x axis
-            chart.select('.x.axis').attr('transform', 'translate(0, ' + height + ')');
 
             // -------------
             // control chart
@@ -547,7 +426,7 @@ nf.StatusHistory = (function () {
             var controlHeight = chartControlContainer.innerHeight() - margin.top - margin.bottom;
 
             var xControl = d3.time.scale()
-                .range([0, width]);
+                .range([0, width - margin.left - margin.right]);
 
             var xControlAxis = d3.svg.axis()
                 .scale(xControl)
@@ -954,6 +833,181 @@ nf.StatusHistory = (function () {
     };
 
     /**
+     * Draw the chart.
+     */
+    var render = function (statusData, opts) {
+
+        // the container for the main chart
+        var chartContainer = $('<div>');
+
+        // calculate the dimensions
+        chartContainer.height(opts.height);
+
+        // define the x axis for the main chart
+        var x = d3.time.scale()
+            .range([0, opts.width - opts.margin.left - opts.margin.right]);
+
+        var xAxis = d3.svg.axis()
+            .scale(x)
+            .ticks(5)
+            .tickFormat(opts.customTimeFormat)
+            .orient('bottom');
+
+        // define the y axis
+        var y = d3.scale.linear()
+            .range([opts.height - opts.margin.top - opts.margin.bottom, 0]);
+
+        var yAxis = d3.svg.axis()
+            .scale(y)
+            .tickFormat(formatters[opts.selectedDescriptor.formatter])
+            .orient('left');
+
+        // status line
+        var line = d3.svg.line()
+            .interpolate('monotone')
+            .x(function (d) {
+                return x(d.timestamp);
+            })
+            .y(function (d) {
+                return y(d.value);
+            });
+
+        // build the chart svg
+        var chartSvg = d3.select(chartContainer[0]).append('svg')
+            .attr('style', 'pointer-events: none;')
+            .attr('width', opts.width)
+            .attr('height', opts.height);
+        // define a clip the path
+        var clipPath = chartSvg.append('defs').append('clipPath')
+            .attr('id', 'clip')
+            .append('rect')
+            .attr('width', opts.width - opts.margin.left - opts.margin.right)
+            .attr('height', opts.height);
+
+        // build the chart
+        var chart = chartSvg.append('g')
+            .attr('transform', 'translate(' + opts.margin.left + ', ' + opts.margin.top + ')');
+
+        // determine the min/max date
+        var minDate = d3.min(statusData, function (d) {
+            return d3.min(d.values, function (s) {
+                return s.timestamp;
+            });
+        });
+        var maxDate = d3.max(statusData, function (d) {
+            return d3.max(d.values, function (s) {
+                return s.timestamp;
+            });
+        });
+
+        // determine the x axis range
+        x.domain([minDate, maxDate]);
+
+        // determine the y axis range
+        y.domain([getMinValue(statusData), getMaxValue(statusData)]);
+
+        // build the x axis
+        chart.append('g')
+            .attr('class', 'x axis')
+            .attr('transform', 'translate(0, ' + opts.height + ')')
+            .call(xAxis);
+
+        // build the y axis
+        chart.append('g')
+            .attr('class', 'y axis')
+            .call(yAxis)
+            .append('text')
+            .attr('transform', 'rotate(-90)')
+            .attr('y', 6)
+            .attr('dy', '.71em')
+            .attr('text-anchor', 'end')
+            .text(opts.selectedDescriptor.label);
+
+        // build the chart
+        var status = chart.selectAll('.status')
+            .data(statusData)
+            .enter()
+            .append('g')
+            .attr('clip-path', 'url(#clip)')
+            .attr('class', 'status');
+
+        // draw the lines
+        status.append('path')
+            .attr('class', function (d) {
+                return 'chart-line chart-line-' + d.id;
+            })
+            .attr('d', function (d) {
+                return line(d.values);
+            })
+            .attr('stroke', function (d) {
+                return opts.color(d.label);
+            })
+            .classed('hidden', function (d) {
+                return d.visible === false;
+            })
+            .append('title')
+            .text(function (d) {
+                return d.label;
+            });
+
+        // draw the control points for each line
+        status.each(function (d) {
+            // create a group for the control points
+            var markGroup = d3.select(this).append('g')
+                .attr('class', function () {
+                    return 'mark-group mark-group-' + d.id;
+                })
+                .classed('hidden', function (d) {
+                    return d.visible === false;
+                });
+
+            // draw the control points
+            markGroup.selectAll('circle.mark')
+                .data(d.values)
+                .enter()
+                .append('circle')
+                .attr('style', 'pointer-events: all;')
+                .attr('class', 'mark')
+                .attr('cx', function (v) {
+                    return x(v.timestamp);
+                })
+                .attr('cy', function (v) {
+                    return y(v.value);
+                })
+                .attr('fill', function () {
+                    return opts.color(d.label);
+                })
+                .attr('r', 1.5)
+                .append('title')
+                .text(function (v) {
+                    return d.label + ' -- ' + formatters[opts.selectedDescriptor.formatter](v.value);
+                });
+        });
+
+        // update the size of the chart
+        chartSvg.attr('width', opts.width)
+            .attr('height', chartContainer.innerHeight());
+
+        // update the size of the clipper
+        clipPath.attr('width', opts.width - opts.margin.left - opts.margin.right)
+            .attr('height', opts.height);
+
+        // update the position of the x axis
+        chart.select('.x.axis').attr('transform', 'translate(0, ' + (opts.height - opts.margin.top - opts.margin.bottom) + ')');
+
+        return {
+            html: chartContainer,
+            x: x,
+            y: y,
+            status: status,
+            line: line,
+            chart: chart,
+            xAxis: xAxis,
+            yAxis: yAxis
+        }
+    };
+
+    /**
      * Gets the minimum value from the specified instances.
      *
      * @param {type} nodeInstances
@@ -1071,7 +1125,7 @@ nf.StatusHistory = (function () {
                         $('#status-history-dialog').removeData('status-history');
 
                         // reset the dom
-                        $('#status-history-chart-container').empty();
+                        $('#status-history-chart-container-rndr').empty();
                         $('#status-history-chart-control-container').empty();
                         $('#status-history-details').empty();
 

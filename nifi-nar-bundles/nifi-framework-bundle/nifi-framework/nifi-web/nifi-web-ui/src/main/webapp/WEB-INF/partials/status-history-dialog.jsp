@@ -27,7 +27,9 @@
         <div id="status-history-details"></div>
         <div id="status-history-metric-combo"></div>
         <div id="status-history-container">
-            <div id="status-history-chart-container"></div>
+            <div id="status-history-chart-container">
+                <div id="status-history-chart-container-rndr"></div>
+            </div>
             <div id="status-history-chart-control-container"></div>
         </div>
         <div class="clear"></div>
