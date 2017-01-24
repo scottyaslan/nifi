@@ -345,7 +345,7 @@ nf.ContextMenu = (function () {
 
         // TODO - also check can modify in parent
         
-        return !selection.empty() && nf.CanvasUtils.isDisconnected(selection) && nf.Canvas.getParentGroupId() !== null;
+        return !selection.empty() && nf.Connection.isDisconnected(selection) && nf.Canvas.getParentGroupId() !== null;
     };
 
     /**
@@ -513,22 +513,6 @@ nf.ContextMenu = (function () {
          */
         hide: function () {
             $('#context-menu').hide();
-        },
-        
-        /**
-         * Activates the context menu for the components in the specified selection.
-         * 
-         * @param {selection} components    The components to enable the context menu for
-         */
-        activate: function (components) {
-            components.on('contextmenu.selection', function () {
-                // get the clicked component to update selection
-                nf.ContextMenu.show();
-
-                // stop propagation and prevent default
-                d3.event.preventDefault();
-                d3.event.stopPropagation();
-            });
         }
     };
 }());

@@ -905,7 +905,6 @@ nf.Canvas = (function () {
 
                     // initialize the component behaviors
                     nf.Draggable.init();
-                    nf.Selectable.init();
                     nf.Connectable.init();
 
                     // initialize the chart

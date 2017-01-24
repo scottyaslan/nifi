@@ -162,7 +162,7 @@ nf.Port = (function () {
             });
 
         // make ports selectable
-        port.call(nf.Selectable.activate).call(nf.ContextMenu.activate);
+        port.call(nf.Selectable.activate).call(nf.CanvasUtils.activateContextMenu);
 
         // only activate dragging and connecting if appropriate
         port.filter(function (d) {

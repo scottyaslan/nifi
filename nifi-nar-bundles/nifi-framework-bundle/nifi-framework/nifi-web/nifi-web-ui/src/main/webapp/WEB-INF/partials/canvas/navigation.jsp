@@ -154,7 +154,7 @@
                     <div class="button-spacer-large">&nbsp;</div>
                     <div id="operate-group" class="action-button" title="Group">
                         <button ng-click="appCtrl.nf.Actions['group'](appCtrl.nf.CanvasUtils.getSelection());"
-                                ng-disabled="!appCtrl.nf.CanvasUtils.isDisconnected(appCtrl.nf.CanvasUtils.getSelection()) || !appCtrl.nf.CanvasUtils.canModify(appCtrl.nf.CanvasUtils.getSelection());">
+                                ng-disabled="!appCtrl.nf.Connection.isDisconnected(appCtrl.nf.CanvasUtils.getSelection()) || !appCtrl.nf.CanvasUtils.canModify(appCtrl.nf.CanvasUtils.getSelection());">
                             <div class="graph-control-action-icon icon icon-group"></div></button>
                     </div>
                     <div class="button-spacer-large">&nbsp;</div>

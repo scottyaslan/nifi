@@ -149,7 +149,7 @@ nf.ProcessGroup = (function () {
                 // enter this group on double click
                 nf.CanvasUtils.enterGroup(d.id);
             })
-            .call(nf.Selectable.activate).call(nf.ContextMenu.activate);
+            .call(nf.Selectable.activate).call(nf.CanvasUtils.activateContextMenu);
 
         // only support dragging, connection, and drag and drop if appropriate
         processGroup.filter(function (d) {
@@ -176,7 +176,7 @@ nf.ProcessGroup = (function () {
                             // mark that we are hovering over a drop area if appropriate
                             target.classed('drop', function () {
                                 // get the current selection and ensure its disconnected
-                                return nf.CanvasUtils.isDisconnected(nf.CanvasUtils.getSelection());
+                                return nf.Connection.isDisconnected(nf.CanvasUtils.getSelection());
                             });
                         }
                     }

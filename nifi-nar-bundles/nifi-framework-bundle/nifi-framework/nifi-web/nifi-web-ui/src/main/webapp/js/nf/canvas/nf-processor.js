@@ -151,7 +151,7 @@ nf.Processor = (function () {
             .text('\uf132');
 
         // make processors selectable
-        processor.call(nf.Selectable.activate).call(nf.ContextMenu.activate);
+        processor.call(nf.Selectable.activate).call(nf.CanvasUtils.activateContextMenu);
     };
 
     /**

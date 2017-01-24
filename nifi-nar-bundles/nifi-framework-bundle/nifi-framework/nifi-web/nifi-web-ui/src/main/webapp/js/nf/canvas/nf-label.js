@@ -112,7 +112,7 @@ nf.Label = (function () {
             });
 
         // always support selecting
-        label.call(nf.Selectable.activate).call(nf.ContextMenu.activate);
+        label.call(nf.Selectable.activate).call(nf.CanvasUtils.activateContextMenu);
     };
 
     /**

@@ -119,7 +119,7 @@ nf.Funnel = (function () {
             .text('\ue803');
 
         // always support selection
-        funnel.call(nf.Selectable.activate).call(nf.ContextMenu.activate);
+        funnel.call(nf.Selectable.activate).call(nf.CanvasUtils.activateContextMenu);
     };
 
     /**
