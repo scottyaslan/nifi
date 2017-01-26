@@ -68,6 +68,11 @@
             d3.event.stopPropagation();
         },
 
+        /**
+         * Activates the select behavior for the components in the specified selection.
+         *
+         * @param {selection} components
+         */
         activate: function (components) {
             components.on('mousedown.selection', function () {
                 // get the clicked component to update selection

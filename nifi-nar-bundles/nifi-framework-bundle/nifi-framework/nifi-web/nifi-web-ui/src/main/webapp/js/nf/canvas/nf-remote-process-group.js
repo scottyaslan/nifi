@@ -26,9 +26,11 @@
                 'nf.Selectable',
                 'nf.Client',
                 'nf.CanvasUtils',
-                'nf.ContextMenu'],
-            function ($, d3, connection, common, selectable, client, canvasUtils, contextMenu) {
-                return (nf.RemoteProcessGroup = factory($, d3, connection, common, selectable, client, canvasUtils, contextMenu));
+                'nf.ContextMenu',
+                'nf.Connectable',
+                'nf.Draggable'],
+            function ($, d3, connection, common, selectable, client, canvasUtils, contextMenu, connectable, draggable) {
+                return (nf.RemoteProcessGroup = factory($, d3, connection, common, selectable, client, canvasUtils, contextMenu, connectable, draggable));
             });
     } else if (typeof exports === 'object' && typeof module === 'object') {
         module.exports = (nf.RemoteProcessGroup =
@@ -39,7 +41,9 @@
                 require('nf.Selectable'),
                 require('nf.Client'),
                 require('nf.CanvasUtils'),
-                require('nf.ContextMenu')));
+                require('nf.ContextMenu'),
+                require('nf.Connectable'),
+                require('nf.Draggable')));
     } else {
         nf.RemoteProcessGroup = factory(root.$,
             root.d3,
@@ -48,9 +52,11 @@
             root.nf.Selectable,
             root.nf.Client,
             root.nf.CanvasUtils,
-            root.nf.ContextMenu);
+            root.nf.ContextMenu,
+            root.nf.Connectable,
+            root.nf.Draggable);
     }
-}(this, function ($, d3, connection, common, selectable, client, canvasUtils, contextMenu) {
+}(this, function ($, d3, connection, common, selectable, client, canvasUtils, contextMenu, connectable, draggable) {
     'use strict';
 
     var PREVIEW_NAME_LENGTH = 30;
@@ -179,7 +185,7 @@
             });
 
         // always support selection
-        remoteProcessGroup.call(selectable.activate).call(canvasUtils.activateContextMenu);
+        remoteProcessGroup.call(selectable.activate).call(contextMenu.activate, nf.Connection);
     };
 
     // attempt of space between component count and icon for process group contents
@@ -212,7 +218,7 @@
             var details = remoteProcessGroup.select('g.remote-process-group-details');
 
             // update the component behavior as appropriate
-            canvasUtils.editable(remoteProcessGroup);
+            canvasUtils.editable(remoteProcessGroup, connectable, draggable);
 
             // if this processor is visible, render everything
             if (remoteProcessGroup.classed('visible')) {

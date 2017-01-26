@@ -17,7 +17,7 @@
 <%@ page contentType="text/html" pageEncoding="UTF-8" session="false" %>
 <nf-breadcrumbs
         breadcrumbs="appCtrl.serviceProvider.breadcrumbsCtrl.getBreadcrumbs();"
-        click-func="appCtrl.nf.CanvasUtils.enterGroup"
+        click-func="appCtrl.nf.ProcessGroup.enterGroup"
         highlight-crumb-id="appCtrl.nf.Canvas.getGroupId();"
         separator-func="appCtrl.nf.Common.isDefinedAndNotNull">
 </nf-breadcrumbs>

@@ -21,33 +21,36 @@
     if (typeof define === 'function' && define.amd) {
         define(['$',
                 'd3',
-                'nf.Connection',
                 'nf.Common',
                 'nf.Selectable',
                 'nf.Client',
-                'nf.CanvasUtils'],
-            function ($, d3, connection, common, selectable, client, canvasUtils) {
-                return (nf.Connection = factory($, d3, connection, common, selectable, client, canvasUtils));
+                'nf.CanvasUtils',
+                'nf.ContextMenu',
+                'nf.Canvas'],
+            function ($, d3, common, selectable, client, canvasUtils, contextMenu, canvas) {
+                return (nf.Connection = factory($, d3, common, selectable, client, canvasUtils, contextMenu, canvas));
             });
     } else if (typeof exports === 'object' && typeof module === 'object') {
         module.exports = (nf.Connection =
             factory(require('$'),
                 require('d3'),
-                require('nf.Connection'),
                 require('nf.Common'),
                 require('nf.Selectable'),
                 require('nf.Client'),
-                require('nf.CanvasUtils')));
+                require('nf.CanvasUtils'),
+                require('nf.ContextMenu'),
+                require('nf.Canvas')));
     } else {
         nf.Connection = factory(root.$,
             root.d3,
-            root.nf.Connection,
             root.nf.Common,
             root.nf.Selectable,
             root.nf.Client,
-            root.nf.CanvasUtils);
+            root.nf.CanvasUtils,
+            root.nf.ContextMenu,
+            root.nf.Canvas);
     }
-}(this, function ($, d3, connection, common, selectable, client, canvasUtils) {
+}(this, function ($, d3, common, selectable, client, canvasUtils, contextMenu, canvas) {
     'use strict';
 
     // the dimensions for the connection label
@@ -307,7 +310,7 @@
                 // select the connection when clicking the selectable path
                 selectable.select(d3.select(this.parentNode));
             })
-            .call(canvasUtils.activateContextMenu);
+            .call(contextMenu.activate, nfConnection);
     };
 
     // determines whether the specified connection contains an unsupported relationship
@@ -627,7 +630,7 @@
                             // select the connection when clicking the label
                             selectable.select(d3.select(this.parentNode));
                         })
-                        .call(canvasUtils.activateContextMenu);
+                        .call(contextMenu.activate, nfConnection);
 
                     // update the start point
                     canvasUtils.transition(startpoints, transition)
@@ -657,7 +660,7 @@
                             // select the connection when clicking the label
                             selectable.select(d3.select(this.parentNode));
                         })
-                        .call(canvasUtils.activateContextMenu);
+                        .call(contextMenu.activate, nfConnection);
 
                     // update the end point
                     canvasUtils.transition(endpoints, transition)
@@ -737,7 +740,7 @@
                             // select the connection when clicking the label
                             selectable.select(d3.select(this.parentNode));
                         })
-                        .call(canvasUtils.activateContextMenu);
+                        .call(contextMenu.activate, nfConnection);
 
                     // update the midpoints
                     canvasUtils.transition(midpoints, transition)
@@ -774,7 +777,7 @@
                                 // select the connection when clicking the label
                                 selectable.select(d3.select(this.parentNode));
                             })
-                            .call(canvasUtils.activateContextMenu);
+                            .call(contextMenu.activate, nfConnection);
 
                         // connection label
                         connectionLabelContainer.append('rect')
@@ -1506,7 +1509,7 @@
             contentType: 'application/json'
         }).done(function (response) {
             // request was successful, update the entry
-            nf.Connection.set(response);
+            nfConnection.set(response);
         }).fail(function (xhr, status, error) {
             if (xhr.status === 400 || xhr.status === 404 || xhr.status === 409) {
                 nf.Dialog.showOkDialog({
@@ -1523,7 +1526,7 @@
     var removeConnections = function (removed) {
         // consider reloading source/destination of connection being removed
         removed.each(function (d) {
-            canvasUtils.reloadConnectionSourceAndDestination(d.sourceId, d.destinationId);
+            canvas.reloadConnectionSourceAndDestination(d.sourceId, d.destinationId);
         });
 
         // remove the connection
@@ -1662,9 +1665,9 @@
                         // prompt for the new port if appropriate
                         if (canvasUtils.isProcessGroup(destination) || canvasUtils.isRemoteProcessGroup(destination)) {
                             // user will select new port and updated connect details will be set accordingly
-                            nf.ConnectionConfiguration.showConfiguration(connection, destination).done(function () {
+                            nfConnectionConfiguration.showConfiguration(connection, destination).done(function () {
                                 // reload the previous destination
-                                canvasUtils.reloadConnectionSourceAndDestination(null, previousDestinationId);
+                                canvas.reloadConnectionSourceAndDestination(null, previousDestinationId);
                             }).fail(function () {
                                 // reset the connection
                                 connection.call(updateConnections, {
@@ -1695,8 +1698,8 @@
                                     x: destinationData.position.x + (destinationData.dimensions.width),
                                     y: destinationData.position.y + (destinationData.dimensions.height / 2)
                                 };
-                                var xOffset = nf.Connection.config.selfLoopXOffset;
-                                var yOffset = nf.Connection.config.selfLoopYOffset;
+                                var xOffset = nfConnection.config.selfLoopXOffset;
+                                var yOffset = nfConnection.config.selfLoopYOffset;
 
                                 connectionEntity.component.bends = [];
                                 connectionEntity.component.bends.push({
@@ -1719,11 +1722,11 @@
                                 var updatedConnectionData = response.component;
 
                                 // refresh to update the label
-                                nf.Connection.set(response);
+                                nfConnection.set(response);
 
                                 // reload the previous destination and the new source/destination
-                                canvasUtils.reloadConnectionSourceAndDestination(null, previousDestinationId);
-                                canvasUtils.reloadConnectionSourceAndDestination(response.sourceId, response.destinationId);
+                                canvas.reloadConnectionSourceAndDestination(null, previousDestinationId);
+                                canvas.reloadConnectionSourceAndDestination(response.sourceId, response.destinationId);
                             }).fail(function (xhr, status, error) {
                                 if (xhr.status === 400 || xhr.status === 401 || xhr.status === 403 || xhr.status === 404 || xhr.status === 409) {
                                     nf.Dialog.showOkDialog({
@@ -1913,45 +1916,6 @@
         },
 
         /**
-         * Reloads a connection's source and destination.
-         *
-         * @param {string} sourceComponentId          The connection source id
-         * @param {string} destinationComponentId     The connection destination id
-         */
-        reloadConnectionSourceAndDestination: function (sourceComponentId, destinationComponentId) {
-            if (common.isBlank(sourceComponentId) === false) {
-                var source = d3.select('#id-' + sourceComponentId);
-                if (source.empty() === false) {
-                    var sourceData = source.datum();
-                    if (sourceData.permissions.canRead) {  // update the source status if necessary
-
-                        if (canvasUtils.isProcessor(source)) {
-                            processor.reload(sourceData.id);
-                        } else if (canvasUtils.isInputPort(source)) {
-                            port.reload(sourceData.id);
-                        } else if (canvasUtils.isRemoteProcessGroup(source)) {
-                            remoteProcessGroup.reload(sourceData.id);
-                        }
-                    }
-                }
-            }
-            if (common.isBlank(destinationComponentId) === false) {
-                var destination = d3.select('#id-' + destinationComponentId);
-                if (destination.empty() === false) {
-                    var destinationData = destination.datum();
-                    if (destinationData.permissions.canRead) {  // update the destination component accordingly
-
-                        if (canvasUtils.isProcessor(destination)) {
-                            processor.reload(destinationData.id);
-                        } else if (canvasUtils.isRemoteProcessGroup(destination)) {
-                            remoteProcessGroup.reload(destinationData.id);
-                        }
-                    }
-                }
-            }
-        },
-
-        /**
          * Determines if the specified selection is disconnected from other nodes.
          *
          * @argument {selection} selection          The selection
@@ -2106,7 +2070,7 @@
          * Removes all processors.
          */
         removeAll: function () {
-            nf.Connection.remove(connectionMap.keys());
+            nfConnection.remove(connectionMap.keys());
         },
 
         /**
@@ -2122,7 +2086,7 @@
                     url: connectionEntity.uri,
                     dataType: 'json'
                 }).done(function (response) {
-                    nf.Connection.set(response);
+                    nfConnection.set(response);
                 });
             }
         },

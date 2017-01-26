@@ -29,7 +29,7 @@
                 'nf.Processor',
                 'nf.ClusterSummary',
                 'nf.CustomUi',
-                'nf.UniversalCapture,',
+                'nf.UniversalCapture',
                 'nf.Connection'],
             function ($, errorHandler, common, dialog, client, canvasUtils, angularBridge, nfProcessor, clusterSummary, customUi, universalCapture, connection) {
                 return (nf.ProcessorConfiguration = factory($, errorHandler, common, dialog, client, canvasUtils, angularBridge, nfProcessor, clusterSummary, customUi), universalCapture, connection);

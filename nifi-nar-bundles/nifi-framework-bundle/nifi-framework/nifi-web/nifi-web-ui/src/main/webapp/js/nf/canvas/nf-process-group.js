@@ -147,9 +147,9 @@ nf.ProcessGroup = (function () {
         // always support selecting and navigation
         processGroup.on('dblclick', function (d) {
                 // enter this group on double click
-                nf.CanvasUtils.enterGroup(d.id);
+                nf.ProcessGroup.enterGroup(d.id);
             })
-            .call(nf.Selectable.activate).call(nf.CanvasUtils.activateContextMenu);
+            .call(nf.Selectable.activate).call(nf.ContextMenu.activate, nf.Connection);
 
         // only support dragging, connection, and drag and drop if appropriate
         processGroup.filter(function (d) {
@@ -221,7 +221,7 @@ nf.ProcessGroup = (function () {
             var details = processGroup.select('g.process-group-details');
 
             // update the component behavior as appropriate
-            nf.CanvasUtils.editable(processGroup);
+            nf.CanvasUtils.editable(processGroup, nf.Connectable, nf.Draggable);
 
             // if this processor is visible, render everything
             if (processGroup.classed('visible')) {
@@ -1203,6 +1203,36 @@ nf.ProcessGroup = (function () {
 
             expire(addedCache);
             expire(removedCache);
+        },
+
+        /**
+         * Enters the specified group.
+         *
+         * @param {string} groupId
+         */
+        enterGroup: function (groupId) {  // hide the context menu
+
+            nf.ContextMenu.hide();   // set the new group id
+
+            nf.Canvas.setGroupId(groupId);   // reload the graph
+
+            return nf.Canvas.reload().done(function () {  // attempt to restore the view
+
+                var viewRestored = nf.CanvasUtils.restoreUserView();   // if the view was not restore attempt to fit
+
+                if (viewRestored === false) {
+                    nf.Canvas.View.fit();   // refresh the canvas
+
+                    nf.Canvas.View.refresh({
+                        transition: true
+                    });
+                }
+            }).fail(function () {
+                nf.Dialog.showOkDialog({
+                    headerText: 'Process Group',
+                    dialogContent: 'Unable to enter the selected group.'
+                });
+            });
         }
     };
 }());

@@ -25,14 +25,11 @@
                 'nf.Canvas',
                 'nf.Dialog',
                 'nf.Actions',
-                'nf.Connectable',
-                'nf.Draggable',
-                'nf.ContextMenu',
                 'nf.Clipboard',
                 'nf.Storage',
                 'nf.ProcessGroup'],
-            function (d3, $, snippet, birdsEye, common, canvas, dialog, actions, connectable, draggable, contextMenu, clipboard, storage, processGroup) {
-                return (nf.CanvasUtils = factory(d3, $, snippet, birdsEye, common, canvas, dialog, actions, connectable, draggable, contextMenu, clipboard, storage, processGroup));
+            function (d3, $, snippet, birdsEye, common, canvas, dialog, actions, clipboard, storage, processGroup) {
+                return (nf.CanvasUtils = factory(d3, $, snippet, birdsEye, common, canvas, dialog, actions, clipboard, storage, processGroup));
             });
     } else if (typeof exports === 'object' && typeof module === 'object') {
         module.exports = (nf.CanvasUtils = factory(
@@ -44,9 +41,6 @@
             require('nf.Canvas'),
             require('nf.Dialog'),
             require('nf.Actions'),
-            require('nf.Connectable'),
-            require('nf.Draggable'),
-            require('nf.ContextMenu'),
             require('nf.Clipboard'),
             require('nf.Storage'),
             require('nf.ProcessGroup')));
@@ -60,14 +54,11 @@
             root.nf.Canvas,
             root.nf.Dialog,
             root.nf.Actions,
-            root.nf.Connectable,
-            root.nf.Draggable,
-            root.nf.ContextMenu,
             root.nf.Clipboard,
             root.nf.Storage,
             root.nf.ProcessGroup);
     }
-}(this, function (d3, $, snippet, birdsEye, common, canvas, dialog, actions, connectable, draggable, contextMenu, clipboard, storage, processGroup) {
+}(this, function (d3, $, snippet, birdsEye, common, canvas, dialog, actions, clipboard, storage, processGroup) {
     var config = {
         storage: {
             namePrefix: 'nifi-view-'
@@ -280,7 +271,7 @@
          *
          * @param selection     selection
          */
-        editable: function (selection) {
+        editable: function (selection, connectable, draggable) {
             if (nfCanvasUtils.canModify(selection)) {
                 if (!selection.classed('connectable')) {
                     selection.call(connectable.activate);
@@ -1206,36 +1197,6 @@
         },
 
         /**
-         * Enters the specified group.
-         *
-         * @param {string} groupId
-         */
-        enterGroup: function (groupId) {  // hide the context menu
-
-            contextMenu.hide();   // set the new group id
-
-            canvas.setGroupId(groupId);   // reload the graph
-
-            return canvas.reload().done(function () {  // attempt to restore the view
-
-                var viewRestored = nfCanvasUtils.restoreUserView();   // if the view was not restore attempt to fit
-
-                if (viewRestored === false) {
-                    canvas.View.fit();   // refresh the canvas
-
-                    canvas.View.refresh({
-                        transition: true
-                    });
-                }
-            }).fail(function () {
-                dialog.showOkDialog({
-                    headerText: 'Process Group',
-                    dialogContent: 'Unable to enter the selected group.'
-                });
-            });
-        },
-
-        /**
          * Gets the origin of the bounding box for the specified selection.
          *
          * @argument {selection} selection      The selection
@@ -1370,22 +1331,6 @@
                 var destinationData = selection.datum();
                 return destinationData.inputRequirement !== 'INPUT_FORBIDDEN';
             }
-        },
-
-        /**
-         * Activates the context menu for the components in the specified selection.
-         *
-         * @param {selection} components    The components to enable the context menu for
-         */
-        activateContextMenu: function (components) {
-            components.on('contextmenu.selection', function () {
-                // get the clicked component to update selection
-                contextMenu.show();
-
-                // stop propagation and prevent default
-                d3.event.preventDefault();
-                d3.event.stopPropagation();
-            });
         }
     };
     return nfCanvasUtils;
