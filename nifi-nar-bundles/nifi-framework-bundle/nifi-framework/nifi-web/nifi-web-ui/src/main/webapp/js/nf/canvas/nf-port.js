@@ -23,15 +23,10 @@
                 'd3',
                 'nf.Connection',
                 'nf.Common',
-                'nf.Selectable',
                 'nf.Client',
-                'nf.CanvasUtils',
-                'nf.ContextMenu',
-                'nf.Connectable',
-                'nf.Draggable',
-                'nf.Canvas'],
-            function ($, d3, connection, common, selectable, client, canvasUtils, contextMenu, connectable, draggable, canvas) {
-                return (nf.Port = factory($, d3, connection, common, selectable, client, canvasUtils, contextMenu, connectable, draggable, canvas));
+                'nf.CanvasUtils'],
+            function ($, d3, connection, common, client, canvasUtils) {
+                return (nf.Port = factory($, d3, connection, common, client, canvasUtils));
             });
     } else if (typeof exports === 'object' && typeof module === 'object') {
         module.exports = (nf.Port =
@@ -39,28 +34,24 @@
                 require('d3'),
                 require('nf.Connection'),
                 require('nf.Common'),
-                require('nf.Selectable'),
                 require('nf.Client'),
-                require('nf.CanvasUtils'),
-                require('nf.ContextMenu'),
-                require('nf.Connectable'),
-                require('nf.Draggable'),
-                require('nf.Canvas')));
+                require('nf.CanvasUtils')));
     } else {
         nf.Port = factory(root.$,
             root.d3,
             root.nf.Connection,
             root.nf.Common,
-            root.nf.Selectable,
             root.nf.Client,
-            root.nf.CanvasUtils,
-            root.nf.ContextMenu,
-            root.nf.Connectable,
-            root.nf.Draggable,
-            root.nf.Canvas);
+            root.nf.CanvasUtils);
     }
-}(this, function ($, d3, connection, common, selectable, client, canvasUtils, contextMenu, connectable, draggable, canvas) {
+}(this, function ($, d3, connection, common, client, canvasUtils) {
     'use strict';
+
+    var nfCanvas;
+    var nfConnectable;
+    var nfDraggable;
+    var nfSelectable;
+    var nfContextMenu;
 
     var PREVIEW_NAME_LENGTH = 15;
     var OFFSET_VALUE = 25;
@@ -164,7 +155,7 @@
         var offset = 0;
 
         // conditionally render the remote banner
-        if (canvas.getParentGroupId() === null) {
+        if (nfCanvas.getParentGroupId() === null) {
             offset = OFFSET_VALUE;
 
             // port remote banner
@@ -205,12 +196,12 @@
             });
 
         // make ports selectable
-        port.call(selectable.activate).call(contextMenu.activate, connection);
+        port.call(nfSelectable.activate).call(nfContextMenu.activate, connection);
 
         // only activate dragging and connecting if appropriate
         port.filter(function (d) {
             return d.permissions.canWrite && d.permissions.canRead;
-        }).call(draggable.activate).call(connectable.activate);
+        }).call(nfDraggable.activate).call(nfConnectable.activate);
     };
 
     /**
@@ -240,7 +231,7 @@
             var details = port.select('g.port-details');
 
             // update the component behavior as appropriate
-            canvasUtils.editable(port, connectable, draggable);
+            canvasUtils.editable(port, nfConnectable, nfDraggable);
 
             // if this process group is visible, render everything
             if (port.classed('visible')) {
@@ -248,7 +239,7 @@
                     details = port.append('g').attr('class', 'port-details');
 
                     var offset = 0;
-                    if (canvas.getParentGroupId() === null) {
+                    if (nfCanvas.getParentGroupId() === null) {
                         offset = OFFSET_VALUE;
 
                         // port transmitting icon
@@ -538,7 +529,13 @@
         /**
          * Initializes of the Port handler.
          */
-        init: function () {
+        init: function (canvas, connectable, draggable, selectable, contextMenu) {
+            nfCanvas = canvas;
+            nfConnectable = connectable;
+            nfDraggable = draggable;
+            nfSelectable = selectable;
+            nfContextMenu = contextMenu;
+
             portMap = d3.map();
             removedCache = d3.map();
             addedCache = d3.map();
@@ -565,7 +562,7 @@
 
             // determine the appropriate dimensions for this port
             var dimensions = portDimensions;
-            if (canvas.getParentGroupId() === null) {
+            if (nfCanvas.getParentGroupId() === null) {
                 dimensions = remotePortDimensions;
             }
 
@@ -616,7 +613,7 @@
 
             // determine the appropriate dimensions for this port
             var dimensions = portDimensions;
-            if (canvas.getParentGroupId() === null) {
+            if (nfCanvas.getParentGroupId() === null) {
                 dimensions = remotePortDimensions;
             }
 

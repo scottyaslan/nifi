@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-/* global nf define, module, require, exports */
+/* global nf, define, module, require, exports */
 
 (function (root, factory) {
     if (typeof define === 'function' && define.amd) {
@@ -23,12 +23,11 @@
                 'd3',
                 'nf.ErrorHandler',
                 'nf.Common',
-                'nf.Canvas',
                 'nf.CanvasUtils',
                 'nf.ng.Bridge',
                 'nf.Actions'],
-            function ($, d3, errorHandler, common, canvas, canvasUtils, angularBridge, nfActions) {
-                return (nf.ContextMenu = factory($, d3, errorHandler, common, canvas, canvasUtils, angularBridge, nfActions));
+            function ($, d3, errorHandler, common, canvasUtils, angularBridge, nfActions) {
+                return (nf.ContextMenu = factory($, d3, errorHandler, common, canvasUtils, angularBridge, nfActions));
             });
     } else if (typeof exports === 'object' && typeof module === 'object') {
         module.exports = (nf.ContextMenu =
@@ -36,7 +35,6 @@
                 require('d3'),
                 require('nf.ErrorHandler'),
                 require('nf.Common'),
-                require('nf.Canvas'),
                 require('nf.CanvasUtils'),
                 require('nf.ng.Bridge'),
                 require('nf.Actions')));
@@ -45,13 +43,14 @@
             root.d3,
             root.nf.ErrorHandler,
             root.nf.Common,
-            root.nf.Canvas,
             root.nf.CanvasUtils,
             root.nf.ng.Bridge,
             root.nf.Actions);
     }
-}(this, function ($, d3, errorHandler, common, canvas, canvasUtils, angularBridge, nfActions) {
+}(this, function ($, d3, errorHandler, common, canvasUtils, angularBridge, nfActions) {
     'use strict';
+
+    var nfCanvas;
 
     /**
      * Returns whether the current group is not the root group.
@@ -59,7 +58,7 @@
      * @param {selection} selection         The selection of currently selected components
      */
     var isNotRootGroup = function (selection) {
-        return canvas.getParentGroupId() !== null && selection.empty();
+        return nfCanvas.getParentGroupId() !== null && selection.empty();
     };
 
     /**
@@ -86,7 +85,7 @@
      * @param {selection} selection         The selection of currently selected components
      */
     var isDeletable = function (selection) {
-        return canvasUtils.areDeletable(selection);
+        return nfCanvas.areDeletable(selection);
     };
 
     /**
@@ -153,7 +152,7 @@
      * @param {selection} selection         The selection of currently selected components
      */
     var isCopyable = function (selection) {
-        return canvasUtils.isCopyable(selection);
+        return nfCanvas.isCopyable(selection);
     };
 
     /**
@@ -162,7 +161,7 @@
      * @param {selection} selection         The selection of currently selected components
      */
     var isPastable = function (selection) {
-        return canvasUtils.isPastable();
+        return nfCanvas.isPastable();
     };
 
     /**
@@ -236,7 +235,7 @@
 
         return canvasUtils.isFunnel(selection) || canvasUtils.isProcessor(selection) || canvasUtils.isProcessGroup(selection) ||
             canvasUtils.isRemoteProcessGroup(selection) || canvasUtils.isInputPort(selection) ||
-            (canvasUtils.isOutputPort(selection) && canvas.getParentGroupId() !== null);
+            (canvasUtils.isOutputPort(selection) && nfCanvas.getParentGroupId() !== null);
     };
 
     /**
@@ -252,7 +251,7 @@
 
         return canvasUtils.isFunnel(selection) || canvasUtils.isProcessor(selection) || canvasUtils.isProcessGroup(selection) ||
             canvasUtils.isRemoteProcessGroup(selection) || canvasUtils.isOutputPort(selection) ||
-            (canvasUtils.isInputPort(selection) && canvas.getParentGroupId() !== null);
+            (canvasUtils.isInputPort(selection) && nfCanvas.getParentGroupId() !== null);
     };
 
     /**
@@ -379,7 +378,7 @@
 
         // TODO - also check can modify in parent
 
-        return !selection.empty() && nfConnection.isDisconnected(selection) && canvas.getParentGroupId() !== null;
+        return !selection.empty() && nfConnection.isDisconnected(selection) && nfCanvas.getParentGroupId() !== null;
     };
 
     /**
@@ -484,7 +483,9 @@
     ];
 
     var nfContextMenu = {
-        init: function () {
+        init: function (canvas) {
+            nfCanvas = canvas;
+
             $('#context-menu').on('contextmenu', function (evt) {
                 // stop propagation and prevent default
                 evt.preventDefault();

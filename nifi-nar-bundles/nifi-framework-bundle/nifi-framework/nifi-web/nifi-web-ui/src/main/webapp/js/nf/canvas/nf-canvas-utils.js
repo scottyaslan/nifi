@@ -14,51 +14,44 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/* global nf */
+/* global nf, define, module, require, exports */
+
 (function (root, factory) {
     if (typeof define === 'function' && define.amd) {
         define(['d3',
                 'jquery',
-                'nf.Snippet',
-                'nf.Birdseye',
                 'nf.Common',
-                'nf.Canvas',
                 'nf.Dialog',
-                'nf.Actions',
                 'nf.Clipboard',
-                'nf.Storage',
-                'nf.ProcessGroup'],
-            function (d3, $, snippet, birdsEye, common, canvas, dialog, actions, clipboard, storage, processGroup) {
-                return (nf.CanvasUtils = factory(d3, $, snippet, birdsEye, common, canvas, dialog, actions, clipboard, storage, processGroup));
+                'nf.Storage'],
+            function (d3, $, common, dialog, clipboard, storage) {
+                return (nf.CanvasUtils = factory(d3, $, common, dialog, clipboard, storage));
             });
     } else if (typeof exports === 'object' && typeof module === 'object') {
         module.exports = (nf.CanvasUtils = factory(
             require('d3'),
             require('jquery'),
-            require('nf.Snippet'),
-            require('nf.Birdseye'),
             require('nf.Common'),
-            require('nf.Canvas'),
             require('nf.Dialog'),
-            require('nf.Actions'),
             require('nf.Clipboard'),
-            require('nf.Storage'),
-            require('nf.ProcessGroup')));
+            require('nf.Storage')));
     } else {
         nf.CanvasUtils = factory(
             root.d3,
             root.$,
-            root.nf.Snippet,
-            root.nf.Birdseye,
             root.nf.Common,
-            root.nf.Canvas,
             root.nf.Dialog,
-            root.nf.Actions,
             root.nf.Clipboard,
-            root.nf.Storage,
-            root.nf.ProcessGroup);
+            root.nf.Storage);
     }
-}(this, function (d3, $, snippet, birdsEye, common, canvas, dialog, actions, clipboard, storage, processGroup) {
+}(this, function (d3, $, common, dialog, clipboard, storage) {
+    'use strict';
+
+    var nfCanvas;
+    var nfSnippet;
+    var nfBirdseye;
+    var nfProcessGroup;
+
     var config = {
         storage: {
             namePrefix: 'nifi-view-'
@@ -89,10 +82,10 @@
     var moveComponents = function (components, groupId) {
         return $.Deferred(function (deferred) {  // create a snippet for the specified components
 
-            var snippet = snippet.marshal(components);
-            snippet.create(snippet).done(function (response) {  // move the snippet into the target
+            var snippet = nfSnippet.marshal(components);
+            nfSnippet.create(snippet).done(function (response) {  // move the snippet into the target
 
-                snippet.move(response.snippet.id, groupId).done(function () {
+                nfSnippet.move(response.snippet.id, groupId).done(function () {
                     var componentMap = d3.map();   // add the id to the type's array
 
                     var addComponent = function (type, id) {
@@ -108,9 +101,11 @@
 
                     componentMap.forEach(function (type, ids) {
                         nf[type].remove(ids);
-                    });   // refresh the birdsEye
+                    });  
 
-                    birdsEye.refresh();
+                    // refresh the birdsEye
+                    nfBirdseye.refresh();
+
                     deferred.resolve();
                 }).fail(common.handleAjaxError).fail(function () {
                     deferred.reject();
@@ -121,6 +116,13 @@
         }).promise();
     };
     var nfCanvasUtils = {
+        init: function(canvas, snippet, birdseye, processGroup){
+            nfCanvas = canvas;
+            nfSnippet = snippet;
+            nfBirdseye = birdseye;
+            nfProcessGroup = processGroup;
+        },
+
         config: {
             systemTooltipConfig: {
                 style: {
@@ -196,6 +198,76 @@
         },
 
         /**
+         * Centers the component in the specified selection.
+         *
+         * @argument {selection} selection      The selection
+         */
+        center: function (selection) {
+            if (selection.size() === 1) {
+                var box;
+                if (nfCanvasUtils.isConnection(selection)) {
+                    var x, y;
+                    var d = selection.datum();
+
+                    // get the position of the connection label
+                    if (d.bends.length > 0) {
+                        var i = Math.min(Math.max(0, d.labelIndex), d.bends.length - 1);
+                        x = d.bends[i].x;
+                        y = d.bends[i].y;
+                    } else {
+                        x = (d.start.x + d.end.x) / 2;
+                        y = (d.start.y + d.end.y) / 2;
+                    }
+
+                    box = {
+                        x: x,
+                        y: y,
+                        width: 1,
+                        height: 1
+                    };
+                } else {
+                    var selectionData = selection.datum();
+                    var selectionPosition = selectionData.position;
+
+                    box = {
+                        x: selectionPosition.x,
+                        y: selectionPosition.y,
+                        width: selectionData.dimensions.width,
+                        height: selectionData.dimensions.height
+                    };
+                }
+
+                // center on the component
+                nfCanvasUtils.centerBoundingBox(box);
+
+                // refresh the canvas
+                nfCanvas.View.refresh({
+                    transition: true
+                });
+            }
+        },
+
+        /**
+         * Shows and selects the component in the specified selection.
+         *
+         * @param {selection} selection     The selection
+         */
+        show: function (selection) {
+            if (selection.size() === 1) {
+                // deselect the current selection
+                var currentlySelected = canvasUtils.getSelection();
+                currentlySelected.classed('selected', false);
+
+                // select only the component/connection in question
+                selection.classed('selected', true);
+                nfCanvasUtils.center(selection);
+
+                // inform Angular app that values have changed
+                angularBridge.digest();
+            }
+        },
+
+        /**
          * Shows the specified component in the specified group.
          *
          * @argument {string} groupId       The id of the group
@@ -207,11 +279,11 @@
 
                 var refreshGraph = $.Deferred(function (deferred) {  // load a different group if necessary
 
-                    if (groupId !== canvas.getGroupId()) {  // set the new group id
+                    if (groupId !== nfCanvas.getGroupId()) {  // set the new group id
 
-                        canvas.setGroupId(groupId);   // reload
+                        nfCanvas.setGroupId(groupId);   // reload
 
-                        canvas.reload().done(function () {
+                        nfCanvas.reload().done(function () {
                             deferred.resolve();
                         }).fail(function () {
                             dialog.showOkDialog({
@@ -229,7 +301,7 @@
 
                     var component = d3.select('#id-' + componentId);
                     if (!component.empty()) {
-                        actions.show(component);
+                        nfCanvasUtils.show(component);
                     } else {
                         dialog.showOkDialog({
                             headerText: 'Process Group',
@@ -255,7 +327,7 @@
          * @param {type} boundingBox
          */
         centerBoundingBox: function (boundingBox) {
-            var scale = canvas.View.scale();   // get the canvas normalized width and height
+            var scale = nfCanvas.View.scale();   // get the canvas normalized width and height
 
             var canvasContainer = $('#canvas-container');
             var screenWidth = canvasContainer.width() / scale;
@@ -263,7 +335,7 @@
 
             var center = [(screenWidth / 2) - (boundingBox.width / 2), (screenHeight / 2) - (boundingBox.height / 2)];   // calculate the difference between the center point and the position of this component and convert to screen space
 
-            canvas.View.translate([(center[0] - boundingBox.x) * scale, (center[1] - boundingBox.y) * scale]);
+            nfCanvas.View.translate([(center[0] - boundingBox.x) * scale, (center[1] - boundingBox.y) * scale]);
         },
 
         /**
@@ -893,7 +965,7 @@
             }
 
             // ensure the user has write permissions to the current process group
-            if (canvas.canWrite() === false) {
+            if (nfCanvas.canWrite() === false) {
                 return false;
             }
 
@@ -1104,18 +1176,18 @@
          * Determines if something is currently pastable.
          */
         isPastable: function () {
-            return canvas.canWrite() && clipboard.isCopied();
+            return nfCanvas.canWrite() && clipboard.isCopied();
         },
 
         /**
          * Persists the current user view.
          */
         persistUserView: function () {
-            var name = config.storage.namePrefix + canvas.getGroupId();   // create the item to store
+            var name = config.storage.namePrefix + nfCanvas.getGroupId();   // create the item to store
 
-            var translate = canvas.View.translate();
+            var translate = nfCanvas.View.translate();
             var item = {
-                scale: canvas.View.scale(),
+                scale: nfCanvas.View.scale(),
                 translateX: translate[0],
                 translateY: translate[1]
             };   // store the item
@@ -1146,7 +1218,7 @@
          */
         getConnectionSourceComponentId: function (connection) {
             var sourceId = connection.sourceId;
-            if (connection.sourceGroupId !== canvas.getGroupId()) {
+            if (connection.sourceGroupId !== nfCanvas.getGroupId()) {
                 sourceId = connection.sourceGroupId;
             }
             return sourceId;
@@ -1161,7 +1233,7 @@
          */
         getConnectionDestinationComponentId: function (connection) {
             var destinationId = connection.destinationId;
-            if (connection.destinationGroupId !== canvas.getGroupId()) {
+            if (connection.destinationGroupId !== nfCanvas.getGroupId()) {
                 destinationId = connection.destinationGroupId;
             }
             return destinationId;
@@ -1175,16 +1247,16 @@
             var viewRestored = false;
             try {  // see if we can restore the view position from storage
 
-                var name = config.storage.namePrefix + canvas.getGroupId();
+                var name = config.storage.namePrefix + nfCanvas.getGroupId();
                 var item = storage.getItem(name);   // ensure the item is valid
 
                 if (common.isDefinedAndNotNull(item)) {
                     if (isFinite(item.scale) && isFinite(item.translateX) && isFinite(item.translateY)) {  // restore previous view
 
-                        canvas.View.translate([item.translateX, item.translateY]);
-                        canvas.View.scale(item.scale);   // refresh the canvas
+                        nfCanvas.View.translate([item.translateX, item.translateY]);
+                        nfCanvas.View.scale(item.scale);   // refresh the canvas
 
-                        canvas.View.refresh({
+                        nfCanvas.View.refresh({
                             transition: true
                         });   // mark the view was restore
 
@@ -1223,7 +1295,7 @@
          * @param {selection} components
          */
         moveComponentsToParent: function (components) {
-            var groupId = canvas.getParentGroupId();   // if the group id is null, we're already in the top most group
+            var groupId = nfCanvas.getParentGroupId();   // if the group id is null, we're already in the top most group
 
             if (groupId === null) {
                 dialog.showOkDialog({
@@ -1246,7 +1318,7 @@
 
             moveComponents(components, groupData.id).done(function () {  // reload the target group
 
-                processGroup.reload(groupData.id);
+                nfProcessGroup.reload(groupData.id);
             });
         },
 

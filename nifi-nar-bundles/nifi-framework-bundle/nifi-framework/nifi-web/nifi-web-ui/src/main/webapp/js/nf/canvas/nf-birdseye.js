@@ -15,17 +15,53 @@
  * limitations under the License.
  */
 
-/* global nf, d3 */
+/* global nf, define, module, require, exports */
 
-nf.Birdseye = (function () {
+(function (root, factory) {
+    if (typeof define === 'function' && define.amd) {
+        define(['$',
+                'd3',
+                'nf.ErrorHandler',
+                'nf.Common',
+                'nf.CanvasUtils',
+                'nf.ContextMenu',
+                'nf.Label',
+                'nf.Graph'],
+            function ($, d3, errorHandler, common, canvasUtils, contextMenu, label, graph) {
+                return (nf.Birdseye = factory($, d3, errorHandler, common, canvasUtils, contextMenu, label, graph));
+            });
+    } else if (typeof exports === 'object' && typeof module === 'object') {
+        module.exports = (nf.Birdseye =
+            factory(require('$'),
+                require('d3'),
+                require('nf.ErrorHandler'),
+                require('nf.Common'),
+                require('nf.CanvasUtils'),
+                require('nf.ContextMenu'),
+                require('nf.Label'),
+                require('nf.Graph')));
+    } else {
+        nf.Birdseye = factory(root.$,
+            root.d3,
+            root.nf.ErrorHandler,
+            root.nf.Common,
+            root.nf.CanvasUtils,
+            root.nf.ContextMenu,
+            root.nf.Label,
+            root.nf.Graph);
+    }
+}(this, function ($, d3, errorHandler, common, canvasUtils, contextMenu, label, graph) {
+    'use strict';
+
+    var nfCanvas;
 
     var birdseyeGroup;
     var componentGroup;
 
     // refreshes the birdseye
     var refresh = function (components) {
-        var translate = nf.Canvas.View.translate();
-        var scale = nf.Canvas.View.scale();
+        var translate = nfCanvas.View.translate();
+        var scale = nfCanvas.View.scale();
 
         // scale the translation
         translate = [translate[0] / scale, translate[1] / scale];
@@ -33,7 +69,7 @@ nf.Birdseye = (function () {
         // get the bounding box for the graph and convert into canvas space
         var graphBox = d3.select('#canvas').node().getBoundingClientRect();
         var graphLeft = (graphBox.left / scale) - translate[0];
-        var graphTop = ((graphBox.top - nf.Canvas.CANVAS_OFFSET) / scale) - translate[1];
+        var graphTop = ((graphBox.top - nfCanvas.CANVAS_OFFSET) / scale) - translate[1];
         var graphRight = (graphBox.right / scale) - translate[0];
         var graphBottom = (graphBox.bottom / scale) - translate[1];
 
@@ -149,11 +185,11 @@ nf.Birdseye = (function () {
 
         // labels
         $.each(components.labels, function (_, d) {
-            var color = nf.Label.defaultColor();
+            var color = label.defaultColor();
 
             if (d.permissions.canRead) {
                 // use the specified color if appropriate
-                if (nf.Common.isDefinedAndNotNull(d.component.style['background-color'])) {
+                if (common.isDefinedAndNotNull(d.component.style['background-color'])) {
                     color = d.component.style['background-color'];
                 }
             }
@@ -192,7 +228,7 @@ nf.Birdseye = (function () {
 
             if (d.permissions.canRead) {
                 // use the specified color if appropriate
-                if (nf.Common.isDefinedAndNotNull(d.component.style['background-color'])) {
+                if (common.isDefinedAndNotNull(d.component.style['background-color'])) {
                     color = d.component.style['background-color'];
 
                     //if the background color is #ffffff use the default instead
@@ -212,8 +248,10 @@ nf.Birdseye = (function () {
     // whether or not the birdseye is open, don't adjust unless necessary
     var visible = true;
 
-    return {
-        init: function () {
+    var nfBirdseye = {
+        init: function (canvas) {
+            nfCanvas = canvas;
+
             var birdseye = $('#birdseye');
 
             d3.select('#birdseye').append('canvas')
@@ -244,7 +282,7 @@ nf.Birdseye = (function () {
                 })
                 .on('dragstart', function () {
                     // hide the context menu
-                    nf.ContextMenu.hide();
+                    contextMenu.hide();
                 })
                 .on('drag', function (d) {
                     d.x += d3.event.dx;
@@ -255,17 +293,17 @@ nf.Birdseye = (function () {
                         return 'translate(' + d.x + ', ' + d.y + ')';
                     });
                     // get the current transformation
-                    var scale = nf.Canvas.View.scale();
-                    var translate = nf.Canvas.View.translate();
+                    var scale = nfCanvas.View.scale();
+                    var translate = nfCanvas.View.translate();
 
                     // update the translation according to the delta
                     translate = [(-d3.event.dx * scale) + translate[0], (-d3.event.dy * scale) + translate[1]];
 
                     // record the current transforms
-                    nf.Canvas.View.translate(translate);
+                    nfCanvas.View.translate(translate);
 
                     // refresh the canvas
-                    nf.Canvas.View.refresh({
+                    nfCanvas.View.refresh({
                         persist: false,
                         transition: false,
                         refreshComponents: false,
@@ -274,13 +312,13 @@ nf.Birdseye = (function () {
                 })
                 .on('dragend', function () {
                     // update component visibility
-                    nf.Canvas.View.updateVisibility();
+                    graph.updateVisibility();
 
                     // persist the users view
-                    nf.CanvasUtils.persistUserView();
+                    canvasUtils.persistUserView();
 
                     // refresh the birdseye
-                    nf.Birdseye.refresh();
+                    nfBirdseye.refresh();
                 });
 
             // context area
@@ -303,7 +341,7 @@ nf.Birdseye = (function () {
          */
         refresh: function () {
             if (visible) {
-                refresh(nf.Graph.get());
+                refresh(graph.get());
             }
         },
 
@@ -322,7 +360,7 @@ nf.Birdseye = (function () {
                 visible = true;
 
                 // refresh the birdseye as it may have changed
-                refresh(nf.Graph.get());
+                refresh(graph.get());
             } else {
                 // hide the outline
                 birdseye.hide();
@@ -330,4 +368,6 @@ nf.Birdseye = (function () {
             }
         }
     };
-}());
+
+    return nfBirdseye;
+}));

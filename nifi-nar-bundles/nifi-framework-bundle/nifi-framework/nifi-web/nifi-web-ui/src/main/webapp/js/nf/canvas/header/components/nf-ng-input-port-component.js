@@ -88,7 +88,7 @@
                 });
 
                 // update component visibility
-                canvas.View.updateVisibility();
+                graph.updateVisibility();
 
                 // update the birdseye
                 birdseye.refresh();

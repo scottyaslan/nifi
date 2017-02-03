@@ -22,36 +22,31 @@
         define(['$',
                 'd3',
                 'nf.Common',
-                'nf.Selectable',
                 'nf.Client',
-                'nf.CanvasUtils',
-                'nf.ContextMenu',
-                'nf.Canvas'],
-            function ($, d3, common, selectable, client, canvasUtils, contextMenu, canvas) {
-                return (nf.Connection = factory($, d3, common, selectable, client, canvasUtils, contextMenu, canvas));
+                'nf.CanvasUtils'],
+            function ($, d3, common, client, canvasUtils) {
+                return (nf.Connection = factory($, d3, common, client, canvasUtils));
             });
     } else if (typeof exports === 'object' && typeof module === 'object') {
         module.exports = (nf.Connection =
             factory(require('$'),
                 require('d3'),
                 require('nf.Common'),
-                require('nf.Selectable'),
                 require('nf.Client'),
-                require('nf.CanvasUtils'),
-                require('nf.ContextMenu'),
-                require('nf.Canvas')));
+                require('nf.CanvasUtils')));
     } else {
         nf.Connection = factory(root.$,
             root.d3,
             root.nf.Common,
-            root.nf.Selectable,
             root.nf.Client,
-            root.nf.CanvasUtils,
-            root.nf.ContextMenu,
-            root.nf.Canvas);
+            root.nf.CanvasUtils);
     }
-}(this, function ($, d3, common, selectable, client, canvasUtils, contextMenu, canvas) {
+}(this, function ($, d3, common, client, canvasUtils) {
     'use strict';
+
+    var nfCanvas;
+    var nfSelectable;
+    var nfContextMenu;
 
     // the dimensions for the connection label
     var dimensions = {
@@ -231,7 +226,7 @@
      * @param {object} terminal
      */
     var isGroup = function (terminal) {
-        return terminal.groupId !== nf.Canvas.getGroupId() && (isInputPortType(terminal.type) || isOutputPortType(terminal.type));
+        return terminal.groupId !== nfCanvas.getGroupId() && (isInputPortType(terminal.type) || isOutputPortType(terminal.type));
     };
 
     /**
@@ -308,9 +303,9 @@
             })
             .on('mousedown.selection', function () {
                 // select the connection when clicking the selectable path
-                selectable.select(d3.select(this.parentNode));
+                nfSelectable.select(d3.select(this.parentNode));
             })
-            .call(contextMenu.activate, nfConnection);
+            .call(nfContextMenu.activate, nfConnection);
     };
 
     // determines whether the specified connection contains an unsupported relationship
@@ -628,9 +623,9 @@
                         })
                         .on('mousedown.selection', function () {
                             // select the connection when clicking the label
-                            selectable.select(d3.select(this.parentNode));
+                            nfSelectable.select(d3.select(this.parentNode));
                         })
-                        .call(contextMenu.activate, nfConnection);
+                        .call(nfContextMenu.activate, nfConnection);
 
                     // update the start point
                     canvasUtils.transition(startpoints, transition)
@@ -658,9 +653,9 @@
                         })
                         .on('mousedown.selection', function () {
                             // select the connection when clicking the label
-                            selectable.select(d3.select(this.parentNode));
+                            nfSelectable.select(d3.select(this.parentNode));
                         })
-                        .call(contextMenu.activate, nfConnection);
+                        .call(nfContextMenu.activate, nfConnection);
 
                     // update the end point
                     canvasUtils.transition(endpoints, transition)
@@ -738,9 +733,9 @@
                         })
                         .on('mousedown.selection', function () {
                             // select the connection when clicking the label
-                            selectable.select(d3.select(this.parentNode));
+                            nfSelectable.select(d3.select(this.parentNode));
                         })
-                        .call(contextMenu.activate, nfConnection);
+                        .call(nfContextMenu.activate, nfConnection);
 
                     // update the midpoints
                     canvasUtils.transition(midpoints, transition)
@@ -775,9 +770,9 @@
                             })
                             .on('mousedown.selection', function () {
                                 // select the connection when clicking the label
-                                selectable.select(d3.select(this.parentNode));
+                                nfSelectable.select(d3.select(this.parentNode));
                             })
-                            .call(contextMenu.activate, nfConnection);
+                            .call(nfContextMenu.activate, nfConnection);
 
                         // connection label
                         connectionLabelContainer.append('rect')
@@ -1526,7 +1521,7 @@
     var removeConnections = function (removed) {
         // consider reloading source/destination of connection being removed
         removed.each(function (d) {
-            canvas.reloadConnectionSourceAndDestination(d.sourceId, d.destinationId);
+            nfCanvas.reloadConnectionSourceAndDestination(d.sourceId, d.destinationId);
         });
 
         // remove the connection
@@ -1539,7 +1534,11 @@
             selfLoopYOffset: 25
         },
 
-        init: function () {
+        init: function (canvas, selectable, contextMenu) {
+            nfCanvas = canvas;
+            nfSelectable = selectable;
+            nfContextMenu = contextMenu;
+
             connectionMap = d3.map();
             removedCache = d3.map();
             addedCache = d3.map();
@@ -1667,7 +1666,7 @@
                             // user will select new port and updated connect details will be set accordingly
                             nfConnectionConfiguration.showConfiguration(connection, destination).done(function () {
                                 // reload the previous destination
-                                canvas.reloadConnectionSourceAndDestination(null, previousDestinationId);
+                                nfCanvas.reloadConnectionSourceAndDestination(null, previousDestinationId);
                             }).fail(function () {
                                 // reset the connection
                                 connection.call(updateConnections, {
@@ -1686,7 +1685,7 @@
                                     'id': connectionData.id,
                                     'destination': {
                                         'id': destinationData.id,
-                                        'groupId': nf.Canvas.getGroupId(),
+                                        'groupId': nfCanvas.getGroupId(),
                                         'type': destinationType
                                     }
                                 }
@@ -1725,8 +1724,8 @@
                                 nfConnection.set(response);
 
                                 // reload the previous destination and the new source/destination
-                                canvas.reloadConnectionSourceAndDestination(null, previousDestinationId);
-                                canvas.reloadConnectionSourceAndDestination(response.sourceId, response.destinationId);
+                                nfCanvas.reloadConnectionSourceAndDestination(null, previousDestinationId);
+                                nfCanvas.reloadConnectionSourceAndDestination(response.sourceId, response.destinationId);
                             }).fail(function (xhr, status, error) {
                                 if (xhr.status === 400 || xhr.status === 401 || xhr.status === 403 || xhr.status === 404 || xhr.status === 409) {
                                     nf.Dialog.showOkDialog({
@@ -1777,10 +1776,10 @@
                                 .attr('width', width)
                                 .attr('height', height)
                                 .attr('stroke-width', function () {
-                                    return 1 / nf.Canvas.View.scale();
+                                    return 1 / nfCanvas.View.scale();
                                 })
                                 .attr('stroke-dasharray', function () {
-                                    return 4 / nf.Canvas.View.scale();
+                                    return 4 / nfCanvas.View.scale();
                                 })
                                 .datum({
                                     x: position.x,

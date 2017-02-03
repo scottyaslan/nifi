@@ -23,11 +23,10 @@
                 'nf.Dialog',
                 'nf.Birdseye',
                 'nf.Canvas',
-                'nf.CanvasUtils',
                 'nf.Common',
                 'nf.Processor'],
-            function ($, dialog, birdseye, canvas, canvasUtils, common, processor) {
-                return (nf.ng.Canvas.OperateCtrl = factory($, dialog, birdseye, canvas, canvasUtils, common, processor));
+            function ($, dialog, birdseye, canvas, common, processor) {
+                return (nf.ng.Canvas.OperateCtrl = factory($, dialog, birdseye, canvas, common, processor));
             });
     } else if (typeof exports === 'object' && typeof module === 'object') {
         module.exports = (nf.ng.Canvas.OperateCtrl =
@@ -35,7 +34,6 @@
                 require('nf.Dialog'),
                 require('nf.Birdseye'),
                 require('nf.Canvas'),
-                require('nf.CanvasUtils'),
                 require('nf.Common'),
                 require('nf.Processor')));
     } else {
@@ -43,11 +41,10 @@
             root.nf.Dialog,
             root.nf.Birdseye,
             root.nf.Canvas,
-            root.nf.CanvasUtils,
             root.nf.Common,
             root.nf.Processor);
     }
-}(this, function ($, dialog, birdseye, canvas, canvasUtils, common, processor) {
+}(this, function ($, dialog, birdseye, canvas, common, processor) {
     'use strict';
 
     return function () {

@@ -25,7 +25,6 @@
                 'nf.Common',
                 'nf.Dialog',
                 'nf.Client',
-                'nf.ControllerService',
                 'nf.ControllerServices',
                 'nf.Settings',
                 'nf.UniversalCapture',
@@ -34,8 +33,8 @@
                 'nf.ReportingTask',
                 'nf.Processor',
                 'nf.Canvas'],
-            function ($, d3, errorHandler, common, dialog, client, controllerService, controllerServices, settings, universalCapture, customUi, canvasUtils, reportingTask, processor, canvas) {
-                return (nf.ControllerService = factory($, d3, errorHandler, common, dialog, client, controllerService, controllerServices, settings, universalCapture, customUi, canvasUtils, reportingTask, processor, canvas));
+            function ($, d3, errorHandler, common, dialog, client, controllerServices, settings, universalCapture, customUi, canvasUtils, reportingTask, processor, canvas) {
+                return (nf.ControllerService = factory($, d3, errorHandler, common, dialog, client, controllerServices, settings, universalCapture, customUi, canvasUtils, reportingTask, processor, canvas));
             });
     } else if (typeof exports === 'object' && typeof module === 'object') {
         module.exports = (nf.ControllerService =
@@ -45,7 +44,6 @@
                 require('nf.Common'),
                 require('nf.Dialog'),
                 require('nf.Client'),
-                require('nf.ControllerService'),
                 require('nf.ControllerServices'),
                 require('nf.Settings'),
                 require('nf.UniversalCapture'),
@@ -61,7 +59,6 @@
             root.nf.Common,
             root.nf.Dialog,
             root.nf.Client,
-            root.nf.ControllerService,
             root.nf.ControllerServices,
             root.nf.Settings,
             root.nf.UniversalCapture,
@@ -71,7 +68,7 @@
             root.nf.Processor,
             root.nf.Canvas);
     }
-}(this, function ($, d3, errorHandler, common, dialog, client, controllerService, controllerServices, settings, universalCapture, customUi, canvasUtils, reportingTask, processor, canvas) {
+}(this, function ($, d3, errorHandler, common, dialog, client, controllerServices, settings, universalCapture, customUi, canvasUtils, reportingTask, processor, canvas) {
     'use strict';
 
     var config = {

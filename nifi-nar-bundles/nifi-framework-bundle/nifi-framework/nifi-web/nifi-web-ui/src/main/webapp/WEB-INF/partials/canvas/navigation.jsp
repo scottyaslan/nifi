@@ -142,13 +142,13 @@
                 <div style="margin-top: 5px;">
                     <div id="operate-copy" class="action-button" title="Copy">
                         <button ng-click="appCtrl.nf.Actions['copy'](appCtrl.nf.CanvasUtils.getSelection());"
-                                ng-disabled="!appCtrl.nf.CanvasUtils.isCopyable(appCtrl.nf.CanvasUtils.getSelection());">
+                                ng-disabled="!appCtrl.nf.Canvas.isCopyable(appCtrl.nf.CanvasUtils.getSelection());">
                             <div class="graph-control-action-icon fa fa-copy"></div></button>
                     </div>
                     <div class="button-spacer-small">&nbsp;</div>
                     <div id="operate-paste" class="action-button" title="Paste">
                         <button ng-click="appCtrl.nf.Actions['paste'](appCtrl.nf.CanvasUtils.getSelection());"
-                                ng-disabled="!appCtrl.nf.CanvasUtils.isPastable()">
+                                ng-disabled="!appCtrl.nf.Canvas.isPastable()">
                             <div class="graph-control-action-icon fa fa-paste"></div></button>
                     </div>
                     <div class="button-spacer-large">&nbsp;</div>
@@ -166,7 +166,7 @@
                     <div class="button-spacer-large">&nbsp;</div>
                     <div id="operate-delete" class="action-button" title="Delete">
                         <button ng-click="appCtrl.nf.Actions['delete'](appCtrl.nf.CanvasUtils.getSelection());"
-                                ng-disabled="!appCtrl.nf.CanvasUtils.areDeletable(appCtrl.nf.CanvasUtils.getSelection());">
+                                ng-disabled="!appCtrl.nf.Canvas.areDeletable(appCtrl.nf.CanvasUtils.getSelection());">
                             <div class="graph-control-action-icon fa fa-trash"></div><span>Delete</span></button>
                     </div>
                     <div class="clear"></div>

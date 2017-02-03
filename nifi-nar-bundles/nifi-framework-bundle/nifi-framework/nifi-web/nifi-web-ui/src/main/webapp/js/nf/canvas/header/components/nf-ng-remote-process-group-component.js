@@ -104,7 +104,7 @@
                 $('#new-remote-process-group-dialog').modal('hide');
 
                 // update component visibility
-                canvas.View.updateVisibility();
+                graph.updateVisibility();
 
                 // update the birdseye
                 birdseye.refresh();

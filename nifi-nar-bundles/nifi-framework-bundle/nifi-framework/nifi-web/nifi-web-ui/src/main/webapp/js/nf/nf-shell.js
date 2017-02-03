@@ -20,21 +20,18 @@
 (function (root, factory) {
     if (typeof define === 'function' && define.amd) {
         define(['jquery',
-                'nf.Common',
-                'nf.ContextMenu'],
-            function ($, common, contextMenu) {
-                return (nf.Shell = factory($, common, contextMenu));
+                'nf.Common'],
+            function ($, common) {
+                return (nf.Shell = factory($, common));
             });
     } else if (typeof exports === 'object' && typeof module === 'object') {
         module.exports = (nf.Shell = factory(require('jquery'),
-            require('nf.Common'),
-            require('nf.ContextMenu')));
+            require('nf.Common')));
     } else {
         nf.Shell = factory(root.$,
-            root.nf.Common,
-            root.nf.ContextMenu);
+            root.nf.Common);
     }
-}(this, function ($, common, contextMenu) {
+}(this, function ($, common) {
     'use strict';
 
     $(document).ready(function () {
@@ -70,8 +67,13 @@
 
     var showPageResize = null;
     var showContentResize = null;
+    var nfContextMenu = null;
 
     return {
+
+        init: function (contextMenu) {
+            nfContextMenu = contextMenu;
+        },
 
         resizeContent: function (shell) {
             var contentContainer = shell.find('.shell-content-container');
@@ -101,7 +103,7 @@
         showPage: function (uri, canUndock) {
             // if the context menu is on this page, attempt to close
             if (common.isDefinedAndNotNull(contextMenu)) {
-                contextMenu.hide();
+                nfContextMenu.hide();
             }
 
             return $.Deferred(function (deferred) {
@@ -155,7 +157,7 @@
         showContent: function (domId) {
             // if the context menu is on this page, attempt to close
             if (common.isDefinedAndNotNull(contextMenu)) {
-                contextMenu.hide();
+                nfContextMenu.hide();
             }
 
             return $.Deferred(function (deferred) {

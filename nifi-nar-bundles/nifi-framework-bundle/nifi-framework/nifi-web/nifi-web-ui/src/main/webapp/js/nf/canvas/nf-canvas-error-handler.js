@@ -19,18 +19,38 @@
 
 (function (root, factory) {
     if (typeof define === 'function' && define.amd) {
-        define(['nf.ErrorHandler', 'nf.Common', 'nf.Canvas', 'nf.ContextMenu'], function (ajaxErrorHandler, common, canvas, contextMenu) {
-            return (nf.ErrorHandler = factory(ajaxErrorHandler, common, canvas, contextMenu));
-        });
+        define(['nf.ErrorHandler',
+                'nf.Common'],
+            function (ajaxErrorHandler, common) {
+                return (nf.ErrorHandler = factory(ajaxErrorHandler, common));
+            });
     } else if (typeof exports === 'object' && typeof module === 'object') {
-        module.exports = (nf.ErrorHandler = factory(require('nf.ErrorHandler'), require('nf.Common'), require('nf.Canvas'), require('nf.ContextMenu')));
+        module.exports = (nf.ErrorHandler =
+            factory(require('nf.ErrorHandler'),
+                require('nf.Common')));
     } else {
-        nf.ErrorHandler = factory(root.nf.ErrorHandler, root.nf.Common, root.nf.Canvas, root.nf.ContextMenu);
+        nf.ErrorHandler = factory(root.nf.ErrorHandler,
+            root.nf.Common);
     }
-}(this, function (ajaxErrorHandler, common, canvas, contextMenu) {
+}(this, function (ajaxErrorHandler, common) {
     'use strict';
 
+    var nfCanvas;
+    var nfContextMenu;
+
     return {
+
+        /**
+         * Initialize the canvas error handler
+         *
+         * @param canvas a reference to nf.Canvas
+         * @param contextMenu A reference to nf.ContextMenu
+         */
+        init: function (canvas, contextMenu) {
+            nfCanvas = canvas;
+            nfContextMenu = contextMenu;
+        },
+
         /**
          * Method for handling ajax errors. This also closes the canvas.
          *
@@ -44,17 +64,17 @@
 
             // hide the splash screen if required
             if ($('#splash').is(':visible')) {
-                canvas.hideSplash();
+                nfCanvas.hideSplash();
             }
 
             // hide the context menu
-            contextMenu.hide();
+            nfContextMenu.hide();
 
             // shut off the auto refresh
-            canvas.stopPolling();
+            nfCanvas.stopPolling();
 
             // allow page refresh with ctrl-r
-            canvas.disableRefreshHotKey();
+            nfCanvas.disableRefreshHotKey();
         }
     };
 }));

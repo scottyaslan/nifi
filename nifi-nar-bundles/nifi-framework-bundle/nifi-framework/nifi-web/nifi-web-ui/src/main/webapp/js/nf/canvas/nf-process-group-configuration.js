@@ -25,12 +25,10 @@
                 'nf.Common',
                 'nf.Dialog',
                 'nf.Client',
-                'nf.ControllerServices',
-                'nf.Canvas',
                 'nf.ProcessGroup',
                 'nf.Shell'],
-            function ($, d3, errorHandler, common, dialog, client, controllerServices, canvas, processGroup, shell) {
-                return (nf.ProcessGroupConfiguration = factory($, d3, errorHandler, common, dialog, client, controllerServices, canvas, processGroup, shell));
+            function ($, d3, errorHandler, common, dialog, client, processGroup, shell) {
+                return (nf.ProcessGroupConfiguration = factory($, d3, errorHandler, common, dialog, client, processGroup, shell));
             });
     } else if (typeof exports === 'object' && typeof module === 'object') {
         module.exports = (nf.ProcessGroupConfiguration =
@@ -40,8 +38,6 @@
                 require('nf.Common'),
                 require('nf.Dialog'),
                 require('nf.Client'),
-                require('nf.ControllerServices'),
-                require('nf.Canvas'),
                 require('nf.ProcessGroup'),
                 require('nf.Shell')));
     } else {
@@ -51,13 +47,14 @@
             root.nf.Common,
             root.nf.Dialog,
             root.nf.Client,
-            root.nf.ControllerServices,
-            root.nf.Canvas,
             root.nf.ProcessGroup,
             root.nf.Shell);
     }
-}(this, function ($, d3, errorHandler, common, dialog, client, controllerServices, canvas, processGroup, shell) {
+}(this, function ($, d3, errorHandler, common, dialog, client, processGroup, shell) {
     'use strict';
+
+    var nfCanvas;
+    var nfControllerServices;
 
     var config = {
         urls: {
@@ -211,7 +208,7 @@
 
         // load the controller services
         var controllerServicesUri = config.urls.api + '/flow/process-groups/' + encodeURIComponent(groupId) + '/controller-services';
-        var controllerServices = controllerServices.loadControllerServices(controllerServicesUri, getControllerServicesTable());
+        var controllerServices = nfControllerServices.loadControllerServices(controllerServicesUri, getControllerServicesTable());
 
         // wait for everything to complete
         return $.when(processGroup, controllerServices).done(function (processGroupResult, controllerServicesResult) {
@@ -256,7 +253,10 @@
         /**
          * Initializes the settings page.
          */
-        init: function () {
+        init: function (canvas, controllerServices) {
+            nfCanvas = canvas;
+            nfControllerServices = controllerServices;
+
             // initialize the process group configuration tabs
             $('#process-group-configuration-tabs').tabbs({
                 tabStyle: 'tab',
@@ -301,14 +301,14 @@
 
             // initialize each tab
             initGeneral();
-            controllerServices.init(getControllerServicesTable());
+            nfControllerServices.init(getControllerServicesTable());
         },
 
         /**
          * Update the size of the grid based on its container's current size.
          */
         resetTableSize: function () {
-            controllerServices.resetTableSize(getControllerServicesTable());
+            nfControllerServices.resetTableSize(getControllerServicesTable());
         },
 
         /**
@@ -325,7 +325,7 @@
                 var selectedTab = $('#process-group-configuration-tabs li.selected-tab').text();
                 if (selectedTab === 'Controller Services') {
                     var controllerServicesUri = config.urls.api + '/process-groups/' + encodeURIComponent(groupId) + '/controller-services';
-                    controllerServices.promptNewControllerService(controllerServicesUri, getControllerServicesTable());
+                    nfControllerServices.promptNewControllerService(controllerServicesUri, getControllerServicesTable());
                 }
             });
 

@@ -27,10 +27,9 @@
                 'nf.Client',
                 'nf.CanvasUtils',
                 'nf.ng.Bridge',
-                'nf.Port',
-                'nf.Canvas'],
-            function ($, d3, errorHandler, common, dialog, client, canvasUtils, angularBridge, port, canvas) {
-                return (nf.PortConfiguration = factory($, d3, errorHandler, common, dialog, client, canvasUtils, angularBridge, port, canvas));
+                'nf.Port'],
+            function ($, d3, errorHandler, common, dialog, client, canvasUtils, angularBridge, port) {
+                return (nf.PortConfiguration = factory($, d3, errorHandler, common, dialog, client, canvasUtils, angularBridge, port));
             });
     } else if (typeof exports === 'object' && typeof module === 'object') {
         module.exports = (nf.PortConfiguration =
@@ -42,8 +41,7 @@
                 require('nf.Client'),
                 require('nf.CanvasUtils'),
                 require('nf.ng.Bridge'),
-                require('nf.Port'),
-                require('nf.Canvas')));
+                require('nf.Port')));
     } else {
         nf.PortConfiguration = factory(root.$,
             root.d3,
@@ -53,11 +51,12 @@
             root.nf.Client,
             root.nf.CanvasUtils,
             root.nf.ng.Bridge,
-            root.nf.Port,
-            root.nf.Canvas);
+            root.nf.Port);
     }
-}(this, function ($, d3, errorHandler, common, dialog, client, canvasUtils, angularBridge, port, canvas) {
+}(this, function ($, d3, errorHandler, common, dialog, client, canvasUtils, angularBridge, port) {
     'use strict';
+
+    var nfCanvas;
 
     /**
      * Initializes the port dialog.
@@ -176,7 +175,9 @@
     };
 
     return {
-        init: function () {
+        init: function (canvas) {
+            nfCanvas = canvas;
+
             initPortConfigurationDialog();
         },
 
@@ -197,7 +198,7 @@
                 }
 
                 // show concurrent tasks for root groups only
-                if (canvas.getParentGroupId() === null) {
+                if (nfCanvas.getParentGroupId() === null) {
                     $('#port-concurrent-task-container').show();
                 } else {
                     $('#port-concurrent-task-container').hide();

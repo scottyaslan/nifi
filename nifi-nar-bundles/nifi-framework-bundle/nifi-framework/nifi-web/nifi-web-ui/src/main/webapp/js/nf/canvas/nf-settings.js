@@ -28,13 +28,12 @@
                 'nf.Canvas',
                 'nf.ControllerServices',
                 'nf.ErrorHandler',
-                'nf.Settings',
                 'nf.ReportingTask',
                 'nf.Shell',
                 'nf.ComponentState',
                 'nf.PolicyManagement'],
-            function ($, Slick, d3, client, dialog, common, canvas, controllerServices, errorHandler, settings, reportingTask, shell, componentState, policyManagement) {
-                return (nf.Settings = factory($, Slick, d3, client, dialog, common, canvas, controllerServices, errorHandler, settings, reportingTask, shell, componentState, policyManagement));
+            function ($, Slick, d3, client, dialog, common, canvas, controllerServices, errorHandler, reportingTask, shell, componentState, policyManagement) {
+                return (nf.Settings = factory($, Slick, d3, client, dialog, common, canvas, controllerServices, errorHandler, reportingTask, shell, componentState, policyManagement));
             });
     } else if (typeof exports === 'object' && typeof module === 'object') {
         module.exports = (nf.Settings =
@@ -47,7 +46,6 @@
                 require('nf.Canvas'),
                 require('nf.ControllerServices'),
                 require('nf.ErrorHandler'),
-                require('nf.Settings'),
                 require('nf.ReportingTask'),
                 require('nf.Shell'),
                 require('nf.ComponentState'),
@@ -62,13 +60,12 @@
             root.nf.Canvas,
             root.nf.ControllerServices,
             root.nf.ErrorHandler,
-            root.nf.Settings,
             root.nf.ReportingTask,
             root.nf.Shell,
             root.nf.ComponentState,
             root.nf.PolicyManagement);
     }
-}(this, function ($, Slick, d3, client, dialog, common, canvas, controllerServices, errorHandler, settings, reportingTask, shell, componentState, policyManagement) {
+}(this, function ($, Slick, d3, client, dialog, common, canvas, controllerServices, errorHandler, reportingTask, shell, componentState, policyManagement) {
     'use strict';
 
 
