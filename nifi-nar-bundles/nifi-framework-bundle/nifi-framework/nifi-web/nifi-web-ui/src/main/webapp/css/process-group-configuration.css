@@ -88,3 +88,13 @@
 #process-group-controller-services-tab-content {
     top: 32px;
 }
+
+.referencing-component-state.disabled:before {
+    content: '\e802';
+    font-family: flowfont;
+}
+
+.referencing-component-state.enabled:before {
+    content: '\f0e7';
+    font-family: FontAwesome;
+}
