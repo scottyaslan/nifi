@@ -459,6 +459,13 @@
                     }
 
                     window.history.replaceState({'previous_url': url.href}, window.document.title, newUrl);
+
+                    //brutal hack to work around firefox 45 svg bug caused by window.history.replaceState changing the base URI
+                    var patterns = document.querySelectorAll('[filter^="url(#"]');
+                    for(var i = 0, ii = patterns.length, pattern; i < ii; i++) {
+                        pattern = patterns[i];
+                        pattern.style.filter = $(pattern).attr('filter');
+                    }
                 }
             }
         },
