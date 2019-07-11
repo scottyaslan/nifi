@@ -185,10 +185,6 @@
         $('#parameter-context-tabs').find('.tab')[0].click();
         $('#parameter-context-update-status').hide();
 
-        newParameters = [];
-        deletedParameters = [];
-        updatedParameters = [];
-
         $('#process-group-parameter').text('');
         $('#parameter-process-group-id').text('').removeData('revision');
         $('#parameter-affected-components-context').removeClass('unset').text('');
@@ -211,6 +207,9 @@
 
         // reset the last selected parameter
         lastSelectedId = null;
+
+        // clean up any tooltips that may have been generated
+        nfCommon.cleanUpTooltips($('#parameter-table'), 'div.fa-question-circle');
     };
 
     /**
@@ -218,49 +217,33 @@
      */
     var marshalParameters = function () {
         var parameters = [];
-        var map = {};
+        var table = $('#parameter-table');
+        var parameterGrid = table.data('gridInstance');
+        var parameterData = parameterGrid.getData();
+        $.each(parameterData.getItems(), function () {
+            if (this.hidden === true) {
+                var parameter = {
+                    parameter: {
+                        'name': this.name,
+                        'value': null
+                    }
+                };
 
-        // only return modified/new/deleted parameters
-        $.each(newParameters, function () {
-            var parameter = {
-                parameter: {
-                    'name': this.name,
-                    'value': this.value,
-                    'sensitive': this.sensitive,
-                    'description': this.description
-                }
-            };
+                // hidden parameters were removed by the user, clear the value
+                parameters.push(parameter);
+            } else if (this.value !== this.previousValue || this.description !== this.previousDescription) {
+                var parameter =  {
+                    parameter: {
+                        'name': this.name,
+                        'description': this.description,
+                        'value': this.value,
+                        'sensitive': this.sensitive
+                    }
+                };
 
-            map[this.name] = parameter;
-        });
-
-        $.each(updatedParameters, function () {
-            var parameter =  {
-                parameter: {
-                    'name': this.name,
-                    'description': this.description
-                }
-            };
-
-            if (!this.sensitive) {
-                parameter['parameter']['value'] = this.value;
+                // the value has changed
+                parameters.push(parameter);
             }
-
-            map[this.name] = parameter;
-        });
-
-        $.each(deletedParameters, function () {
-            var parameter =  {
-                parameter: {
-                    'name': this.name
-                }
-            };
-
-            map[this.name] = parameter;
-        });
-
-        $.each(map, function (key, value) {
-            parameters.push(value);
         });
 
         return parameters;
@@ -433,6 +416,17 @@
      * @param {object} affectedComponents
      */
     var populateAffectedComponents = function (affectedComponents) {
+        // toggles the visibility of a container
+        var toggle = function (twist, container) {
+            if (twist.hasClass('expanded')) {
+                twist.removeClass('expanded').addClass('collapsed');
+                container.hide();
+            } else {
+                twist.removeClass('collapsed').addClass('expanded');
+                container.show();
+            }
+        };
+
         var affectedProcessors = [];
         var affectedControllerServices = [];
         var unauthorizedAffectedComponents = [];
@@ -594,10 +588,6 @@
         return a.component.name.localeCompare(b.component.name);
     };
 
-    var newParameters = [];
-    var updatedParameters = [];
-    var deletedParameters = [];
-
     /**
      * Adds a new parameter.
      */
@@ -620,12 +610,14 @@
             if (matchingParameter === null) {
                 var parameter = {
                     id: parameterCount,
+                    hidden: false,
                     type: 'Parameter',
                     sensitive: $('#parameter-dialog').find('input[name="sensitive"]:checked').val() === "sensitive" ? true : false,
                     name: parameterName,
-                    value: $('#parameter-dialog').find('.nf-checkbox').hasClass('checkbox-checked') ? '' : ($.trim($('#parameter-value-field').val()) === '' ? null : $.trim($('#parameter-value-field').val())),
+                    value: ($.trim($('#parameter-value-field').val()) === '' ? ($('#parameter-dialog').find('.nf-checkbox').hasClass('checkbox-checked') ? '' : null) : $.trim($('#parameter-value-field').val())),
                     description: $.trim($('#parameter-description-field').val()),
                     previousValue: null,
+                    previousDescription: null,
                     isEditable: true
                 };
 
@@ -638,7 +630,6 @@
                 // select the new parameter row
                 var row = parameterData.getRowById(parameterCount);
                 parameterGrid.setActiveCell(row, parameterGrid.getColumnIndex('value'));
-                newParameters.push(parameter);
                 parameterCount++;
             } else {
                 nfDialog.showOkDialog({
@@ -688,13 +679,15 @@
             if (matchingParameter !== null) {
                 var parameter = {
                     id: matchingParameter.id,
+                    hidden: false,
                     type: 'Parameter',
                     sensitive: matchingParameter.sensitive,
                     name: parameterName,
-                    value: $('#parameter-dialog').find('.nf-checkbox').hasClass('checkbox-checked') ? '' : ($.trim($('#parameter-value-field').val()) === '' ? null : $.trim($('#parameter-value-field').val())),
+                    value: ($.trim($('#parameter-value-field').val()) === '' ? ($('#parameter-dialog').find('.nf-checkbox').hasClass('checkbox-checked') ? '' : null) : $.trim($('#parameter-value-field').val())),
                     description: $.trim($('#parameter-description-field').val()),
                     previousValue: matchingParameter.value,
-                    isEditable: matchingParameter.canWrite
+                    previousDescription: matchingParameter.description,
+                    isEditable: matchingParameter.isEditable
                 };
 
                 // update row for the parameter
@@ -706,7 +699,6 @@
                 // select the parameter row
                 var row = parameterData.getRowById(matchingParameter.id);
                 parameterGrid.setActiveCell(row, parameterGrid.getColumnIndex('value'));
-                updatedParameters.push(parameter);
             } else {
                 nfDialog.showOkDialog({
                     headerText: 'Parameter Does Not Exists',
@@ -982,12 +974,14 @@
             $.each(parameterContext.component.parameters, function (i, parameterEntity) {
                 var parameter = {
                     id: parameterCount++,
+                    hidden: false,
                     type: 'Parameter',
                     name: parameterEntity.parameter.name,
                     value: parameterEntity.parameter.value,
                     sensitive: parameterEntity.parameter.sensitive,
                     description: parameterEntity.parameter.description,
                     previousValue: parameterEntity.parameter.value,
+                    previousDescription: parameterEntity.parameter.description,
                     isEditable: parameterEntity.canWrite,
                     affectedComponents: parameterEntity.parameter.referencingComponents
                 };
@@ -1013,31 +1007,49 @@
             }
 
             if (parameters.length === 0) {
-                // empty the containers
-                var processorContainer = $('#parameter-context-affected-processors');
-                nfCommon.cleanUpTooltips(processorContainer, 'div.referencing-component-state');
-                nfCommon.cleanUpTooltips(processorContainer, 'div.referencing-component-bulletins');
-                processorContainer.empty();
-
-                var controllerServiceContainer = $('#parameter-context-affected-controller-services');
-                nfCommon.cleanUpTooltips(controllerServiceContainer, 'div.referencing-component-state');
-                nfCommon.cleanUpTooltips(controllerServiceContainer, 'div.referencing-component-bulletins');
-                controllerServiceContainer.empty();
-
-                var unauthorizedComponentsContainer = $('#parameter-context-affected-unauthorized-components').empty();
-
-                // indicate no affected components
-                $('<li class="affected-component-container"><span class="unset">None</span></li>').appendTo(processorContainer);
-                $('<li class="affected-component-container"><span class="unset">None</span></li>').appendTo(controllerServiceContainer);
-                $('<li class="affected-component-container"><span class="unset">None</span></li>').appendTo(unauthorizedComponentsContainer);
-
-                // update the selection context
-                $('#parameter-affected-components-context').addClass('unset').text('None');
+                resetUsage();
             } else {
                 // select the desired row
                 parameterGrid.setSelectedRows([parameterIndex]);
             }
         }
+    };
+
+    var resetUsage = function () {
+        // empty the containers
+        var processorContainer = $('#parameter-context-affected-processors');
+        nfCommon.cleanUpTooltips(processorContainer, 'div.referencing-component-state');
+        nfCommon.cleanUpTooltips(processorContainer, 'div.referencing-component-bulletins');
+        processorContainer.empty();
+
+        var controllerServiceContainer = $('#parameter-context-affected-controller-services');
+        nfCommon.cleanUpTooltips(controllerServiceContainer, 'div.referencing-component-state');
+        nfCommon.cleanUpTooltips(controllerServiceContainer, 'div.referencing-component-bulletins');
+        controllerServiceContainer.empty();
+
+        var unauthorizedComponentsContainer = $('#parameter-context-affected-unauthorized-components').empty();
+
+        // reset the last selected parameter
+        lastSelectedId = null;
+
+        // indicate no affected components
+        $('<li class="affected-component-container"><span class="unset">None</span></li>').appendTo(processorContainer);
+        $('<li class="affected-component-container"><span class="unset">None</span></li>').appendTo(controllerServiceContainer);
+        $('<li class="affected-component-container"><span class="unset">None</span></li>').appendTo(unauthorizedComponentsContainer);
+
+        // update the selection context
+        $('#parameter-affected-components-context').addClass('unset').text('None');
+    };
+
+    /**
+     * Performs the filtering.
+     *
+     * @param {object} item     The item subject to filtering
+     * @param {object} args     Filter arguments
+     * @returns {Boolean}       Whether or not to include the item
+     */
+    var filter = function (item, args) {
+        return item.hidden === false;
     };
 
     /**
@@ -1058,7 +1070,8 @@
 
             // show the parameter description if applicable
             if (!nfCommon.isBlank(dataContext.description)) {
-                $('<div class="fa fa-question-circle" alt="Info" title="' + dataContext.description + '" style="float: right;"></div>').appendTo(cellContent);
+                $('<div class="fa fa-question-circle" alt="Info" style="float: right;"></div>').appendTo(cellContent);
+                $('<span class="hidden parameter-row"></span>').text(row).appendTo(cellContent);
                 nameWidthOffset = 46; // 10 + icon width (10) + icon margin (6) + padding (20)
             }
 
@@ -1070,14 +1083,19 @@
         };
 
         var valueFormatter = function (row, cell, value, columnDef, dataContext) {
-            if (dataContext.sensitive === true) {
-                return '<span class="table-cell blank">********</span>';
-            } else if (value === '') {
-                return '<span class="table-cell blank">Empty string set</span>';
-            } else if (value === null) {
-                return '<span class="unset">No value set</span>';
+            if (nfCommon.isDefinedAndNotNull(value)) {
+                // determine if the parameter is sensitive
+                if (dataContext.sensitive === true) {
+                    return '<span class="table-cell sensitive">Sensitive value set</span>';
+                } else {
+                    if (value === '') {
+                        return '<span class="table-cell blank">Empty string set</span>';
+                    } else {
+                        return '<div class="table-cell value"><pre class="ellipsis">' + nfCommon.escapeHtml(value) + '</pre></div>';
+                    }
+                }
             } else {
-                return nfCommon.escapeHtml(value);
+                return '<span class="unset">No value set</span>';
             }
         };
 
@@ -1127,6 +1145,11 @@
         var parameterData = new Slick.Data.DataView({
             inlineFilters: false
         });
+        parameterData.setFilterArgs({
+            searchString: '',
+            property: 'hidden'
+        });
+        parameterData.setFilter(filter);
 
         // initialize the sort
         sortParameters({
@@ -1155,8 +1178,9 @@
                 // determine the desired action
                 if (target.hasClass('delete-parameter')) {
                     // mark the property in question for removal and refresh the table
-                    parameterData.deleteItem(parameter.id);
-                    deletedParameters.push(parameter);
+                    parameterData.updateItem(parameter.id, $.extend(parameter, {
+                        hidden: true
+                    }));
 
                     // reset the selection if necessary
                     var selectedRows = parametersGrid.getSelectedRows();
@@ -1165,24 +1189,22 @@
                     }
 
                     var rows = parameterData.getItems();
+
                     if (rows.length === 0) {
                         // clear usages
-                        $('#parameter-affected-components-context').removeClass('unset').text('');
+                        resetUsage();
+                    } else {
+                        var reset = true;
+                        $.each(rows, function (_, parameter) {
+                            if (!parameter.hidden) {
+                                reset = false;
+                            }
+                        });
 
-                        var affectedProcessorContainer = $('#parameter-context-affected-processors');
-                        nfCommon.cleanUpTooltips(affectedProcessorContainer, 'div.referencing-component-state');
-                        nfCommon.cleanUpTooltips(affectedProcessorContainer, 'div.referencing-component-bulletins');
-                        affectedProcessorContainer.empty();
-
-                        var affectedControllerServicesContainer = $('#parameter-context-affected-controller-services');
-                        nfCommon.cleanUpTooltips(affectedControllerServicesContainer, 'div.referencing-component-state');
-                        nfCommon.cleanUpTooltips(affectedControllerServicesContainer, 'div.referencing-component-bulletins');
-                        affectedControllerServicesContainer.empty();
-
-                        $('#parameter-context-affected-unauthorized-components').empty();
-
-                        // reset the last selected parameter
-                        lastSelectedId = null;
+                        if (reset) {
+                            // clear usages
+                            resetUsage();
+                        }
                     }
 
                     // update the buttons to possibly trigger the disabled state
@@ -1306,8 +1328,28 @@
         });
         parameterData.syncGridSelection(parametersGrid, true);
 
-        // hold onto an instance of the grid
-        parameterTable.data('gridInstance', parametersGrid);
+        // hold onto an instance of the grid and create parameter description tooltip
+        parameterTable.data('gridInstance', parametersGrid).on('mouseenter', 'div.slick-cell', function (e) {
+            var infoIcon = $(this).find('div.fa-question-circle');
+            if (infoIcon.length) {
+                if (infoIcon.data('qtip')) {
+                    infoIcon.qtip('destroy', true);
+                }
+
+                var row = $(this).find('span.parameter-row').text();
+
+                // get the parameter
+                var parameter = parameterData.getItem(row);
+
+                if (nfCommon.isDefinedAndNotNull(parameter.description)) {
+                    infoIcon.qtip($.extend({},
+                        nfCommon.config.tooltipConfig,
+                        {
+                            content: parameter.description
+                        }));
+                }
+            }
+        });
     };
 
     /**
@@ -1670,6 +1712,8 @@
 
             // create a new parameter context
             $('#new-parameter-context').on('click', function () {
+                resetUsage();
+
                 $('#parameter-context-dialog').modal('setHeaderText', 'Add Parameter Context').modal('setButtonModel', [{
                     buttonText: 'Apply',
                     color: {
