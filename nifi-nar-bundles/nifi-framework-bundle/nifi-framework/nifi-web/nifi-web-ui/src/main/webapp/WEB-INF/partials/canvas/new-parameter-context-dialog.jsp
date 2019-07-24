@@ -70,29 +70,11 @@
                     </div>
                     <div class="setting">
                         <div class="setting-name">
-                            Referencing Processors
-                            <div class="fa fa-question-circle" alt="Info" title="Processors referencing this variable."></div>
+                            Referencing Components
+                            <div class="fa fa-question-circle" alt="Info" title="Components referencing this parameter grouped by process group."></div>
                         </div>
                         <div class="setting-field">
-                            <ul id="parameter-context-affected-processors"></ul>
-                        </div>
-                    </div>
-                    <div class="setting">
-                        <div class="setting-name">
-                            Referencing Controller Services
-                            <div class="fa fa-question-circle" alt="Info" title="Controller Services referencing this variable."></div>
-                        </div>
-                        <div class="setting-field">
-                            <ul id="parameter-context-affected-controller-services"></ul>
-                        </div>
-                    </div>
-                    <div class="setting">
-                        <div class="setting-name">
-                            Unauthorized referencing components
-                            <div class="fa fa-question-circle" alt="Info" title="Referencing components for which READ or WRITE permissions are not granted."></div>
-                        </div>
-                        <div class="setting-field">
-                            <ul id="parameter-context-affected-unauthorized-components"></ul>
+                            <div id="parameter-referencing-components"></div>
                         </div>
                     </div>
                 </div>
@@ -134,6 +116,35 @@
                 <textarea id="parameter-description-field" rows="6"></textarea>
             </div>
             <div class="clear"></div>
+        </div>
+    </div>
+</div>
+<div id="referencing-components-template" class="referencing-components-template hidden">
+    <div class="setting">
+        <div class="setting-name">
+            Referencing Processors
+<%--            <div class="fa fa-question-circle" alt="Info" title="Processors referencing this parameter."></div>--%>
+        </div>
+        <div class="setting-field">
+            <ul class="parameter-context-affected-processors"></ul>
+        </div>
+    </div>
+    <div class="setting">
+        <div class="setting-name">
+            Referencing Controller Services
+<%--            <div class="fa fa-question-circle" alt="Info" title="Controller Services referencing this parameter."></div>--%>
+        </div>
+        <div class="setting-field">
+            <ul class="parameter-context-affected-controller-services"></ul>
+        </div>
+    </div>
+    <div class="setting">
+        <div class="setting-name">
+            Unauthorized referencing components
+<%--            <div class="fa fa-question-circle" alt="Info" title="Referencing components for which READ or WRITE permissions are not granted."></div>--%>
+        </div>
+        <div class="setting-field">
+            <ul class="parameter-context-affected-unauthorized-components"></ul>
         </div>
     </div>
 </div>

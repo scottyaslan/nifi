@@ -65,7 +65,7 @@
     var config = {
         urls: {
             api: '../nifi-api',
-            parameterContexts: '../nifi-api/parameter-contexts'
+            parameterContexts: '../nifi-api/flow/parameter-contexts'
         }
     };
 
@@ -103,7 +103,9 @@
                 'id': groupId,
                 'name': $('#process-group-name').val(),
                 'comments': $('#process-group-comments').val(),
-                'parameterContextId': $('#process-group-parameter-context-combo').combo('getSelectedOption').value
+                'parameterContext': {
+                    'id': $('#process-group-parameter-context-combo').combo('getSelectedOption').value
+                }
             }
         };
 
@@ -352,8 +354,13 @@
 
             // populate the parameter context
             if (processGroupResult.permissions.canRead) {
+                var parameterContextId = null;
+                if ($.isEmptyObject(processGroupResult.component.parameterContext) === false) {
+                    parameterContextId = processGroupResult.component.parameterContext.id;
+                }
+
                 $('#process-group-parameter-context-combo').combo('setSelectedOption', {
-                    value: processGroupResult.component.parameterContextId
+                    value: parameterContextId
                 });
             }
         }).fail(nfErrorHandler.handleAjaxError);
