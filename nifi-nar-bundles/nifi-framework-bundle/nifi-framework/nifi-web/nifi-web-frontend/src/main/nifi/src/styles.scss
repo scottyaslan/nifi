@@ -455,3 +455,16 @@ button.nifi-button:disabled {
     font-weight: 500;
     color: #775351;
 }
+
+@mixin global-menu-buttons-theme($theme) {
+    $primary-color: map.get(map.get($theme, primary), 500);
+    button.global-menu-item {
+        .fa,
+        .icon {
+            text-align: start;
+            color: $primary-color;
+        }
+    }
+}
+
+@include global-menu-buttons-theme($nifi-theme);

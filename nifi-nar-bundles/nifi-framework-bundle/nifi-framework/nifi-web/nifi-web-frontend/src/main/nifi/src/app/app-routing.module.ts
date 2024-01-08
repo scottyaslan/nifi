@@ -73,6 +73,24 @@ const routes: Routes = [
         canMatch: [authenticationGuard],
         loadChildren: () =>
             import('./pages/flow-designer/feature/flow-designer.module').then((m) => m.FlowDesignerModule)
+    },
+    {
+        path: 'datavolo',
+        canMatch: [authenticationGuard],
+        children: [
+            {
+                path: '',
+                canMatch: [authenticationGuard],
+                loadChildren: () =>
+                    import('./pages/dv-flow-designer/feature/flow-designer.module').then((m) => m.FlowDesignerModule)
+            },
+            {
+                path: 'settings',
+                canMatch: [authenticationGuard],
+                loadChildren: () => import('./pages/dv-settings/feature/settings.module').then((m) => m.SettingsModule)
+            },
+        ]
+
     }
 ];
 
