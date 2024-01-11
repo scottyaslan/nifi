@@ -31,7 +31,6 @@ import {
     ConfigureReportingTaskRequest,
     ConfigureReportingTaskSuccess
 } from './index';
-import { ConfigureReportingTaskRequest, ConfigureReportingTaskSuccess } from '../management-controller-services';
 
 export const resetReportingTasksState = createAction('[Reporting Tasks] Reset Reporting Tasks State');
 

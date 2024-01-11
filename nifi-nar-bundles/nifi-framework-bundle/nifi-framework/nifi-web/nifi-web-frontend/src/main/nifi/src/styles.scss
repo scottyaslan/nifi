@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+
 // Custom Theming for Angular Material
 // For more information: https://material.angular.io/guide/theming
 @use '@angular/material' as mat;
@@ -25,6 +26,8 @@
 @use 'font-awesome/css/font-awesome.min.css';
 @use 'codemirror/lib/codemirror.css';
 @use 'codemirror/addon/hint/show-hint.css';
+
+@import '../src/assets/color-palette';
 
 $fontPrimary: 'Roboto', sans-serif;
 $fontSecondary: 'Robot Slab', sans-serif;
@@ -123,68 +126,68 @@ $appFontPath: '~roboto-fontface/fonts';
 @tailwind utilities;
 
 $nifi-primary-palette: (
-    50: #eef1f3,
-    100: #d5dde1,
-    200: #b9c7cd,
-    300: #9cb0b9,
-    400: #879faa,
-    500: #728e9b,
-    600: #6a8693,
-    700: #5f7b89,
-    800: #55717f,
-    900: #425f6d,
-    A100: #c7ecff,
-    A200: #94daff,
-    A400: #61c9ff,
-    A700: #47c0ff,
+    50: var(--primary-light-50),
+    100: var(--primary-light-100),
+    200: var(--primary-light-200),
+    300: var(--primary-light-300),
+    400: var(--primary-light-400),
+    500: var(--primary-light-500),
+    600: var(--primary-light-600),
+    700: var(--primary-light-700),
+    800: var(--primary-light-800),
+    900: var(--primary-light-900),
+    A100: var(--primary-light-A100),
+    A200: var(--primary-light-A200),
+    A400: var(--primary-light-A400),
+    A700: var(--primary-light-A700),
     contrast: (
-        50: #000000,
-        100: #000000,
-        200: #000000,
-        300: #000000,
-        400: #000000,
-        500: #000000,
-        600: #ffffff,
-        700: #ffffff,
-        800: #ffffff,
-        900: #ffffff,
-        A100: #000000,
-        A200: #000000,
-        A400: #000000,
-        A700: #000000
+        50: var(--primary-light-contrast-50),
+        100: var(--primary-light-contrast-100),
+        200: var(--primary-light-contrast-200),
+        300: var(--primary-light-contrast-300),
+        400: var(--primary-light-contrast-400),
+        500: var(--primary-light-contrast-500),
+        600: var(--primary-light-contrast-600),
+        700: var(--primary-light-contrast-700),
+        800: var(--primary-light-contrast-800),
+        900: var(--primary-light-contrast-900),
+        A100: var(--primary-light-contrast-A100),
+        A200: var(--primary-light-contrast-A200),
+        A400: var(--primary-light-contrast-A400),
+        A700: var(--primary-light-contrast-A700)
     )
 );
 
 $nifi-accent-palette: (
-    50: #fcfcfd,
-    100: #f7f8f9,
-    200: #f1f4f5,
-    300: #ebeff1,
-    400: #e7ebee,
-    500: #e3e8eb,
-    600: #e0e5e9,
-    700: #dce2e5,
-    800: #d8dee2,
-    900: #d0d8dd,
-    A100: #ffffff,
-    A200: #ffffff,
-    A400: #ffffff,
-    A700: #ffffff,
+    50: var(--accent-light-50),
+    100: var(--accent-light-100),
+    200: var(--accent-light-200),
+    300: var(--accent-light-300),
+    400: var(--accent-light-400),
+    500: var(--accent-light-500),
+    600: var(--accent-light-600),
+    700: var(--accent-light-700),
+    800: var(--accent-light-800),
+    900: var(--accent-light-900),
+    A100: var(--accent-light-A100),
+    A200: var(--accent-light-A200),
+    A400: var(--accent-light-A400),
+    A700: var(--accent-light-A700),
     contrast: (
-        50: #000000,
-        100: #000000,
-        200: #000000,
-        300: #000000,
-        400: #000000,
-        500: #000000,
-        600: #000000,
-        700: #000000,
-        800: #000000,
-        900: #000000,
-        A100: #000000,
-        A200: #000000,
-        A400: #000000,
-        A700: #000000
+        50: var(--accent-light-contrast-50),
+        100: var(--accent-light-contrast-100),
+        200: var(--accent-light-contrast-200),
+        300: var(--accent-light-contrast-300),
+        400: var(--accent-light-contrast-400),
+        500: var(--accent-light-contrast-500),
+        600: var(--accent-light-contrast-600),
+        700: var(--accent-light-contrast-700),
+        800: var(--accent-light-contrast-800),
+        900: var(--accent-light-contrast-900),
+        A100: var(--accent-light-contrast-A100),
+        A200: var(--accent-light-contrast-A200),
+        A400: var(--accent-light-contrast-A400),
+        A700: var(--accent-light-contrast-A700)
     )
 );
 
@@ -229,7 +232,7 @@ body {
 
 body {
     margin: 0;
-    //font-family: Roboto, 'Helvetica Neue', sans-serif;
+    font-family: Roboto, 'Helvetica Neue', sans-serif;
 }
 
 a {
@@ -456,15 +459,98 @@ button.nifi-button:disabled {
     color: #775351;
 }
 
+@mixin buttons-theme($theme) {
+    .mat-mdc-raised-button {
+        height: 34px;
+        font-family: $fontPrimary;
+        font-weight: lighter;
+        font-size: 14px;
+        text-transform: uppercase;
+        line-height: normal;
+        box-shadow: 0 0 0 0 rgba(0 0 0 / 20%), 0 0 0 0 rgba(0 0 0 / 14%), 0 0 0 0 rgba(0 0 0 / 12%);
+        border-radius: 2px;
+        min-width: 88px;
+    }
+}
+
 @mixin global-menu-buttons-theme($theme) {
-    $primary-color: map.get(map.get($theme, primary), 500);
     button.global-menu-item {
         .fa,
         .icon {
             text-align: start;
-            color: $primary-color;
+            color: var(--primary-light-500);
         }
     }
 }
 
+@mixin table-theme($theme) {
+    .listing-table {
+        table {
+            width: 100%;
+            table-layout: fixed;
+
+            td,
+            th {
+                max-width: 300px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                padding: 0 8px;
+            }
+
+            th {
+                background-color: var(--primary-light-500);
+                color: #fff;
+            }
+
+            tr:hover {
+                background-color: #E3F2FF !important;
+            }
+
+            .selected {
+                background-color: #E3F2FF !important;
+            }
+
+            .even {
+                background-color: #f4f6f7;
+            }
+
+            .fa,
+            .icon {
+                color: #616161;
+                width: 10px;
+                height: 14px;
+                text-align: center;
+            }
+
+            .mat-column-moreDetails {
+                min-width: 30px;
+            }
+
+            .mat-column-actions {
+                min-width: 115px;
+            }
+        }
+
+        .mat-mdc-table .mdc-data-table__header-row {
+            height: 36px;
+        }
+
+        .mat-mdc-table .mdc-data-table__row {
+            height: 59px;
+        }
+    }
+
+    ::ng-deep .mat-sort-header-arrow {
+        color: #fff;
+    }
+
+    ::ng-deep .mat-sort-header-content {
+        overflow: hidden;
+    }
+
+}
+
 @include global-menu-buttons-theme($nifi-theme);
+@include table-theme($nifi-theme);
+@include buttons-theme($nifi-theme);

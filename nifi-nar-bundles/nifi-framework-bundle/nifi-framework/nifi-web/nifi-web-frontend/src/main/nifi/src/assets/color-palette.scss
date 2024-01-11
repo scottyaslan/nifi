@@ -1,0 +1,208 @@
+/*!
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
+$dark-primary-text: rgba(black, 0.87);
+$dark-secondary-text: rgba(black, 0.54);
+$dark-disabled-text: rgba(black, 0.38);
+$dark-dividers: rgba(black, 0.12);
+$dark-focused: rgba(black, 0.12);
+$light-primary-text: white;
+$light-secondary-text: rgba(white, 0.7);
+$light-disabled-text: rgba(white, 0.5);
+$light-dividers: rgba(white, 0.12);
+$light-focused: rgba(white, 0.12);
+
+:root {
+    --white: #fff;
+    --black: #000;
+    --link: #007ed2;
+    --primary-light-50: #eef1f3;
+    --primary-light-100: #d5dde1;
+    --primary-light-200: #b9c7cd;
+    --primary-light-300: #9cb0b9;
+    --primary-light-400: #879faa;
+    --primary-light-500: #728e9b;
+    --primary-light-600: #6a8693;
+    --primary-light-700: #5f7b89;
+    --primary-light-800: #55717f;
+    --primary-light-900: #425f6d;
+    --primary-light-A100: #c7ecff;
+    --primary-light-A200: #94daff;
+    --primary-light-A400: #61c9ff;
+    --primary-light-A700: #47c0ff;
+    --primary-light-contrast-50: $dark-primary-text;
+    --primary-light-contrast-100: $dark-primary-text;
+    --primary-light-contrast-200: $dark-primary-text;
+    --primary-light-contrast-300: $dark-primary-text;
+    --primary-light-contrast-400: $dark-primary-text;
+    --primary-light-contrast-500: $light-primary-text;
+    --primary-light-contrast-600: $light-primary-text;
+    --primary-light-contrast-700: $light-primary-text;
+    --primary-light-contrast-800: $light-primary-text;
+    --primary-light-contrast-900: $light-primary-text;
+    --primary-light-contrast-A100: $dark-primary-text;
+    --primary-light-contrast-A200: $light-primary-text;
+    --primary-light-contrast-A400: $light-primary-text;
+    --primary-light-contrast-A700: $light-primary-text;
+    --accent-light-50: #fcfcfd;
+    --accent-light-100: #f7f8f9;
+    --accent-light-200: #f1f4f5;
+    --accent-light-300: #ebeff1;
+    --accent-light-400: #e7ebee;
+    --accent-light-500: #e3e8eb;
+    --accent-light-600: #e0e5e9;
+    --accent-light-700: #dce2e5;
+    --accent-light-800: #d8dee2;
+    --accent-light-900: #d0d8dd;
+    --accent-light-A100: #ffffff;
+    --accent-light-A200: #ffffff;
+    --accent-light-A400: #ffffff;
+    --accent-light-A700: #ffffff;
+    --accent-light-contrast-50: $dark-primary-text;
+    --accent-light-contrast-100: $dark-primary-text;
+    --accent-light-contrast-200: $dark-primary-text;
+    --accent-light-contrast-300: $dark-primary-text;
+    --accent-light-contrast-400: $dark-primary-text;
+    --accent-light-contrast-500: $light-primary-text;
+    --accent-light-contrast-600: $light-primary-text;
+    --accent-light-contrast-700: $light-primary-text;
+    --accent-light-contrast-800: $light-primary-text;
+    --accent-light-contrast-900: $light-primary-text;
+    --accent-light-contrast-A100: $dark-primary-text;
+    --accent-light-contrast-A200: $light-primary-text;
+    --accent-light-contrast-A400: $light-primary-text;
+    --accent-light-contrast-A700: $light-primary-text;
+    --warn-light-50: #ffebee;
+    --warn-light-100: #ffcdd2;
+    --warn-light-200: #ef9a9a;
+    --warn-light-300: #e57373;
+    --warn-light-400: #ef5350;
+    --warn-light-500: #f44336;
+    --warn-light-600: #e53935;
+    --warn-light-700: #d32f2f;
+    --warn-light-800: #c62828;
+    --warn-light-900: #b71c1c;
+    --warn-light-A100: #ff8a80;
+    --warn-light-A200: #ff5252;
+    --warn-light-A400: #ff1744;
+    --warn-light-A700: #d50000;
+    --warn-light-contrast-50: $dark-primary-text;
+    --warn-light-contrast-100: $dark-primary-text;
+    --warn-light-contrast-200: $dark-primary-text;
+    --warn-light-contrast-300: $dark-primary-text;
+    --warn-light-contrast-400: $dark-primary-text;
+    --warn-light-contrast-500: $light-primary-text;
+    --warn-light-contrast-600: $light-primary-text;
+    --warn-light-contrast-700: $light-primary-text;
+    --warn-light-contrast-800: $light-primary-text;
+    --warn-light-contrast-900: $light-primary-text;
+    --warn-light-contrast-A100: $dark-primary-text;
+    --warn-light-contrast-A200: $light-primary-text;
+    --warn-light-contrast-A400: $light-primary-text;
+    --warn-light-contrast-A700: $light-primary-text;
+    --primary-dark-50: #eef1f3;
+    --primary-dark-100: #d5dde1;
+    --primary-dark-200: #b9c7cd;
+    --primary-dark-300: #9cb0b9;
+    --primary-dark-400: #879faa;
+    --primary-dark-500: #728e9b;
+    --primary-dark-600: #6a8693;
+    --primary-dark-700: #5f7b89;
+    --primary-dark-800: #55717f;
+    --primary-dark-900: #425f6d;
+    --primary-dark-A100: #c7ecff;
+    --primary-dark-A200: #94daff;
+    --primary-dark-A400: #61c9ff;
+    --primary-dark-A700: #47c0ff;
+    --primary-dark-contrast-50: $dark-primary-text;
+    --primary-dark-contrast-100: $dark-primary-text;
+    --primary-dark-contrast-200: $dark-primary-text;
+    --primary-dark-contrast-300: $dark-primary-text;
+    --primary-dark-contrast-400: $dark-primary-text;
+    --primary-dark-contrast-500: $light-primary-text;
+    --primary-dark-contrast-600: $light-primary-text;
+    --primary-dark-contrast-700: $light-primary-text;
+    --primary-dark-contrast-800: $light-primary-text;
+    --primary-dark-contrast-900: $light-primary-text;
+    --primary-dark-contrast-A100: $dark-primary-text;
+    --primary-dark-contrast-A200: $light-primary-text;
+    --primary-dark-contrast-A400: $light-primary-text;
+    --primary-dark-contrast-A700: $light-primary-text;
+    --accent-dark-50: #fcfcfd;
+    --accent-dark-100: #f7f8f9;
+    --accent-dark-200: #f1f4f5;
+    --accent-dark-300: #ebeff1;
+    --accent-dark-400: #e7ebee;
+    --accent-dark-500: #e3e8eb;
+    --accent-dark-600: #e0e5e9;
+    --accent-dark-700: #dce2e5;
+    --accent-dark-800: #d8dee2;
+    --accent-dark-900: #d0d8dd;
+    --accent-dark-A100: #ffffff;
+    --accent-dark-A200: #ffffff;
+    --accent-dark-A400: #ffffff;
+    --accent-dark-A700: #ffffff;
+    --accent-dark-contrast-50: $dark-primary-text;
+    --accent-dark-contrast-100: $dark-primary-text;
+    --accent-dark-contrast-200: $dark-primary-text;
+    --accent-dark-contrast-300: $dark-primary-text;
+    --accent-dark-contrast-400: $dark-primary-text;
+    --accent-dark-contrast-500: $light-primary-text;
+    --accent-dark-contrast-600: $light-primary-text;
+    --accent-dark-contrast-700: $light-primary-text;
+    --accent-dark-contrast-800: $light-primary-text;
+    --accent-dark-contrast-900: $light-primary-text;
+    --accent-dark-contrast-A100: $dark-primary-text;
+    --accent-dark-contrast-A200: $light-primary-text;
+    --accent-dark-contrast-A400: $light-primary-text;
+    --accent-dark-contrast-A700: $light-primary-text;
+    --warn-dark-50: #fcfcfd;
+    --warn-dark-100: #f7f8f9;
+    --warn-dark-200: #f1f4f5;
+    --warn-dark-300: #ebeff1;
+    --warn-dark-400: #e7ebee;
+    --warn-dark-500: #e3e8eb;
+    --warn-dark-600: #e0e5e9;
+    --warn-dark-700: #dce2e5;
+    --warn-dark-800: #d8dee2;
+    --warn-dark-900: #d0d8dd;
+    --warn-dark-A100: #ffffff;
+    --warn-dark-A200: #ffffff;
+    --warn-dark-A400: #ffffff;
+    --warn-dark-A700: #ffffff;
+    --warn-dark-contrast-50: $dark-primary-text;
+    --warn-dark-contrast-100: $dark-primary-text;
+    --warn-dark-contrast-200: $dark-primary-text;
+    --warn-dark-contrast-300: $dark-primary-text;
+    --warn-dark-contrast-400: $dark-primary-text;
+    --warn-dark-contrast-500: $light-primary-text;
+    --warn-dark-contrast-600: $light-primary-text;
+    --warn-dark-contrast-700: $light-primary-text;
+    --warn-dark-contrast-800: $light-primary-text;
+    --warn-dark-contrast-900: $light-primary-text;
+    --warn-dark-contrast-A100: $dark-primary-text;
+    --warn-dark-contrast-A200: $light-primary-text;
+    --warn-dark-contrast-A400: $light-primary-text;
+    --warn-dark-contrast-A700: $light-primary-text;
+    --codemirror-text-shadow: #b9f;
+    --codemirror-hint-active: #08f;
+    --codemirror-gutters-background-color: #f7f7f7;
+    --codemirror-gutters-border-right: #ddd;
+    --codemirror-guttermarker: #000000;
+    --codemirror-guttermarker-subtle: #999;
+    --codemirror-linenumber: #999;
+}
