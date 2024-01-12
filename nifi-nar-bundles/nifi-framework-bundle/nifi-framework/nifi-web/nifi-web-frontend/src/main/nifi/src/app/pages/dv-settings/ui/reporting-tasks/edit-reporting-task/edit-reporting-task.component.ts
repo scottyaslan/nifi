@@ -32,22 +32,21 @@ import {
     ControllerServiceReferencingComponent,
     InlineServiceCreationRequest,
     InlineServiceCreationResponse,
-    Parameter,
-    ParameterContextReferenceEntity,
     Property,
-    PropertyTipInput,
     SelectOption,
-    TextTipInput,
-    UpdateControllerServiceRequest,
-    UpdateReportingTaskRequest
+    TextTipInput
 } from '../../../../../state/shared';
 import { NiFiCommon } from '../../../../../service/nifi-common.service';
 import { PropertyTable } from '../../../../../ui/common/property-table/property-table.component';
 import { NifiSpinnerDirective } from '../../../../../ui/common/spinner/nifi-spinner.directive';
-import { EditReportingTaskDialogRequest, ReportingTaskEntity } from '../../../state/reporting-tasks';
+import {
+    EditReportingTaskDialogRequest,
+    ReportingTaskEntity
+} from '../../../state/reporting-tasks';
 import { ControllerServiceApi } from '../../../../../ui/common/controller-service/controller-service-api/controller-service-api.component';
 import { NifiTooltipDirective } from '../../../../../ui/common/tooltips/nifi-tooltip.directive';
 import { TextTip } from '../../../../../ui/common/tooltips/text-tip/text-tip.component';
+import { UpdateReportingTaskRequest } from '../../../../settings/state/reporting-tasks';
 
 @Component({
     selector: 'edit-reporting-task',
@@ -76,10 +75,6 @@ import { TextTip } from '../../../../../ui/common/tooltips/text-tip/text-tip.com
 export class EditReportingTask {
     @Input() createNewProperty!: (existingProperties: string[], allowsSensitive: boolean) => Observable<Property>;
     @Input() createNewService!: (request: InlineServiceCreationRequest) => Observable<InlineServiceCreationResponse>;
-    @Input() getParameters!: (sensitive: boolean) => Observable<Parameter[]>;
-    @Input() parameterContext: ParameterContextReferenceEntity | undefined;
-    @Input() goToParameter!: (parameter: string) => void;
-    @Input() convertToParameter!: (name: string, sensitive: boolean, value: string | null) => Observable<string>;
     @Input() goToService!: (serviceId: string) => void;
     @Input() goToReferencingComponent!: (component: ControllerServiceReferencingComponent) => void;
     @Input() saving$!: Observable<boolean>;
