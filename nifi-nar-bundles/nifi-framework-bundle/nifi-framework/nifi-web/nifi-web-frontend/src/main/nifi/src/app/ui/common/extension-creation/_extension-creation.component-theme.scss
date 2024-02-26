@@ -24,43 +24,21 @@
     $canvas-color-config: mat.get-color-config($canvas-theme);
 
     // Get the color palette from the color-config.
-    $primary-palette: map.get($color-config, 'primary');
     $warn-palette: map.get($color-config, 'warn');
     $canvas-primary-palette: map.get($canvas-color-config, 'primary');
-    $canvas-accent-palette: map.get($canvas-color-config, 'accent');
 
     // Get hues from palette
-    $primary-palette-100: mat.get-color-from-palette($primary-palette, 100);
-    $primary-palette-500: mat.get-color-from-palette($primary-palette, 500);
-    $canvas-primary-palette-800: mat.get-color-from-palette($canvas-primary-palette, 800);
-    $canvas-primary-palette-900: mat.get-color-from-palette($canvas-primary-palette, 900);
     $canvas-primary-palette-A700: mat.get-color-from-palette($canvas-primary-palette, 'A700');
-    $canvas-accent-palette-A100: mat.get-color-from-palette($canvas-accent-palette, 'A100');
     $warn-palette-400: mat.get-color-from-palette($warn-palette, 400);
     $warn-palette-A400: mat.get-color-from-palette($warn-palette, 'A400');
 
     .extension-creation-dialog {
         @include mat.button-density(-1);
 
-        .type-table {
+        .listing-table {
+            @include mat.table-density(-4);
+
             table {
-                th {
-                    background-color: $primary-palette-500;
-                    color: $canvas-primary-palette-900;
-                }
-
-                tr:hover {
-                    background-color: $primary-palette-100 !important;
-                }
-
-                .selected {
-                    background-color: $canvas-accent-palette-A100 !important;
-                }
-
-                .even {
-                    background-color: $canvas-primary-palette-800;
-                }
-
                 .fa.fa-shield {
                     color: $warn-palette-400;
                 }
@@ -74,9 +52,5 @@
         .selected-type-bundle {
             color: $canvas-primary-palette-A700;
         }
-    }
-
-    .mat-sort-header-arrow {
-        color: $canvas-primary-palette-900;
     }
 }

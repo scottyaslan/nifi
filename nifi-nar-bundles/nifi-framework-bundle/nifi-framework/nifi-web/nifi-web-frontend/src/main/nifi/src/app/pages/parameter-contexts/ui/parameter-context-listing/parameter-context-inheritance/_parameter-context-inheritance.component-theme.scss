@@ -33,6 +33,7 @@
     $canvas-primary-palette-100: mat.get-color-from-palette($canvas-primary-palette, 100);
     $canvas-primary-palette-400: mat.get-color-from-palette($canvas-primary-palette, 400);
     $canvas-primary-palette-500: mat.get-color-from-palette($canvas-primary-palette, 500);
+    $canvas-primary-palette-900: mat.get-color-from-palette($canvas-primary-palette, 900);
 
     .parameter-context-inheritance {
         .parameter-context-inheritance-list {
@@ -48,7 +49,7 @@
         .parameter-context-draggable-item {
             border-bottom: solid 1px $canvas-primary-palette-400;
             color: $canvas-primary-palette-100;
-            background: white;
+            background: $canvas-primary-palette-900;
         }
 
         .cdk-drag-preview {

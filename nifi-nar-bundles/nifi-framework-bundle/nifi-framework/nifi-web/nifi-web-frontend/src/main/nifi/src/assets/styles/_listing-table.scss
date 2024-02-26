@@ -52,14 +52,6 @@
                 min-width: 115px;
             }
         }
-
-        .mat-mdc-table .mdc-data-table__header-row {
-            height: 35px;
-        }
-
-        .mat-mdc-table .mdc-data-table__row {
-            height: 35px;
-        }
     }
 
     .mat-sort-header-content {
@@ -80,17 +72,25 @@
 
     // Get hues from palette
     $primary-palette-100: mat.get-color-from-palette($primary-palette, 100);
-    $primary-palette-500: mat.get-color-from-palette($primary-palette, 500);
+    $primary-palette-300: mat.get-color-from-palette($primary-palette, 300);
+    $primary-palette-contrast-300: mat.get-color-from-palette($primary-palette, '300-contrast');
     $accent-palette-A400: mat.get-color-from-palette($accent-palette, 'A400');
+    $canvas-primary-palette-400: mat.get-color-from-palette($canvas-primary-palette, 400);
     $canvas-primary-palette-800: mat.get-color-from-palette($canvas-primary-palette, 800);
-    $canvas-primary-palette-900: mat.get-color-from-palette($canvas-primary-palette, 900);
     $canvas-accent-palette-A100: mat.get-color-from-palette($canvas-accent-palette, 'A100');
 
     .listing-table {
+        border: 1px solid $canvas-primary-palette-400;
+
         table {
             th {
-                background-color: $primary-palette-500 !important;
-                color: $canvas-primary-palette-900;
+                background-color: $primary-palette-300 !important;
+                color: $primary-palette-contrast-300;
+            }
+
+            th,
+            td {
+                border-bottom: 1px solid $canvas-primary-palette-400;
             }
 
             tr:hover {
@@ -116,6 +116,6 @@
     }
 
     .mat-sort-header-arrow {
-        color: $canvas-primary-palette-900;
+        color: $primary-palette-contrast-300 !important;
     }
 }

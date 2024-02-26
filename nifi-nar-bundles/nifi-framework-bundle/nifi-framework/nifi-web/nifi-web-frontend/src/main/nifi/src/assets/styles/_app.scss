@@ -205,6 +205,10 @@
         box-shadow: 0 2px 5px $canvas-primary-palette-50;
     }
 
+    .references-container {
+        border: 1px solid $canvas-primary-palette-400;
+    }
+
     .disabled {
         color: $primary-palette-500 !important;
         fill: $primary-palette-500 !important;

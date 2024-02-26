@@ -86,7 +86,7 @@
                                     class="fa fa-question-circle"
                                     title="Affected components referencing this parameter provider."></i>
                             </div>
-                            <div class="relative h-full border">
+                            <div class="relative h-full references-container">
                                 <div class="absolute inset-0 overflow-y-auto p-1">
                                     <parameter-references
                                         [parameterReferences]="
@@ -178,7 +178,7 @@
                                                 class="fa fa-question-circle"
                                                 title="Discovered parameters from the selected parameter group."></i>
                                         </div>
-                                        <ul class="flex-1 overflow-y-auto border px-2">
+                                        <ul class="flex-1 overflow-y-auto references-container px-2">
                                             <li
                                                 *ngFor="
                                                     let param of Object.entries(
@@ -202,7 +202,7 @@
                                         </div>
 
                                         <div class="flex-1 relative">
-                                            <div class="listing-table overflow-y-auto border absolute inset-0">
+                                            <div class="listing-table overflow-y-auto absolute inset-0">
                                                 <table
                                                     mat-table
                                                     [dataSource]="getParameterMappingDataSource(parameterGroupConfig)"
@@ -302,7 +302,7 @@
                                         class="fa fa-question-circle"
                                         title="Components referencing this selected parameter."></i>
                                 </div>
-                                <div class="relative h-full border">
+                                <div class="relative h-full references-container">
                                     <div class="absolute inset-0 overflow-y-auto p-1">
                                         <parameter-references
                                             [parameterReferences]="parameterReferences"></parameter-references>

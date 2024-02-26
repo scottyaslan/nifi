@@ -52,7 +52,7 @@ $material-primary-light-palette: (
         50: rgba(black, 0.87),
         100: rgba(black, 0.87),
         200: rgba(black, 0.87),
-        300: #ffffff,
+        300: rgba(black, 0.87),
         400: #ffffff,
         500: #ffffff,
         600: #ffffff,
@@ -96,20 +96,20 @@ $material-primary-dark-palette: (
     // NOTE: When creating the Material palette definition mat.define-palette($material-primary-dark-palette, 300);
     // Since 300, was set as the default the contrast-300 will be used as the default text color.
     contrast: (
-        50: #ffffff,
-        100: #ffffff,
-        200: #ffffff,
+        50: rgba(black, 0.87),
+        100: rgba(black, 0.87),
+        200: rgba(black, 0.87),
         300: #ffffff,
         400: #ffffff,
         500: #ffffff,
-        600: rgba(black, 0.87),
-        700: rgba(black, 0.87),
-        800: rgba(black, 0.87),
-        900: rgba(black, 0.87),
-        A100: #ffffff,
-        A200: #ffffff,
-        A400: rgba(black, 0.87),
-        A700: rgba(black, 0.87),
+        600: #ffffff,
+        700: #ffffff,
+        800: #ffffff,
+        900: #ffffff,
+        A100: rgba(black, 0.87),
+        A200: rgba(black, 0.87),
+        A400: #ffffff,
+        A700: #ffffff,
     )
 );
 
@@ -166,7 +166,7 @@ $nifi-canvas-dark-palette: (
     100: #f4f6f7, //rgba(black, 0.87), // .prioritizer-draggable-item, .parameter-context-draggable-item
     200: #e5ebed, // .tooltip, .cm-s-default .CodeMirror-matchingbracket, circle.flowfile-link
     300: #f9fafb, // .context-menu-item:active, .CodeMirror, .cm-s-default .CodeMirror-matchingbracket
-    400: #d8d8d8, // .unset, .border.ghost, .backpressure-tick.not-configured, g.connection.ghost path.connection-path, g.connection.ghost rect.connection-label, .prioritizers-list, .prioritizer-draggable-item, .parameter-context-inheritance-list, .parameter-context-draggable-item
+    400: #686868, // .unset, .border.ghost, .backpressure-tick.not-configured, g.connection.ghost path.connection-path, g.connection.ghost rect.connection-label, .prioritizers-list, .prioritizer-draggable-item, .parameter-context-inheritance-list, .parameter-context-draggable-item
     500: #acacac, // g.connection rect.backpressure-object, g.connection rect.backpressure-data-size, .cdk-drag-disabled, .resizable-triangle
     600: #545454, // .canvas-background, .navigation-control, .operation-control, .lineage
     700: #696060, // .canvas-background, g.component rect.body.unauthorized, g.component rect.processor-icon-container.unauthorized, g.connection rect.body.unauthorized, #birdseye, .lineage
