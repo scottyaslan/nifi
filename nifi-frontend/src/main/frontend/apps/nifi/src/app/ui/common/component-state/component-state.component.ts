@@ -19,10 +19,10 @@ import { AfterViewInit, Component, DestroyRef, inject, Input, OnDestroy } from '
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { NiFiCommon } from '../../../service/nifi-common.service';
+import { NiFiCommon } from 'libs/shared/src/services/nifi-common.service';
 import { MatSortModule, Sort } from '@angular/material/sort';
 import { AsyncPipe } from '@angular/common';
-import { NifiTooltipDirective } from '../tooltips/nifi-tooltip.directive';
+import { NifiTooltipDirective } from 'libs/shared/src/directives/nifi-tooltip.directive';
 import { NifiSpinnerDirective } from '../spinner/nifi-spinner.directive';
 import { ComponentStateState, StateEntry, StateItem, StateMap } from '../../../state/component-state';
 import { Store } from '@ngrx/store';
@@ -32,7 +32,7 @@ import {
     selectComponentName,
     selectComponentState
 } from '../../../state/component-state/component-state.selectors';
-import { isDefinedAndNotNull } from '../../../state/shared';
+import { isDefinedAndNotNull } from 'libs/shared/src';
 import { debounceTime, Observable } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
@@ -40,7 +40,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { selectClusterSummary } from '../../../state/cluster-summary/cluster-summary.selectors';
 import { ErrorBanner } from '../error-banner/error-banner.component';
-import { clearBannerErrors } from '../../../state/error/error.actions';
+import { clearBannerErrors } from 'libs/shared/src/state/error/error.actions';
 import { CloseOnEscapeDialog } from '../close-on-escape-dialog/close-on-escape-dialog.component';
 
 @Component({

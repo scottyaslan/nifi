@@ -19,9 +19,9 @@ import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import * as LoginConfigurationActions from './login-configuration.actions';
 import { catchError, from, map, of, switchMap } from 'rxjs';
-import * as ErrorActions from '../error/error.actions';
+import * as ErrorActions from 'libs/shared/src/state/error/error.actions';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ErrorHelper } from '../../service/error-helper.service';
+import { ErrorHelper } from 'libs/shared/src/services/error-helper.service';
 import { AuthService } from '../../service/auth.service';
 
 @Injectable()

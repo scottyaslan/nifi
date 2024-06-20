@@ -23,7 +23,7 @@ import { Store } from '@ngrx/store';
 import { stopCurrentUserPolling } from '../../state/current-user/current-user.actions';
 import { stopProcessGroupPolling } from '../../pages/flow-designer/state/flow/flow.actions';
 import { stopClusterSummaryPolling } from '../../state/cluster-summary/cluster-summary.actions';
-import { fullScreenError } from '../../state/error/error.actions';
+import { fullScreenError } from 'libs/shared/src';
 
 export const pollingInterceptor: HttpInterceptorFn = (request: HttpRequest<unknown>, next: HttpHandlerFn) => {
     const store: Store<NiFiState> = inject(Store<NiFiState>);

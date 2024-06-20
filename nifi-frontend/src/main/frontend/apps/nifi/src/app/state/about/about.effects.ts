@@ -18,14 +18,14 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import * as AboutActions from './about.actions';
-import * as ErrorActions from '../error/error.actions';
+import * as ErrorActions from 'libs/shared/src/state/error/error.actions';
 import { catchError, from, map, of, switchMap, tap } from 'rxjs';
 import { AboutService } from '../../service/about.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
 import { AboutDialog } from '../../ui/common/about-dialog/about-dialog.component';
-import { MEDIUM_DIALOG } from '../../index';
-import { ErrorHelper } from '../../service/error-helper.service';
+import { MEDIUM_DIALOG } from 'libs/shared/src';
+import { ErrorHelper } from 'libs/shared/src/services/error-helper.service';
 
 @Injectable()
 export class AboutEffects {

@@ -23,11 +23,11 @@ import { NiFiState } from '../../../../state';
 import { AdvancedUiParams } from '../../../../state/shared';
 import { Client } from '../../../../service/client.service';
 import { HttpErrorResponse } from '@angular/common/http';
-import { fullScreenError } from '../../../../state/error/error.actions';
+import { fullScreenError } from 'libs/shared/src/state/error/error.actions';
 import { ParameterProviderService } from '../parameter-provider.service';
 import { selectParameterProvider } from '../../state/parameter-providers/parameter-providers.selectors';
 import { ClusterConnectionService } from '../../../../service/cluster-connection.service';
-import { ErrorHelper } from '../../../../service/error-helper.service';
+import { ErrorHelper } from 'libs/shared/src/services/error-helper.service';
 
 export const parameterProviderAdvancedUiParamsResolver: ResolveFn<AdvancedUiParams> = (
     route: ActivatedRouteSnapshot

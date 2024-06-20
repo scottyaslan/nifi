@@ -38,13 +38,13 @@ import { ProvenanceSearchDialog } from '../../ui/provenance-event-listing/proven
 import { selectAbout } from '../../../../state/about/about.selectors';
 import { ProvenanceEventDialog } from '../../../../ui/common/provenance-event-dialog/provenance-event-dialog.component';
 import { CancelDialog } from '../../../../ui/common/cancel-dialog/cancel-dialog.component';
-import * as ErrorActions from '../../../../state/error/error.actions';
-import { ErrorHelper } from '../../../../service/error-helper.service';
+import * as ErrorActions from 'libs/shared/src/state/error/error.actions';
+import { ErrorHelper } from 'libs/shared/src/services/error-helper.service';
 import { HttpErrorResponse } from '@angular/common/http';
-import { isDefinedAndNotNull } from '../../../../state/shared';
+import { isDefinedAndNotNull } from 'libs/shared/src';
 import { selectClusterSummary } from '../../../../state/cluster-summary/cluster-summary.selectors';
 import { ClusterService } from '../../../../service/cluster.service';
-import { LARGE_DIALOG, MEDIUM_DIALOG } from '../../../../index';
+import { LARGE_DIALOG, MEDIUM_DIALOG } from 'libs/shared/src';
 
 @Injectable()
 export class ProvenanceEventListingEffects {

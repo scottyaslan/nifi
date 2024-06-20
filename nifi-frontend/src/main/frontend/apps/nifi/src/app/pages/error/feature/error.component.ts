@@ -17,9 +17,9 @@
 
 import { Component, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { selectFullScreenError } from '../../../state/error/error.selectors';
+import { selectFullScreenError } from 'libs/shared/src/state/error/error.selectors';
 import { NiFiState } from '../../../state';
-import { resetErrorState } from '../../../state/error/error.actions';
+import { resetErrorState } from 'libs/shared/src/state/error/error.actions';
 
 @Component({
     selector: 'error',

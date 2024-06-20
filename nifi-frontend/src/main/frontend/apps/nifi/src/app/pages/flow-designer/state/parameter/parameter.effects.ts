@@ -22,11 +22,12 @@ import * as ParameterActions from './parameter.actions';
 import { Store } from '@ngrx/store';
 import { CanvasState } from '../index';
 import { asyncScheduler, catchError, filter, from, interval, map, of, switchMap, takeUntil } from 'rxjs';
-import { isDefinedAndNotNull, ParameterContextUpdateRequest } from '../../../../state/shared';
+import { isDefinedAndNotNull } from 'libs/shared/src';
+import { ParameterContextUpdateRequest } from '../../../../state/shared';
 import { selectUpdateRequest } from './parameter.selectors';
 import { ParameterService } from '../../service/parameter.service';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ErrorHelper } from '../../../../service/error-helper.service';
+import { ErrorHelper } from 'libs/shared/src/services/error-helper.service';
 
 @Injectable()
 export class ParameterEffects {

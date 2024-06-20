@@ -25,7 +25,7 @@ import { asyncScheduler, catchError, from, interval, map, of, switchMap, takeUnt
 import { BulletinBoardService } from '../../service/bulletin-board.service';
 import { selectBulletinBoardFilter, selectLastBulletinId, selectStatus } from './bulletin-board.selectors';
 import { LoadBulletinBoardRequest } from './index';
-import { ErrorHelper } from '../../../../service/error-helper.service';
+import { ErrorHelper } from 'libs/shared/src/services/error-helper.service';
 import { HttpErrorResponse } from '@angular/common/http';
 
 @Injectable()

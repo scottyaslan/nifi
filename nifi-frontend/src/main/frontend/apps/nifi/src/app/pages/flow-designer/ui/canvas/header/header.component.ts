@@ -16,7 +16,7 @@
  */
 
 import { Component } from '@angular/core';
-import { ComponentType } from '../../../../../state/shared';
+import { ComponentType } from 'libs/shared/src';
 import { Store } from '@ngrx/store';
 import { CanvasState } from '../../../state';
 import {
@@ -26,7 +26,7 @@ import {
     selectCurrentProcessGroupId,
     selectLastRefreshed
 } from '../../../state/flow/flow.selectors';
-import { LoadingService } from '../../../../../service/loading.service';
+import { LoadingService } from 'libs/shared/src/services/loading.service';
 import { NewCanvasItem } from './new-canvas-item/new-canvas-item.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';

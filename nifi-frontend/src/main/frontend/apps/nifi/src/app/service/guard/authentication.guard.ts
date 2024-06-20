@@ -25,8 +25,8 @@ import { CurrentUserState } from '../../state/current-user';
 import { loadCurrentUserSuccess } from '../../state/current-user/current-user.actions';
 import { selectCurrentUserState } from '../../state/current-user/current-user.selectors';
 import { HttpErrorResponse } from '@angular/common/http';
-import { fullScreenError } from '../../state/error/error.actions';
-import { ErrorHelper } from '../error-helper.service';
+import { fullScreenError } from 'libs/shared/src/state/error/error.actions';
+import { ErrorHelper } from 'libs/shared/src/services/error-helper.service';
 import { selectLoginConfiguration } from '../../state/login-configuration/login-configuration.selectors';
 import { loadLoginConfigurationSuccess } from '../../state/login-configuration/login-configuration.actions';
 

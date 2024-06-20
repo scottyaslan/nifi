@@ -53,10 +53,10 @@ import { PropertyTableHelperService } from '../../../../service/property-table-h
 import { EditParameterProviderRequest, ParameterProviderEntity, UpdateParameterProviderRequest } from './index';
 import { ManagementControllerServiceService } from '../../service/management-controller-service.service';
 import { FetchParameterProviderParameters } from '../../ui/parameter-providers/fetch-parameter-provider-parameters/fetch-parameter-provider-parameters.component';
-import * as ErrorActions from '../../../../state/error/error.actions';
+import * as ErrorActions from 'libs/shared/src/state/error/error.actions';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ErrorHelper } from '../../../../service/error-helper.service';
-import { LARGE_DIALOG, SMALL_DIALOG, XL_DIALOG } from '../../../../index';
+import { ErrorHelper } from 'libs/shared/src/services/error-helper.service';
+import { LARGE_DIALOG, SMALL_DIALOG, XL_DIALOG } from 'libs/shared/src';
 import {
     resetPropertyVerificationState,
     verifyProperties

@@ -21,7 +21,7 @@ import { map } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { CurrentUser, CurrentUserState } from '../../state/current-user';
 import { selectCurrentUser } from '../../state/current-user/current-user.selectors';
-import { fullScreenError } from '../../state/error/error.actions';
+import { fullScreenError } from 'libs/shared/src/state/error/error.actions';
 
 export const authorizationGuard = (
     authorizationCheck: (user: CurrentUser) => boolean,

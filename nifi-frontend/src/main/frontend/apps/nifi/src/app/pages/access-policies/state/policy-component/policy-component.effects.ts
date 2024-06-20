@@ -18,11 +18,11 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import * as PolicyComponentActions from './policy-component.actions';
-import * as ErrorActions from '../../../../state/error/error.actions';
+import * as ErrorActions from 'libs/shared/src/state/error/error.actions';
 import { catchError, from, map, of, switchMap } from 'rxjs';
 import { AccessPolicyService } from '../../service/access-policy.service';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ErrorHelper } from '../../../../service/error-helper.service';
+import { ErrorHelper } from 'libs/shared/src/services/error-helper.service';
 
 @Injectable()
 export class PolicyComponentEffects {

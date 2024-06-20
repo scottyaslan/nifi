@@ -20,7 +20,7 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { concatLatestFrom } from '@ngrx/operators';
 import { Store } from '@ngrx/store';
 import { NiFiState } from '../../../../state';
-import { ErrorHelper } from '../../../../service/error-helper.service';
+import { ErrorHelper } from 'libs/shared/src/services/error-helper.service';
 import { MatDialog } from '@angular/material/dialog';
 import * as HistoryActions from './flow-configuration-history-listing.actions';
 import { catchError, from, map, of, switchMap, take, tap } from 'rxjs';
@@ -32,10 +32,10 @@ import { Router } from '@angular/router';
 import { ActionDetails } from '../../ui/flow-configuration-history-listing/action-details/action-details.component';
 import { PurgeHistory } from '../../ui/flow-configuration-history-listing/purge-history/purge-history.component';
 import { YesNoDialog } from '../../../../ui/common/yes-no-dialog/yes-no-dialog.component';
-import { isDefinedAndNotNull } from '../../../../state/shared';
-import * as ErrorActions from '../../../../state/error/error.actions';
+import { isDefinedAndNotNull } from 'libs/shared/src';
+import * as ErrorActions from 'libs/shared/src/state/error/error.actions';
 import { selectAbout } from '../../../../state/about/about.selectors';
-import { MEDIUM_DIALOG, SMALL_DIALOG } from '../../../../index';
+import { MEDIUM_DIALOG, SMALL_DIALOG } from 'libs/shared/src';
 
 @Injectable()
 export class FlowConfigurationHistoryListingEffects {

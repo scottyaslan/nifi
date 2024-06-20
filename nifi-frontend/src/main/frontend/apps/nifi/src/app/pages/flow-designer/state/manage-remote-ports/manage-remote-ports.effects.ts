@@ -25,17 +25,17 @@ import { Store } from '@ngrx/store';
 import { NiFiState } from '../../../../state';
 import { Router } from '@angular/router';
 import { selectRpg, selectRpgIdFromRoute, selectStatus } from './manage-remote-ports.selectors';
-import * as ErrorActions from '../../../../state/error/error.actions';
-import { ErrorHelper } from '../../../../service/error-helper.service';
+import * as ErrorActions from 'libs/shared/src/state/error/error.actions';
+import { ErrorHelper } from 'libs/shared/src/services/error-helper.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ManageRemotePortService } from '../../service/manage-remote-port.service';
 import { PortSummary } from './index';
 import { EditRemotePortComponent } from '../../ui/manage-remote-ports/edit-remote-port/edit-remote-port.component';
 import { EditRemotePortDialogRequest } from '../flow';
-import { ComponentType, isDefinedAndNotNull } from '../../../../state/shared';
+import { ComponentType, isDefinedAndNotNull } from 'libs/shared/src';
 import { selectTimeOffset } from '../../../../state/flow-configuration/flow-configuration.selectors';
 import { selectAbout } from '../../../../state/about/about.selectors';
-import { MEDIUM_DIALOG } from '../../../../index';
+import { MEDIUM_DIALOG } from 'libs/shared/src';
 import { ClusterConnectionService } from '../../../../service/cluster-connection.service';
 
 @Injectable()

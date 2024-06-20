@@ -27,11 +27,10 @@ import { MatDialog } from '@angular/material/dialog';
 import { ComponentStateService } from '../../service/component-state.service';
 import { ComponentStateDialog } from '../../ui/common/component-state/component-state.component';
 import { selectComponentUri } from './component-state.selectors';
-import { isDefinedAndNotNull } from '../shared';
-import { LARGE_DIALOG } from '../../index';
-import * as ErrorActions from '../error/error.actions';
+import { isDefinedAndNotNull, LARGE_DIALOG } from 'libs/shared/src';
+import * as ErrorActions from 'libs/shared/src/state/error/error.actions';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ErrorHelper } from '../../service/error-helper.service';
+import { ErrorHelper } from 'libs/shared/src/services/error-helper.service';
 
 @Injectable()
 export class ComponentStateEffects {

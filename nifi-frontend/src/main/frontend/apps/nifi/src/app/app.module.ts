@@ -41,9 +41,9 @@ import { ControllerServiceStateEffects } from './state/contoller-service-state/c
 import { SystemDiagnosticsEffects } from './state/system-diagnostics/system-diagnostics.effects';
 import { FlowConfigurationEffects } from './state/flow-configuration/flow-configuration.effects';
 import { ComponentStateEffects } from './state/component-state/component-state.effects';
-import { ErrorEffects } from './state/error/error.effects';
+import { ErrorEffects } from 'libs/shared/src/state/error/error.effects';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { PipesModule } from './pipes/pipes.module';
+import { PipesModule } from 'libs/shared/src/pipes/pipes.module';
 import { DocumentationEffects } from './state/documentation/documentation.effects';
 import { ClusterSummaryEffects } from './state/cluster-summary/cluster-summary.effects';
 import { PropertyVerificationEffects } from './state/property-verification/property-verification.effects';

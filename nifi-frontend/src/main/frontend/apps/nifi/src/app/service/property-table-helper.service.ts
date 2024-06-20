@@ -37,10 +37,10 @@ import { ExtensionTypesService } from './extension-types.service';
 import { Client } from './client.service';
 import { NiFiState } from '../state';
 import { Store } from '@ngrx/store';
-import { snackBarError } from '../state/error/error.actions';
+import { snackBarError } from 'libs/shared/src/state/error/error.actions';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { LARGE_DIALOG, SMALL_DIALOG } from '../index';
-import { ErrorHelper } from './error-helper.service';
+import { LARGE_DIALOG, SMALL_DIALOG } from 'libs/shared/src';
+import { ErrorHelper } from 'libs/shared/src/services/error-helper.service';
 
 @Injectable({
     providedIn: 'root'

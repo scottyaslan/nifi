@@ -31,9 +31,9 @@ import {
 import { selectCurrentUser } from '../../../state/current-user/current-user.selectors';
 import { CurrentUser } from '../../../state/current-user';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { selectCurrentRoute } from '../../../state/router/router.selectors';
+import { selectCurrentRoute } from 'libs/shared/src/state/router/router.selectors';
 import { resetSystemDiagnostics } from '../../../state/system-diagnostics/system-diagnostics.actions';
-import { clearBannerErrors } from '../../../state/error/error.actions';
+import { clearBannerErrors } from 'libs/shared/src/state/error/error.actions';
 
 interface TabLink {
     label: string;

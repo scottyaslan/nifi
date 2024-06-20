@@ -22,22 +22,23 @@ import { NiFiState } from '../../../../state';
 import { Store } from '@ngrx/store';
 import { Router } from '@angular/router';
 import * as AccessPolicyActions from './access-policy.actions';
-import * as ErrorActions from '../../../../state/error/error.actions';
+import * as ErrorActions from 'libs/shared/src/state/error/error.actions';
 import { catchError, from, map, of, switchMap, take, tap } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { AccessPolicyService } from '../../service/access-policy.service';
 import { AccessPolicyEntity, ComponentResourceAction, PolicyStatus, ResourceAction } from '../shared';
 import { selectAccessPolicy, selectResourceAction, selectSaving } from './access-policy.selectors';
 import { YesNoDialog } from '../../../../ui/common/yes-no-dialog/yes-no-dialog.component';
-import { isDefinedAndNotNull, TenantEntity } from '../../../../state/shared';
+import { isDefinedAndNotNull } from 'libs/shared/src';
+import { TenantEntity } from '../../../../state/shared';
 import { AddTenantToPolicyDialog } from '../../ui/common/add-tenant-to-policy-dialog/add-tenant-to-policy-dialog.component';
 import { AddTenantsToPolicyRequest } from './index';
 import { selectUserGroups, selectUsers } from '../tenants/tenants.selectors';
 import { OverridePolicyDialog } from '../../ui/common/override-policy-dialog/override-policy-dialog.component';
-import { MEDIUM_DIALOG, SMALL_DIALOG } from '../../../../index';
+import { MEDIUM_DIALOG, SMALL_DIALOG } from 'libs/shared/src';
 import { HttpErrorResponse } from '@angular/common/http';
 import { loadCurrentUser } from '../../../../state/current-user/current-user.actions';
-import { ErrorHelper } from '../../../../service/error-helper.service';
+import { ErrorHelper } from 'libs/shared/src/services/error-helper.service';
 
 @Injectable()
 export class AccessPolicyEffects {

@@ -20,10 +20,10 @@ import { HttpErrorResponse, HttpHandlerFn, HttpInterceptorFn, HttpRequest } from
 import { catchError, take, combineLatest, tap, NEVER, switchMap } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { NiFiState } from '../../state';
-import { fullScreenError, setRoutedToFullScreenError } from '../../state/error/error.actions';
+import { fullScreenError, setRoutedToFullScreenError } from 'libs/shared/src/state/error/error.actions';
 import { selectCurrentUserState } from '../../state/current-user/current-user.selectors';
 import { navigateToLogIn, resetCurrentUser } from '../../state/current-user/current-user.actions';
-import { selectRoutedToFullScreenError } from '../../state/error/error.selectors';
+import { selectRoutedToFullScreenError } from 'libs/shared/src/state/error/error.selectors';
 import { selectLoginConfiguration } from '../../state/login-configuration/login-configuration.selectors';
 
 export const authInterceptor: HttpInterceptorFn = (request: HttpRequest<unknown>, next: HttpHandlerFn) => {

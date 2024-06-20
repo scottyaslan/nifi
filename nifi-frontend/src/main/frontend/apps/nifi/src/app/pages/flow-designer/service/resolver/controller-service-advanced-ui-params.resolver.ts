@@ -25,9 +25,9 @@ import { Client } from '../../../../service/client.service';
 import { selectService } from '../../state/controller-services/controller-services.selectors';
 import { ControllerServiceService } from '../controller-service.service';
 import { HttpErrorResponse } from '@angular/common/http';
-import { fullScreenError } from '../../../../state/error/error.actions';
+import { fullScreenError } from 'libs/shared/src/state/error/error.actions';
 import { ClusterConnectionService } from '../../../../service/cluster-connection.service';
-import { ErrorHelper } from '../../../../service/error-helper.service';
+import { ErrorHelper } from 'libs/shared/src/services/error-helper.service';
 
 export const controllerServiceAdvancedUiParamsResolver: ResolveFn<AdvancedUiParams> = (
     route: ActivatedRouteSnapshot

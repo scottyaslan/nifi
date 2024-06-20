@@ -23,9 +23,9 @@ import { FlowConfiguration, FlowConfigurationState } from '../../state/flow-conf
 import { selectFlowConfiguration } from '../../state/flow-configuration/flow-configuration.selectors';
 import { FlowConfigurationService } from '../flow-configuration.service';
 import { loadFlowConfigurationSuccess } from '../../state/flow-configuration/flow-configuration.actions';
-import { fullScreenError } from '../../state/error/error.actions';
+import { fullScreenError } from 'libs/shared/src/state/error/error.actions';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ErrorHelper } from '../error-helper.service';
+import { ErrorHelper } from 'libs/shared/src/services/error-helper.service';
 
 export const checkFlowConfiguration = (
     flowConfigurationCheck: (flowConfiguration: FlowConfiguration) => boolean

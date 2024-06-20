@@ -19,17 +19,17 @@ import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { concatLatestFrom } from '@ngrx/operators';
 import * as GeneralActions from './general.actions';
-import * as ErrorActions from '../../../../state/error/error.actions';
+import * as ErrorActions from 'libs/shared/src/state/error/error.actions';
 import { catchError, from, map, of, switchMap, tap } from 'rxjs';
 import { ControllerService } from '../../service/controller.service';
 import { MatDialog } from '@angular/material/dialog';
 import { OkDialog } from '../../../../ui/common/ok-dialog/ok-dialog.component';
-import { ErrorHelper } from '../../../../service/error-helper.service';
+import { ErrorHelper } from 'libs/shared/src/services/error-helper.service';
 import { selectStatus } from './general.selectors';
 import { NiFiState } from '../../../../state';
 import { Store } from '@ngrx/store';
 import { HttpErrorResponse } from '@angular/common/http';
-import { SMALL_DIALOG } from '../../../../index';
+import { SMALL_DIALOG } from 'libs/shared/src';
 
 @Injectable()
 export class GeneralEffects {

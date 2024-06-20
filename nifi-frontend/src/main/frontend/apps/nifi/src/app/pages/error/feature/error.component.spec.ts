@@ -20,7 +20,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Error } from './error.component';
 import { provideMockStore } from '@ngrx/store/testing';
 import { initialState } from '../../../state/current-user/current-user.reducer';
-import { errorFeatureKey } from '../../../state/error';
+import { errorFeatureKey } from 'libs/shared/src/state/error';
 import { MockComponent } from 'ng-mocks';
 import { PageContent } from '../../../ui/common/page-content/page-content.component';
 

@@ -40,7 +40,7 @@ import { NiFiState } from '../../../../state';
 import { selectAbout } from '../../../../state/about/about.selectors';
 import { About } from '../../../../state/about';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { clearBannerErrors } from '../../../../state/error/error.actions';
+import { clearBannerErrors } from 'libs/shared/src/state/error/error.actions';
 import { selectClusterSummary } from '../../../../state/cluster-summary/cluster-summary.selectors';
 import { loadClusterSummary } from '../../../../state/cluster-summary/cluster-summary.actions';
 

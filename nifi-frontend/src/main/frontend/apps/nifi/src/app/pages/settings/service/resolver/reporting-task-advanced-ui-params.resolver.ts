@@ -23,11 +23,11 @@ import { NiFiState } from '../../../../state';
 import { AdvancedUiParams } from '../../../../state/shared';
 import { Client } from '../../../../service/client.service';
 import { HttpErrorResponse } from '@angular/common/http';
-import { fullScreenError } from '../../../../state/error/error.actions';
+import { fullScreenError } from 'libs/shared/src/state/error/error.actions';
 import { ReportingTaskService } from '../reporting-task.service';
 import { selectTask } from '../../state/reporting-tasks/reporting-tasks.selectors';
 import { ClusterConnectionService } from '../../../../service/cluster-connection.service';
-import { ErrorHelper } from '../../../../service/error-helper.service';
+import { ErrorHelper } from 'libs/shared/src/services/error-helper.service';
 
 export const reportingTaskAdvancedUiParamsResolver: ResolveFn<AdvancedUiParams> = (route: ActivatedRouteSnapshot) => {
     const store: Store<NiFiState> = inject(Store);

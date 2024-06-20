@@ -19,7 +19,7 @@ import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { concatLatestFrom } from '@ngrx/operators';
 import * as ParameterContextListingActions from './parameter-context-listing.actions';
-import * as ErrorActions from '../../../../state/error/error.actions';
+import * as ErrorActions from 'libs/shared/src/state/error/error.actions';
 import {
     asyncScheduler,
     catchError,
@@ -50,18 +50,17 @@ import {
 import {
     EditParameterRequest,
     EditParameterResponse,
-    isDefinedAndNotNull,
     Parameter,
     ParameterContextUpdateRequest
 } from '../../../../state/shared';
 import { EditParameterDialog } from '../../../../ui/common/edit-parameter-dialog/edit-parameter-dialog.component';
 import { OkDialog } from '../../../../ui/common/ok-dialog/ok-dialog.component';
-import { ErrorHelper } from '../../../../service/error-helper.service';
+import { ErrorHelper } from 'libs/shared/src/services/error-helper.service';
 import { HttpErrorResponse } from '@angular/common/http';
-import { MEDIUM_DIALOG, SMALL_DIALOG, XL_DIALOG } from '../../../../index';
+import { isDefinedAndNotNull, MEDIUM_DIALOG, SMALL_DIALOG, XL_DIALOG } from 'libs/shared/src';
 import { BackNavigation } from '../../../../state/navigation';
-import { Storage } from '../../../../service/storage.service';
-import { NiFiCommon } from '../../../../service/nifi-common.service';
+import { Storage } from 'libs/shared/src/services/storage.service';
+import { NiFiCommon } from 'libs/shared/src/services/nifi-common.service';
 
 @Injectable()
 export class ParameterContextListingEffects {

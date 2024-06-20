@@ -20,9 +20,9 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import * as ExtensionTypesActions from './extension-types.actions';
 import { catchError, combineLatest, map, of, switchMap } from 'rxjs';
 import { ExtensionTypesService } from '../../service/extension-types.service';
-import * as ErrorActions from '../error/error.actions';
+import * as ErrorActions from 'libs/shared/src/state/error/error.actions';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ErrorHelper } from '../../service/error-helper.service';
+import { ErrorHelper } from 'libs/shared/src/services/error-helper.service';
 
 @Injectable()
 export class ExtensionTypesEffects {

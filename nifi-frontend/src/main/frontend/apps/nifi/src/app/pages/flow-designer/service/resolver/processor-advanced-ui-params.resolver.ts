@@ -24,10 +24,10 @@ import { selectProcessor } from '../../state/flow/flow.selectors';
 import { FlowService } from '../flow.service';
 import { AdvancedUiParams } from '../../../../state/shared';
 import { Client } from '../../../../service/client.service';
-import { fullScreenError } from '../../../../state/error/error.actions';
+import { fullScreenError } from 'libs/shared/src/state/error/error.actions';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ClusterConnectionService } from '../../../../service/cluster-connection.service';
-import { ErrorHelper } from '../../../../service/error-helper.service';
+import { ErrorHelper } from 'libs/shared/src/services/error-helper.service';
 
 export const processorAdvancedUiParamsResolver: ResolveFn<AdvancedUiParams> = (route: ActivatedRouteSnapshot) => {
     const store: Store<NiFiState> = inject(Store);

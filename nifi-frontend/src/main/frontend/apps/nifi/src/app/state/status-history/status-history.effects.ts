@@ -25,9 +25,9 @@ import { StatusHistoryRequest } from './index';
 import { catchError, filter, from, map, of, switchMap, tap } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { StatusHistory } from '../../ui/common/status-history/status-history.component';
-import * as ErrorActions from '../../state/error/error.actions';
+import * as ErrorActions from 'libs/shared/src/state/error/error.actions';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ErrorHelper } from '../../service/error-helper.service';
+import { ErrorHelper } from 'libs/shared/src/services/error-helper.service';
 
 @Injectable()
 export class StatusHistoryEffects {

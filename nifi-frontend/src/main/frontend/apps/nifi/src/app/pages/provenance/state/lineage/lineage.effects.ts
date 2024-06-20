@@ -26,10 +26,10 @@ import { NiFiState } from '../../../../state';
 import { ProvenanceService } from '../../service/provenance.service';
 import { Lineage } from './index';
 import { selectActiveLineageId, selectClusterNodeIdFromActiveLineage } from './lineage.selectors';
-import * as ErrorActions from '../../../../state/error/error.actions';
-import { ErrorHelper } from '../../../../service/error-helper.service';
+import * as ErrorActions from 'libs/shared/src/state/error/error.actions';
+import { ErrorHelper } from 'libs/shared/src/services/error-helper.service';
 import { HttpErrorResponse } from '@angular/common/http';
-import { isDefinedAndNotNull } from '../../../../state/shared';
+import { isDefinedAndNotNull } from 'libs/shared/src';
 
 @Injectable()
 export class LineageEffects {

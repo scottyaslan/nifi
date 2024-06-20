@@ -19,7 +19,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ErrorBanner } from './error-banner.component';
 import { provideMockStore } from '@ngrx/store/testing';
-import { initialState } from '../../../state/error/error.reducer';
+import { initialState } from 'libs/shared/src/state/error/error.reducer';
 
 describe('ErrorBanner', () => {
     let component: ErrorBanner;

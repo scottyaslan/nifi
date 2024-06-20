@@ -20,7 +20,7 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import * as UserActions from './current-user.actions';
 import { asyncScheduler, catchError, from, interval, map, of, switchMap, takeUntil, tap } from 'rxjs';
 import { CurrentUserService } from '../../service/current-user.service';
-import { ErrorHelper } from '../../service/error-helper.service';
+import { ErrorHelper } from 'libs/shared/src/services/error-helper.service';
 import { concatLatestFrom } from '@ngrx/operators';
 import { Store } from '@ngrx/store';
 import { NiFiState } from '../index';

@@ -33,8 +33,8 @@ import { flowConfigurationFeatureKey, FlowConfigurationState } from './flow-conf
 import { flowConfigurationReducer } from './flow-configuration/flow-configuration.reducer';
 import { componentStateFeatureKey, ComponentStateState } from './component-state';
 import { componentStateReducer } from './component-state/component-state.reducer';
-import { errorFeatureKey, ErrorState } from './error';
-import { errorReducer } from './error/error.reducer';
+import { errorFeatureKey, ErrorState } from 'libs/shared/src/state/error';
+import { errorReducer } from 'libs/shared/src/state/error/error.reducer';
 import { documentationFeatureKey, DocumentationState } from './documentation';
 import { documentationReducer } from './documentation/documentation.reducer';
 import { clusterSummaryFeatureKey, ClusterSummaryState } from './cluster-summary';

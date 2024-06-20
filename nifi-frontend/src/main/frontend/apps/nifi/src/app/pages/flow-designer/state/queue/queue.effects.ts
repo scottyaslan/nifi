@@ -19,7 +19,7 @@ import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { concatLatestFrom } from '@ngrx/operators';
 import * as QueueActions from './queue.actions';
-import * as ErrorActions from '../../../../state/error/error.actions';
+import * as ErrorActions from 'libs/shared/src/state/error/error.actions';
 import { Store } from '@ngrx/store';
 import { asyncScheduler, catchError, filter, from, interval, map, of, switchMap, take, takeUntil, tap } from 'rxjs';
 import { selectDropConnectionId, selectDropProcessGroupId, selectDropRequestEntity } from './queue.selectors';
@@ -27,14 +27,14 @@ import { QueueService } from '../../service/queue.service';
 import { DropRequest } from './index';
 import { CancelDialog } from '../../../../ui/common/cancel-dialog/cancel-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
-import { isDefinedAndNotNull } from '../../../../state/shared';
+import { isDefinedAndNotNull } from 'libs/shared/src';
 import { YesNoDialog } from '../../../../ui/common/yes-no-dialog/yes-no-dialog.component';
 import { OkDialog } from '../../../../ui/common/ok-dialog/ok-dialog.component';
 import { loadChildProcessGroup, loadConnection, loadProcessGroup } from '../flow/flow.actions';
 import { resetQueueState } from './queue.actions';
-import { SMALL_DIALOG } from '../../../../index';
+import { SMALL_DIALOG } from 'libs/shared/src';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ErrorHelper } from '../../../../service/error-helper.service';
+import { ErrorHelper } from 'libs/shared/src/services/error-helper.service';
 import { selectCurrentProcessGroupId } from '../flow/flow.selectors';
 
 @Injectable()

@@ -47,7 +47,7 @@ import { ProvenanceSearchDialog } from './provenance-search-dialog/provenance-se
 import { resetLineage, submitLineageQuery } from '../../state/lineage/lineage.actions';
 import { LineageRequest } from '../../state/lineage';
 import { selectCompletedLineage } from '../../state/lineage/lineage.selectors';
-import { clearBannerErrors } from '../../../../state/error/error.actions';
+import { clearBannerErrors } from 'libs/shared/src/state/error/error.actions';
 import { selectClusterSummary } from '../../../../state/cluster-summary/cluster-summary.selectors';
 import { loadClusterSummary } from '../../../../state/cluster-summary/cluster-summary.actions';
 

@@ -20,9 +20,9 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import * as FlowConfigurationActions from './flow-configuration.actions';
 import { catchError, from, map, of, switchMap } from 'rxjs';
 import { FlowConfigurationService } from '../../service/flow-configuration.service';
-import * as ErrorActions from '../error/error.actions';
+import * as ErrorActions from 'libs/shared/src/state/error/error.actions';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ErrorHelper } from '../../service/error-helper.service';
+import { ErrorHelper } from 'libs/shared/src/services/error-helper.service';
 
 @Injectable()
 export class FlowConfigurationEffects {

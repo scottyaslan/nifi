@@ -140,8 +140,8 @@
                             <goal>copy</goal>
                         </goals>
                         <configuration>
-                            <sourceFile>${frontend.working.dir}/apps/nifi/src/assets/themes/${frontend.theme}.scss</sourceFile>
-                            <destinationFile>${frontend.working.dir}/apps/nifi/src/assets/themes/material.scss</destinationFile>
+                            <sourceFile>${frontend.working.dir}/libs/shared/src/assets/themes/${frontend.theme}.scss</sourceFile>
+                            <destinationFile>${frontend.working.dir}/libs/shared/src/assets/themes/material.scss</destinationFile>
                         </configuration>
                     </execution>
                 </executions>

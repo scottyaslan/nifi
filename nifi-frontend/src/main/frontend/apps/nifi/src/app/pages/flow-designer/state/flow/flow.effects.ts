@@ -21,7 +21,7 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { concatLatestFrom } from '@ngrx/operators';
 import * as FlowActions from './flow.actions';
 import * as StatusHistoryActions from '../../../../state/status-history/status-history.actions';
-import * as ErrorActions from '../../../../state/error/error.actions';
+import * as ErrorActions from 'libs/shared/src/state/error/error.actions';
 import {
     asyncScheduler,
     catchError,
@@ -89,8 +89,6 @@ import { EditPort } from '../../ui/canvas/items/port/edit-port/edit-port.compone
 import {
     BranchEntity,
     BucketEntity,
-    ComponentType,
-    isDefinedAndNotNull,
     OpenChangeComponentVersionDialogRequest,
     RegistryClientEntity,
     VersionedFlowEntity,
@@ -121,7 +119,14 @@ import { ImportFromRegistry } from '../../ui/canvas/items/flow/import-from-regis
 import { selectCurrentUser } from '../../../../state/current-user/current-user.selectors';
 import { NoRegistryClientsDialog } from '../../ui/common/no-registry-clients-dialog/no-registry-clients-dialog.component';
 import { EditRemoteProcessGroup } from '../../ui/canvas/items/remote-process-group/edit-remote-process-group/edit-remote-process-group.component';
-import { LARGE_DIALOG, MEDIUM_DIALOG, SMALL_DIALOG, XL_DIALOG } from '../../../../index';
+import {
+    ComponentType,
+    isDefinedAndNotNull,
+    LARGE_DIALOG,
+    MEDIUM_DIALOG,
+    SMALL_DIALOG,
+    XL_DIALOG
+} from 'libs/shared/src';
 import { HttpErrorResponse } from '@angular/common/http';
 import { SaveVersionDialog } from '../../ui/canvas/items/flow/save-version-dialog/save-version-dialog.component';
 import { ChangeVersionDialog } from '../../ui/canvas/items/flow/change-version-dialog/change-version-dialog';
@@ -133,7 +138,7 @@ import { ChangeComponentVersionDialog } from '../../../../ui/common/change-compo
 import { SnippetService } from '../../service/snippet.service';
 import { selectTransform } from '../transform/transform.selectors';
 import { EditLabel } from '../../ui/canvas/items/label/edit-label/edit-label.component';
-import { ErrorHelper } from '../../../../service/error-helper.service';
+import { ErrorHelper } from 'libs/shared/src/services/error-helper.service';
 import { selectConnectedStateChanged } from '../../../../state/cluster-summary/cluster-summary.selectors';
 import { resetConnectedStateChanged } from '../../../../state/cluster-summary/cluster-summary.actions';
 import { ChangeColorDialog } from '../../ui/canvas/change-color-dialog/change-color-dialog.component';
@@ -147,8 +152,8 @@ import {
 } from '../../../../state/property-verification/property-verification.selectors';
 import { VerifyPropertiesRequestContext } from '../../../../state/property-verification';
 import { BackNavigation } from '../../../../state/navigation';
-import { Storage } from '../../../../service/storage.service';
-import { NiFiCommon } from '../../../../service/nifi-common.service';
+import { Storage } from 'libs/shared/src/services/storage.service';
+import { NiFiCommon } from 'libs/shared/src/services/nifi-common.service';
 
 @Injectable()
 export class FlowEffects {

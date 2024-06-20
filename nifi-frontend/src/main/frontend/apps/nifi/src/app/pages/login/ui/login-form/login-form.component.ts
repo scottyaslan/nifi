@@ -23,7 +23,7 @@ import { selectLoginFailure } from '../../state/access/access.selectors';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { selectLogoutSupported } from '../../../../state/current-user/current-user.selectors';
 import { NiFiState } from '../../../../state';
-import { setRoutedToFullScreenError } from '../../../../state/error/error.actions';
+import { setRoutedToFullScreenError } from 'libs/shared/src/state/error/error.actions';
 import { logout } from '../../../../state/current-user/current-user.actions';
 
 @Component({

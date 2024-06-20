@@ -20,8 +20,8 @@ import { Store } from '@ngrx/store';
 import { AsyncPipe } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { NiFiState } from '../../../state';
-import { selectBannerErrors } from '../../../state/error/error.selectors';
-import { clearBannerErrors } from '../../../state/error/error.actions';
+import { selectBannerErrors } from 'libs/shared/src/state/error/error.selectors';
+import { clearBannerErrors } from 'libs/shared/src/state/error/error.actions';
 
 @Component({
     selector: 'error-banner',

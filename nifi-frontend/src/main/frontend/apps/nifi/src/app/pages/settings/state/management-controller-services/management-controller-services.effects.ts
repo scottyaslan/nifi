@@ -19,7 +19,7 @@ import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { concatLatestFrom } from '@ngrx/operators';
 import * as ManagementControllerServicesActions from './management-controller-services.actions';
-import * as ErrorActions from '../../../../state/error/error.actions';
+import * as ErrorActions from 'libs/shared/src/state/error/error.actions';
 import { catchError, from, map, of, switchMap, take, takeUntil, tap } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { ManagementControllerServiceService } from '../../service/management-controller-service.service';
@@ -31,7 +31,6 @@ import { Client } from '../../../../service/client.service';
 import { YesNoDialog } from '../../../../ui/common/yes-no-dialog/yes-no-dialog.component';
 import { EditControllerService } from '../../../../ui/common/controller-service/edit-controller-service/edit-controller-service.component';
 import {
-    ComponentType,
     ControllerServiceReferencingComponent,
     EditControllerServiceDialogRequest,
     OpenChangeComponentVersionDialogRequest,
@@ -43,8 +42,8 @@ import { EnableControllerService } from '../../../../ui/common/controller-servic
 import { DisableControllerService } from '../../../../ui/common/controller-service/disable-controller-service/disable-controller-service.component';
 import { PropertyTableHelperService } from '../../../../service/property-table-helper.service';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ErrorHelper } from '../../../../service/error-helper.service';
-import { LARGE_DIALOG, SMALL_DIALOG, XL_DIALOG } from '../../../../index';
+import { ErrorHelper } from 'libs/shared/src/services/error-helper.service';
+import { ComponentType, LARGE_DIALOG, SMALL_DIALOG, XL_DIALOG } from 'libs/shared/src';
 import { ChangeComponentVersionDialog } from '../../../../ui/common/change-component-version-dialog/change-component-version-dialog';
 import { ExtensionTypesService } from '../../../../service/extension-types.service';
 import {
