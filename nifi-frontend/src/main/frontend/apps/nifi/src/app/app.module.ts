@@ -55,6 +55,7 @@ import { loadingInterceptor } from './service/interceptors/loading.interceptor';
 import { LoginConfigurationEffects } from './state/login-configuration/login-configuration.effects';
 import { BannerTextEffects } from './state/banner-text/banner-text.effects';
 import { MAT_TOOLTIP_DEFAULT_OPTIONS, MatTooltipDefaultOptions } from '@angular/material/tooltip';
+import { provideMarkdown } from 'ngx-markdown';
 
 const entry = localStorage.getItem('disable-animations');
 let disableAnimations: string = entry !== null ? JSON.parse(entry).item : '';
@@ -119,6 +120,7 @@ export const customTooltipDefaults: MatTooltipDefaultOptions = {
                 headerName: 'Request-Token'
             })
         ),
+        provideMarkdown(),
         { provide: MAT_TOOLTIP_DEFAULT_OPTIONS, useValue: customTooltipDefaults }
     ]
 })
