@@ -86,7 +86,7 @@ export class Breadcrumbs {
                 return 'locally-modified neutral-color fa fa-asterisk';
             } else {
                 // up to date
-                return 'up-to-date success-color fa fa-check';
+                return 'up-to-date success-color-default fa fa-check';
             }
         } else {
             return '';

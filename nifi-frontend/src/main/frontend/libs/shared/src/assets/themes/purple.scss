@@ -121,20 +121,20 @@ $m3-material-primary-light-palette: (
     ),
     error: (
         0: #000000,
-        10: #b71c1c,
-        20: #c62828,
-        25: #d32f2f,
-        30: #e53935,
-        35: #f44336,
-        40: #ef5350,
-        50: #e57373,
-        60: #ef9a9a,
-        70: #ffcdd2,
-        80: #ffebee,
-        90: #ffebee,
-        95: #ffebee,
-        98: #ffebee,
-        99: #ffebee,
+        10: #a8372a,
+        20: #a8372a,
+        25: #a8372a,
+        30: #a8372a,
+        35: #a8372a,
+        40: #bd3533,
+        50: #f64e4c,
+        60: #f64e4c,
+        70: #f64e4c,
+        80: #eb7071,
+        90: #f49999,
+        95: #ffccd2,
+        98: #ffccd2,
+        99: #ffccd2,
         100: #ffffff
     )
 );
@@ -243,10 +243,10 @@ $m3-material-primary-dark-palette: (
     error: (
         0: #000000,
         10: #ba554a,
-        20: #ff0000,
-        25: #ff0000,
-        30: #ff1507,
-        35: #ec3030,
+        20: #ba554a,
+        25: #ba554a,
+        30: #ba554a,
+        35: #f64e4c,
         40: #f64e4c,
         50: #f64e4c,
         60: #f64e4c,
@@ -341,12 +341,11 @@ $m3-light-theme-config: (
         lighter: 90
     ),
     success: (
-        darker: #016131,
-        default: #52bf7e,
-        lighter: #9dd9b2
+        default: #31975b,
+        variant: #1390ca
     ),
     alternate-surface: #ffffff,
-    caution: #cf9f5d,
+    caution: #cf9338,
     neutral: (
         darker: 4,
         default: 35,
@@ -357,7 +356,8 @@ $m3-light-theme-config: (
     error: (
         darker: 10,
         default: 50,
-        lighter: 60
+        lighter: 80,
+        contrast: #ffffff
     )
 );
 
@@ -384,9 +384,8 @@ $m3-dark-theme-config: (
         lighter: 80
     ),
     success: (
-        darker: #016131,
         default: #52bf7e,
-        lighter: #9dd9b2
+        variant: #44a3cf
     ),
     alternate-surface: #444444,
     caution: #cf9f5d,
@@ -398,8 +397,9 @@ $m3-dark-theme-config: (
     ),
     neutral-variant: 35,
     error: (
-        darker: 35,
-        default: 70,
-        lighter: 80
+        darker: 10,
+        default: 50,
+        lighter: 70,
+        contrast: #ffffff
     )
 );

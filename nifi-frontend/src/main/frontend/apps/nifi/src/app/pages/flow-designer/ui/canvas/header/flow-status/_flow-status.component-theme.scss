@@ -61,15 +61,17 @@
         map.get(map.get($config, neutral), default)
     );
 
-    $material-theme-secondary-palette-default: mat.get-theme-color(
+    $material-theme-primary-palette-default: mat.get-theme-color(
         $material-theme,
-        secondary,
-        map.get(map.get($config, secondary), default)
+        primary,
+        map.get(map.get($config, primary), default)
     );
 
-    $on-primary: mat.get-theme-color($material-theme, on-primary);
-    $success-default: map.get(map.get($config, success), default);
-    $caution-default: map.get($config, caution);
+    $primary-contrast: map.get(map.get($config, primary), contrast);
+    $caution-contrast: map.get(map.get($config, caution), contrast);
+    $error-contrast: map.get(map.get($config, error), contrast);
+    $success: map.get(map.get($config, success), default);
+    $caution: map.get(map.get($config, caution), default);
 
     .flow-status {
         background-color: if(
@@ -82,29 +84,33 @@
             background-color: unset;
 
             .fa {
-                color: $material-theme-secondary-palette-default;
+                color: $material-theme-primary-palette-default;
             }
         }
 
         .controller-bulletins.has-bulletins {
             .fa {
-                color: mat.get-theme-color($material-theme, surface);
+                color: $primary-contrast;
             }
 
             &.error {
-                background-color: if(
-                    $is-material-dark,
-                    $material-theme-error-palette-default,
-                    $material-theme-error-palette-darker
-                );
+                .fa {
+                    color: $error-contrast;
+                }
+
+                background-color: $material-theme-error-palette-darker;
             }
             &.warning {
-                background-color: $caution-default;
+                .fa {
+                    color: $caution-contrast;
+                }
+
+                background-color: $caution;
             }
             &.info,
             &.debug,
             &.trace {
-                background-color: $success-default;
+                background-color: $success;
             }
         }
 
@@ -116,7 +122,7 @@
             );
 
             .fa {
-                color: mat.get-theme-color($material-theme, surface);
+                color: $primary-contrast;
             }
         }
 
@@ -128,7 +134,7 @@
             );
 
             .fa {
-                color: mat.get-theme-color($material-theme, surface);
+                color: $primary-contrast;
             }
         }
     }

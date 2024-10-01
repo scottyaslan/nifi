@@ -735,7 +735,7 @@ export class ProcessGroupManager {
                 // update transmitting
                 const transmitting = details
                     .select('text.process-group-transmitting')
-                    .classed('success-color', function (d: any) {
+                    .classed('success-color-variant', function (d: any) {
                         return d.permissions.canRead && d.activeRemotePortCount > 0;
                     })
                     .classed('zero', function (d: any) {
@@ -791,7 +791,7 @@ export class ProcessGroupManager {
                 // update running
                 const running = details
                     .select('text.process-group-running')
-                    .classed('success-color-lighter', function (d: any) {
+                    .classed('success-color-default', function (d: any) {
                         return d.permissions.canRead && d.component.runningCount > 0;
                     })
                     .classed('zero', function (d: any) {
@@ -919,7 +919,7 @@ export class ProcessGroupManager {
                 // up to date current
                 const upToDate = details
                     .select('text.process-group-up-to-date')
-                    .classed('success-color', function (d: any) {
+                    .classed('success-color-variant', function (d: any) {
                         return d.permissions.canRead && d.component.upToDateCount > 0;
                     })
                     .classed('zero', function (d: any) {
@@ -1088,7 +1088,7 @@ export class ProcessGroupManager {
                                 return `version-control neutral-color`;
                             } else {
                                 // up to date
-                                return `version-control success-color`;
+                                return `version-control success-color-default`;
                             }
                         } else {
                             return 'version-control neutral-contrast';

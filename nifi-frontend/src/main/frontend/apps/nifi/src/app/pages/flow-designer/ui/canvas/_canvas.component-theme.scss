@@ -65,12 +65,15 @@
         neutral,
         map.get(map.get($config, neutral), lighter)
     );
+
+    $primary-contrast: map.get(map.get($config, primary), contrast);
+    $caution-contrast: map.get(map.get($config, caution), contrast);
+    $error-contrast: map.get(map.get($config, error), contrast);
     $neutral-contrast: map.get(map.get($config, neutral), contrast);
     $border-color: mat.get-theme-color($material-theme, neutral-variant, map.get($config, neutral-variant));
     $success-lighter: map.get($config, success-lighter);
     $success-default: map.get(map.get($config, success), default);
-    $caution-default: map.get($config, caution);
-    $on-primary: mat.get-theme-color($material-theme, on-primary);
+    $caution: map.get(map.get($config, caution), default);
 
     // Shadows should always be darker. We explicitly set this so the SVG shadows are correct in both modes.
     $drop-shadow-color: black;
@@ -199,12 +202,22 @@
         }
 
         text.bulletin-icon {
-            &.error,
-            &.warning,
             &.info,
             &.debug,
             &.trace {
-                fill: mat.get-theme-color($material-theme, surface);
+                fill: $primary-contrast;
+            }
+        }
+
+        text.bulletin-icon {
+            &.error {
+                fill: $error-contrast;
+            }
+        }
+
+        text.bulletin-icon {
+            &.warning {
+                fill: $caution-contrast;
             }
         }
 
@@ -217,7 +230,7 @@
                 );
             }
             &.warning {
-                fill: $caution-default;
+                fill: $caution;
             }
             &.info,
             &.debug,

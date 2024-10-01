@@ -116,7 +116,7 @@ export class ProcessGroupStatusTable extends ComponentStatusTable<ProcessGroupSt
             label: 'Locally modified'
         },
         UP_TO_DATE: {
-            classes: 'up-to-date fa fa-check success-color',
+            classes: 'up-to-date fa fa-check success-color-default',
             label: 'Up to date'
         },
         LOCALLY_MODIFIED_AND_STALE: {
