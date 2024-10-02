@@ -998,7 +998,7 @@ export class ConnectionManager {
                                         return d.component.source.running;
                                     }
                                 })
-                                .classed('stopped error-color-lighter', function () {
+                                .classed('stopped error-color', function () {
                                     if (d.component.source.exists === false) {
                                         return false;
                                     } else {
@@ -1113,7 +1113,7 @@ export class ConnectionManager {
                                         return d.component.destination.running;
                                     }
                                 })
-                                .classed('stopped error-color-lighter', function () {
+                                .classed('stopped error-color', function () {
                                     if (d.component.destination.exists === false) {
                                         return false;
                                     } else {

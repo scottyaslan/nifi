@@ -823,7 +823,7 @@ export class ProcessGroupManager {
                 // update stopped
                 const stopped = details
                     .select('text.process-group-stopped')
-                    .classed('error-color-lighter', function (d: any) {
+                    .classed('error-color', function (d: any) {
                         return d.permissions.canRead && d.component.stoppedCount > 0;
                     })
                     .classed('zero', function (d: any) {
@@ -975,7 +975,7 @@ export class ProcessGroupManager {
                 // update stale
                 const stale = details
                     .select('text.process-group-stale')
-                    .classed('error-color-lighter', function (d: any) {
+                    .classed('error-color', function (d: any) {
                         return d.permissions.canRead && d.component.staleCount > 0;
                     })
                     .classed('zero', function (d: any) {
@@ -1007,7 +1007,7 @@ export class ProcessGroupManager {
                 // update locally modified and stale
                 const locallyModifiedAndStale = details
                     .select('text.process-group-locally-modified-and-stale')
-                    .classed('error-color-lighter', function (d: any) {
+                    .classed('error-color', function (d: any) {
                         return d.permissions.canRead && d.component.locallyModifiedAndStaleCount > 0;
                     })
                     .classed('zero', function (d: any) {
@@ -1081,9 +1081,9 @@ export class ProcessGroupManager {
                             if (vciState === 'SYNC_FAILURE') {
                                 return `version-control neutral-color`;
                             } else if (vciState === 'LOCALLY_MODIFIED_AND_STALE') {
-                                return `version-control error-color-lighter`;
+                                return `version-control error-color`;
                             } else if (vciState === 'STALE') {
-                                return `version-control error-color-lighter`;
+                                return `version-control error-color`;
                             } else if (vciState === 'LOCALLY_MODIFIED') {
                                 return `version-control neutral-color`;
                             } else {

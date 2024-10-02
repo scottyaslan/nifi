@@ -539,11 +539,7 @@
         }
 
         rect.process-group-stats-border {
-            fill: if(
-                $is-material-dark,
-                $material-theme-secondary-palette-default,
-                $material-theme-secondary-palette-lighter
-            );
+            fill: $border-color;
         }
 
         rect.process-group-banner,

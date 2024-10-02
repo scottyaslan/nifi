@@ -109,7 +109,7 @@ export class ParameterReferences {
 
     getNonServiceStateIcon(reference: AffectedComponent): string {
         if (reference.state == 'STOPPED') {
-            return 'stopped fa fa-stop error-color-lighter';
+            return 'stopped fa fa-stop error-color';
         } else if (reference.state == 'RUNNING') {
             return 'running fa fa-play success-color-default';
         } else {

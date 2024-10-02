@@ -57,9 +57,7 @@
                 </div>
             </div>
             <div class="flex items-center gap-x-2" title="Stopped Components">
-                <div
-                    class="fa fa-stop"
-                    [class]="getActiveStyle(controllerStatus.stoppedCount, 'error-color-lighter')"></div>
+                <div class="fa fa-stop" [class]="getActiveStyle(controllerStatus.stoppedCount, 'error-color')"></div>
                 <div class="tertiary-color font-medium">
                     {{ formatValue(controllerStatus.stoppedCount) }}
                 </div>
@@ -99,7 +97,7 @@
             <div class="flex items-center gap-x-2" title="Stale Versioned Process Groups">
                 <div
                     class="fa fa-arrow-circle-up"
-                    [class]="getActiveStyle(controllerStatus.staleCount, 'error-color-lighter')"></div>
+                    [class]="getActiveStyle(controllerStatus.staleCount, 'error-color')"></div>
                 <div class="tertiary-color font-medium">
                     {{ formatValue(controllerStatus.staleCount) }}
                 </div>
@@ -107,9 +105,7 @@
             <div class="flex items-center gap-x-2" title="Locally modified and stale Versioned Process Groups">
                 <div
                     class="fa fa-exclamation-circle"
-                    [class]="
-                        getActiveStyle(controllerStatus.locallyModifiedAndStaleCount, 'error-color-lighter')
-                    "></div>
+                    [class]="getActiveStyle(controllerStatus.locallyModifiedAndStaleCount, 'error-color')"></div>
                 <div class="tertiary-color font-medium">
                     {{ formatValue(controllerStatus.locallyModifiedAndStaleCount) }}
                 </div>

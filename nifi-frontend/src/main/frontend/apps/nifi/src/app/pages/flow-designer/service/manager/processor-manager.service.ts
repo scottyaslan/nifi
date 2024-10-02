@@ -694,7 +694,7 @@ export class ProcessorManager {
                 } else if (d.status.aggregateSnapshot.runStatus === 'Running') {
                     clazz = 'running success-color-default';
                 } else if (d.status.aggregateSnapshot.runStatus === 'Stopped') {
-                    clazz = 'stopped error-color-lighter';
+                    clazz = 'stopped error-color';
                 }
 
                 return `run-status-icon ${clazz}`;

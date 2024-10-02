@@ -119,7 +119,7 @@ export class ReportingTaskTable {
             return 'invalid fa fa-warning caution-color';
         } else {
             if (entity.status.runStatus === 'STOPPED') {
-                return 'fa fa-stop error-color-lighter stopped';
+                return 'fa fa-stop error-color stopped';
             } else if (entity.status.runStatus === 'RUNNING') {
                 return 'fa fa-play success-color-default running';
             } else {

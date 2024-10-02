@@ -35,11 +35,6 @@
         error,
         map.get(map.get($config, error), default)
     );
-    $material-theme-error-palette-lighter: mat.get-theme-color(
-        $material-theme,
-        error,
-        map.get(map.get($config, error), lighter)
-    );
     $material-theme-error-palette-darker: mat.get-theme-color(
         $material-theme,
         error,

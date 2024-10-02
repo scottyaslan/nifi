@@ -453,11 +453,6 @@
         error,
         map.get(map.get($config, error), darker)
     );
-    $material-theme-error-palette-lighter: mat.get-theme-color(
-        $material-theme,
-        error,
-        map.get(map.get($config, error), lighter)
-    );
     $material-theme-neutral-palette-default: mat.get-theme-color(
         $material-theme,
         neutral,
@@ -527,11 +522,6 @@
     .error-color {
         color: $material-theme-error-palette-default;
         fill: $material-theme-error-palette-default;
-    }
-
-    .error-color-lighter {
-        color: $material-theme-error-palette-lighter;
-        fill: $material-theme-error-palette-lighter;
     }
 
     .error-color-darker {
