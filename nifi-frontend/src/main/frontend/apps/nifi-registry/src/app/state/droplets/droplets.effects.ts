@@ -19,16 +19,15 @@ import { inject, Injectable } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { Store } from '@ngrx/store';
-import { concatLatestFrom } from '@ngrx/operators';
 import { catchError, from, map, of, switchMap, tap } from 'rxjs';
 import { MEDIUM_DIALOG, SMALL_DIALOG, XL_DIALOG } from '@nifi/shared';
-import { NiFiState } from '../index';
 import { DropletsService } from '../../service/droplets.service';
 import * as DropletsActions from './droplets.actions';
 import { DeleteDropletDialogComponent } from '../../pages/resources/feature/ui/delete-droplet-dialog/delete-droplet-dialog.component';
-import { ImportNewFlowDialogComponent } from '../../pages/resources/feature/ui/import-new-flow-dialog/import-new-flow-dialog.component';
-import { ImportNewFlowDialogData } from '../../pages/resources/feature/ui/import-new-flow-dialog/import-new-flow-dialog.component';
+import {
+    ImportNewFlowDialogComponent,
+    ImportNewFlowDialogData
+} from '../../pages/resources/feature/ui/import-new-flow-dialog/import-new-flow-dialog.component';
 import {
     ImportNewFlowVersionDialogComponent,
     ImportNewFlowVersionDialogData
@@ -39,15 +38,13 @@ import {
 } from '../../pages/resources/feature/ui/export-flow-version-dialog/export-flow-version-dialog.component';
 import { FlowVersionsDialogComponent } from '../../pages/resources/feature/ui/flow-versions-dialog/flow-versions-dialog.component';
 import { ErrorHelper } from '../../service/error-helper.service';
-import * as ErrorActions from '../../state/error/error.actions';
-import { selectStatus } from './droplets.selectors';
 import { Router } from '@angular/router';
 import { ErrorContextKey } from '../error';
+import * as ErrorActions from '../../state/error/error.actions';
 
 @Injectable()
 export class DropletsEffects {
     constructor(
-        private store: Store<NiFiState>,
         private dropletsService: DropletsService,
         private dialog: MatDialog,
         private errorHelper: ErrorHelper,
@@ -59,8 +56,7 @@ export class DropletsEffects {
     loadDroplets$ = createEffect(() =>
         this.actions$.pipe(
             ofType(DropletsActions.loadDroplets),
-            concatLatestFrom(() => this.store.select(selectStatus)),
-            switchMap(([, status]) => {
+            switchMap(() => {
                 return from(
                     this.dropletsService.getDroplets().pipe(
                         map((response) =>
@@ -70,9 +66,7 @@ export class DropletsEffects {
                                 }
                             })
                         ),
-                        catchError((errorResponse: HttpErrorResponse) =>
-                            of(this.errorHelper.handleLoadingError(status, errorResponse))
-                        )
+                        catchError((errorResponse: HttpErrorResponse) => of(this.bannerError(errorResponse)))
                     )
                 );
             })
@@ -84,7 +78,7 @@ export class DropletsEffects {
             this.actions$.pipe(
                 ofType(DropletsActions.openDeleteDropletDialog),
                 tap(({ request }) => {
-                    const dialogRef = this.dialog.open<DeleteDropletDialogComponent, ExportFlowVersionDialogData>(
+                    this.dialog.open<DeleteDropletDialogComponent, ExportFlowVersionDialogData>(
                         DeleteDropletDialogComponent,
                         {
                             ...SMALL_DIALOG,
@@ -92,8 +86,6 @@ export class DropletsEffects {
                             data: request
                         }
                     );
-
-                    dialogRef.afterClosed().subscribe(() => this.store.dispatch(DropletsActions.loadDroplets()));
                 })
             ),
         { dispatch: false }
@@ -106,29 +98,21 @@ export class DropletsEffects {
             switchMap((request) =>
                 from(this.dropletsService.deleteDroplet(request.droplet.link.href)).pipe(
                     map((res) => DropletsActions.deleteDropletSuccess({ response: res })),
-                    tap({
-                        error: (errorResponse: HttpErrorResponse) => {
-                            this.store.dispatch(
-                                DropletsActions.dropletsBannerError({
-                                    errorContext: {
-                                        context: ErrorContextKey.DELETE_DROPLET,
-                                        errors: [this.errorHelper.getErrorString(errorResponse)]
-                                    }
-                                })
-                            );
-                        }
-                    })
+                    catchError((errorResponse: HttpErrorResponse) =>
+                        of(this.bannerError(errorResponse, ErrorContextKey.DELETE_DROPLET))
+                    )
                 )
             )
         )
     );
 
-    deleteDropletSuccess$ = createEffect(() =>
-        this.actions$.pipe(
-            ofType(DropletsActions.deleteDropletSuccess),
-            tap(() => this.dialog.closeAll()),
-            switchMap(() => of(DropletsActions.loadDroplets()))
-        )
+    deleteDropletSuccess$ = createEffect(
+        () =>
+            this.actions$.pipe(
+                ofType(DropletsActions.deleteDropletSuccess),
+                tap(() => this.dialog.closeAll())
+            ),
+        { dispatch: false }
     );
 
     openImportNewFlowDialog$ = createEffect(
@@ -162,6 +146,7 @@ export class DropletsEffects {
                 ).pipe(
                     map((res) =>
                         DropletsActions.createNewFlowSuccess({
+                            response: res,
                             request: {
                                 href: res.link.href,
                                 file: request.file,
@@ -169,64 +154,45 @@ export class DropletsEffects {
                             }
                         })
                     ),
-                    tap({
-                        error: (errorResponse: HttpErrorResponse) => {
-                            this.store.dispatch(
-                                DropletsActions.dropletsBannerError({
-                                    errorContext: {
-                                        context: ErrorContextKey.CREATE_DROPLET,
-                                        errors: [this.errorHelper.getErrorString(errorResponse)]
-                                    }
-                                })
-                            );
-                        }
-                    })
+                    catchError((errorResponse: HttpErrorResponse) =>
+                        of(this.bannerError(errorResponse, ErrorContextKey.CREATE_DROPLET))
+                    )
                 )
             )
         )
     );
 
-    createNewFlowSuccess$ = createEffect(() =>
-        this.actions$.pipe(
-            ofType(DropletsActions.createNewFlowSuccess),
-            tap(() => this.store.dispatch(DropletsActions.loadDroplets())),
-            map((action) => action.request),
-            map(({ href, file, description }) =>
-                DropletsActions.importNewFlow({ request: { href, file, description } })
-            )
-        )
+    createNewFlowSuccess$ = createEffect(
+        () =>
+            this.actions$.pipe(
+                ofType(DropletsActions.createNewFlowSuccess),
+                tap(() => this.dialog.closeAll())
+            ),
+        { dispatch: false }
     );
 
     importNewFlow$ = createEffect(() =>
         this.actions$.pipe(
-            ofType(DropletsActions.importNewFlow),
+            ofType(DropletsActions.importNewFlowVersion),
             map((action) => action.request),
             switchMap(({ href, file, description }) =>
                 from(this.dropletsService.uploadFlow(href, file, description)).pipe(
-                    map((res) => DropletsActions.importNewFlowSuccess({ response: res })),
-                    tap({
-                        error: (errorResponse: HttpErrorResponse) => {
-                            this.store.dispatch(
-                                DropletsActions.dropletsBannerError({
-                                    errorContext: {
-                                        context: ErrorContextKey.IMPORT_DROPLET_VERSION,
-                                        errors: [this.errorHelper.getErrorString(errorResponse)]
-                                    }
-                                })
-                            );
-                        }
-                    })
+                    map((res) => DropletsActions.importNewFlowVersionSuccess({ response: res })),
+                    catchError((errorResponse: HttpErrorResponse) =>
+                        of(this.bannerError(errorResponse, ErrorContextKey.IMPORT_DROPLET_VERSION))
+                    )
                 )
             )
         )
     );
 
-    importNewFlowSuccess$ = createEffect(() =>
-        this.actions$.pipe(
-            ofType(DropletsActions.importNewFlowSuccess),
-            tap(() => this.dialog.closeAll()),
-            switchMap(() => of(DropletsActions.loadDroplets()))
-        )
+    importNewFlowSuccess$ = createEffect(
+        () =>
+            this.actions$.pipe(
+                ofType(DropletsActions.importNewFlowVersionSuccess),
+                tap(() => this.dialog.closeAll())
+            ),
+        { dispatch: false }
     );
 
     openImportNewFlowVersionDialog$ = createEffect(
@@ -296,53 +262,43 @@ export class DropletsEffects {
                     }),
                     map((res) => DropletsActions.exportFlowVersionSuccess({ response: res })),
                     catchError((errorResponse: HttpErrorResponse) => {
-                        this.dialog.closeAll();
-                        return of(
-                            DropletsActions.dropletsSnackbarError({
-                                error: this.errorHelper.getErrorString(errorResponse)
-                            })
-                        );
+                        return of(this.bannerError(errorResponse, ErrorContextKey.EXPORT_DROPLET_VERSION));
                     })
                 )
             )
         );
     });
 
-    exportFlowVersionSuccess$ = createEffect(() =>
-        this.actions$.pipe(
-            ofType(DropletsActions.exportFlowVersionSuccess),
-            switchMap(() => of(DropletsActions.loadDroplets()))
-        )
-    );
-
-    openFlowVersionsDialog$ = createEffect(
+    exportFlowVersionSuccess$ = createEffect(
         () =>
             this.actions$.pipe(
-                ofType(DropletsActions.openFlowVersionsDialog),
-                map((action) => action.request),
-                switchMap((request) =>
-                    from(this.dropletsService.getDropletSnapshotMetadata(request.droplet.link.href)).pipe(
-                        map((res) => {
-                            this.dialog.open(FlowVersionsDialogComponent, {
-                                ...XL_DIALOG,
-                                autoFocus: false,
-                                data: {
-                                    droplet: request.droplet,
-                                    versions: res
-                                }
-                            });
-                        }),
-                        catchError((errorResponse: HttpErrorResponse) => {
-                            return of(
-                                DropletsActions.dropletsSnackbarError({
-                                    error: this.errorHelper.getErrorString(errorResponse)
-                                })
-                            );
-                        })
-                    )
-                )
+                ofType(DropletsActions.exportFlowVersionSuccess),
+                tap(() => this.dialog.closeAll())
             ),
         { dispatch: false }
+    );
+
+    openFlowVersionsDialog$ = createEffect(() =>
+        this.actions$.pipe(
+            ofType(DropletsActions.openFlowVersionsDialog),
+            map((action) => action.request),
+            switchMap((request) =>
+                from(this.dropletsService.getDropletSnapshotMetadata(request.droplet.link.href)).pipe(
+                    map((res) => {
+                        this.dialog.open(FlowVersionsDialogComponent, {
+                            ...XL_DIALOG,
+                            autoFocus: false,
+                            data: {
+                                droplet: request.droplet,
+                                versions: res
+                            }
+                        });
+                        return DropletsActions.noOp();
+                    }),
+                    catchError((errorResponse: HttpErrorResponse) => of(this.bannerError(errorResponse)))
+                )
+            )
+        )
     );
 
     selectDroplet$ = createEffect(
@@ -365,14 +321,12 @@ export class DropletsEffects {
         )
     );
 
-    dropletsSnackbarError$ = createEffect(() =>
-        this.actions$.pipe(
-            ofType(DropletsActions.dropletsSnackbarError),
-            map((action) => action.error),
-            tap(() => {
-                this.dialog.closeAll();
-            }),
-            switchMap((error) => of(ErrorActions.snackBarError({ error })))
-        )
-    );
+    private bannerError(errorResponse: HttpErrorResponse, context: ErrorContextKey = ErrorContextKey.GLOBAL) {
+        return DropletsActions.dropletsBannerError({
+            errorContext: {
+                errors: [this.errorHelper.getErrorString(errorResponse)],
+                context
+            }
+        });
+    }
 }

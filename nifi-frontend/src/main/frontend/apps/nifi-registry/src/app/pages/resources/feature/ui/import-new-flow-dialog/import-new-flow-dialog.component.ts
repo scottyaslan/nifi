@@ -27,8 +27,8 @@ import { MatInputModule } from '@angular/material/input';
 import { Store } from '@ngrx/store';
 import { createNewFlow } from 'apps/nifi-registry/src/app/state/droplets/droplets.actions';
 import { MatButtonModule } from '@angular/material/button';
-import { ContextErrorBanner } from '@nifi/shared';
 import { ErrorContextKey } from 'apps/nifi-registry/src/app/state/error';
+import { ContextErrorBanner } from 'apps/nifi-registry/src/app/ui/common/context-error-banner/context-error-banner.component';
 
 export interface ImportNewFlowDialogData {
     buckets: Bucket[];
@@ -55,6 +55,7 @@ export class ImportNewFlowDialogComponent extends CloseOnEscapeDialog implements
     @ViewChild('flowUploadControl') flowUploadControl!: ElementRef;
 
     protected readonly ErrorContextKey = ErrorContextKey;
+
     fileToUpload: File | null = null;
     writableBuckets: Bucket[] = [];
     buckets: Bucket[] = [];

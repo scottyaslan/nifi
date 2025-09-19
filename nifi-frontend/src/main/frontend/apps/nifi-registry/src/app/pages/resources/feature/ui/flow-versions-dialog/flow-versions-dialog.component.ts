@@ -26,6 +26,8 @@ import { CloseOnEscapeDialog, NiFiCommon } from '@nifi/shared';
 import { MatMenuModule } from '@angular/material/menu';
 import { exportFlowVersion } from 'apps/nifi-registry/src/app/state/droplets/droplets.actions';
 import { MatButtonModule } from '@angular/material/button';
+import { ContextErrorBanner } from '../../../../../ui/common/context-error-banner/context-error-banner.component';
+import { ErrorContextKey } from '../../../../../state/error';
 
 interface Data {
     droplet: Droplet;
@@ -45,7 +47,15 @@ interface VersionedFlowSnapshotMetadata {
 @Component({
     selector: 'app-flow-versions-dialog',
     standalone: true,
-    imports: [CommonModule, MatTableModule, MatSortModule, MatDialogModule, MatMenuModule, MatButtonModule],
+    imports: [
+        CommonModule,
+        MatTableModule,
+        MatSortModule,
+        MatDialogModule,
+        MatMenuModule,
+        MatButtonModule,
+        ContextErrorBanner
+    ],
     templateUrl: './flow-versions-dialog.component.html',
     styleUrl: './flow-versions-dialog.component.scss'
 })
@@ -119,4 +129,6 @@ export class FlowVersionsDialogComponent extends CloseOnEscapeDialog {
             return this.nifiCommon.compareString(a, b);
         }
     }
+
+    protected readonly ErrorContextKey = ErrorContextKey;
 }
