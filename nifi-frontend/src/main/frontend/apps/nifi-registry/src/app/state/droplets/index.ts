@@ -77,7 +77,7 @@ export interface ImportDropletRequest {
     name: string;
 }
 
-export interface ImportFlowVersionRequest {
+export interface ImportDropletVersionRequest {
     href: string;
     file: File;
     description: string;

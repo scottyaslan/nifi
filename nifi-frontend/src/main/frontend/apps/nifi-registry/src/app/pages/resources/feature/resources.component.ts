@@ -21,7 +21,7 @@ import {
     selectDroplets,
     selectDropletState
 } from '../../../state/droplets/droplets.selectors';
-import { loadDroplets, openImportNewFlowDialog, selectDroplet } from '../../../state/droplets/droplets.actions';
+import { loadDroplets, openImportNewDropletDialog, selectDroplet } from '../../../state/droplets/droplets.actions';
 import { Droplet } from '../../../state/droplets';
 import { Store } from '@ngrx/store';
 import { MatTableDataSource } from '@angular/material/table';
@@ -155,8 +155,8 @@ export class ResourcesComponent implements OnInit {
         });
     }
 
-    openImportNewFlowDialog() {
-        this.store.dispatch(openImportNewFlowDialog({ request: { buckets: this.buckets } }));
+    openImportNewDropletDialog() {
+        this.store.dispatch(openImportNewDropletDialog({ request: { buckets: this.buckets } }));
     }
 
     applyFilter(filter: DropletTableFilterContext) {

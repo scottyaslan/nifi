@@ -61,7 +61,7 @@ export class DropletsService {
         return this.httpClient.delete(`${DropletsService.API}/${href}?version=0`);
     }
 
-    createNewFlow(bucketUri: string, name: string, description: string): Observable<any> {
+    createNewDroplet(bucketUri: string, name: string, description: string): Observable<any> {
         // const mockError: HttpErrorResponse = new HttpErrorResponse({
         //     status: 400,
         //     statusText: 'Bad Request',
@@ -80,7 +80,7 @@ export class DropletsService {
         });
     }
 
-    uploadFlow(flowUri: string, file: File, description: string): Observable<any> {
+    uploadDroplet(flowUri: string, file: File, description: string): Observable<any> {
         // const mockError: HttpErrorResponse = new HttpErrorResponse({
         //     status: 413,
         //     statusText: 'Payload Too Large',

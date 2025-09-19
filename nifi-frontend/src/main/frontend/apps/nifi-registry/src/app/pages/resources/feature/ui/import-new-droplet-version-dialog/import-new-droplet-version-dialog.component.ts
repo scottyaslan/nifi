@@ -21,7 +21,7 @@ import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { CloseOnEscapeDialog, NiFiCommon } from '@nifi/shared';
 import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { importNewFlowVersion } from 'apps/nifi-registry/src/app/state/droplets/droplets.actions';
+import { importNewDropletVersion } from 'apps/nifi-registry/src/app/state/droplets/droplets.actions';
 import { Droplet } from 'apps/nifi-registry/src/app/state/droplets';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
@@ -48,10 +48,10 @@ export interface ImportNewFlowVersionDialogData {
         MatButtonModule,
         ContextErrorBanner
     ],
-    templateUrl: './import-new-flow-version-dialog.component.html',
-    styleUrl: './import-new-flow-version-dialog.component.scss'
+    templateUrl: './import-new-droplet-version-dialog.component.html',
+    styleUrl: './import-new-droplet-version-dialog.component.scss'
 })
-export class ImportNewFlowVersionDialogComponent extends CloseOnEscapeDialog {
+export class ImportNewDropletVersionDialogComponent extends CloseOnEscapeDialog {
     @ViewChild('flowUploadControl') flowUploadControl!: ElementRef;
 
     protected readonly ErrorContextKey = ErrorContextKey;
@@ -104,7 +104,7 @@ export class ImportNewFlowVersionDialogComponent extends CloseOnEscapeDialog {
 
     importNewFlowVersion() {
         this.store.dispatch(
-            importNewFlowVersion({
+            importNewDropletVersion({
                 request: {
                     href: this.droplet.link.href,
                     file: this.fileToUpload!,

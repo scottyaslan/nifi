@@ -23,7 +23,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { Droplet } from 'apps/nifi-registry/src/app/state/droplets';
 import { Store } from '@ngrx/store';
-import { exportFlowVersion } from 'apps/nifi-registry/src/app/state/droplets/droplets.actions';
+import { exportDropletVersion } from 'apps/nifi-registry/src/app/state/droplets/droplets.actions';
 import { CloseOnEscapeDialog } from '@nifi/shared';
 import { MatButtonModule } from '@angular/material/button';
 import { ContextErrorBanner } from '../../../../../ui/common/context-error-banner/context-error-banner.component';
@@ -45,10 +45,10 @@ export interface ExportFlowVersionDialogData {
         MatButtonModule,
         ContextErrorBanner
     ],
-    templateUrl: './export-flow-version-dialog.component.html',
-    styleUrl: './export-flow-version-dialog.component.scss'
+    templateUrl: './export-droplet-version-dialog.component.html',
+    styleUrl: './export-droplet-version-dialog.component.scss'
 })
-export class ExportFlowVersionDialogComponent extends CloseOnEscapeDialog {
+export class ExportDropletVersionDialogComponent extends CloseOnEscapeDialog {
     droplet: Droplet;
     selectedVersion: number;
 
@@ -62,7 +62,9 @@ export class ExportFlowVersionDialogComponent extends CloseOnEscapeDialog {
     }
 
     exportVersion() {
-        this.store.dispatch(exportFlowVersion({ request: { droplet: this.droplet, version: this.selectedVersion } }));
+        this.store.dispatch(
+            exportDropletVersion({ request: { droplet: this.droplet, version: this.selectedVersion } })
+        );
     }
 
     protected readonly ErrorContextKey = ErrorContextKey;

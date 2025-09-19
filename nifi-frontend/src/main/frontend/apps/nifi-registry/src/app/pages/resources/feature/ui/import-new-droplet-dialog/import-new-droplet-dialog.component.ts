@@ -25,7 +25,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { Bucket } from 'apps/nifi-registry/src/app/state/buckets';
 import { MatInputModule } from '@angular/material/input';
 import { Store } from '@ngrx/store';
-import { createNewFlow } from 'apps/nifi-registry/src/app/state/droplets/droplets.actions';
+import { createNewDroplet } from 'apps/nifi-registry/src/app/state/droplets/droplets.actions';
 import { MatButtonModule } from '@angular/material/button';
 import { ErrorContextKey } from 'apps/nifi-registry/src/app/state/error';
 import { ContextErrorBanner } from 'apps/nifi-registry/src/app/ui/common/context-error-banner/context-error-banner.component';
@@ -48,10 +48,10 @@ export interface ImportNewFlowDialogData {
         MatButtonModule,
         ContextErrorBanner
     ],
-    templateUrl: './import-new-flow-dialog.component.html',
-    styleUrl: './import-new-flow-dialog.component.scss'
+    templateUrl: './import-new-droplet-dialog.component.html',
+    styleUrl: './import-new-droplet-dialog.component.scss'
 })
-export class ImportNewFlowDialogComponent extends CloseOnEscapeDialog implements OnInit {
+export class ImportNewDropletDialogComponent extends CloseOnEscapeDialog implements OnInit {
     @ViewChild('flowUploadControl') flowUploadControl!: ElementRef;
 
     protected readonly ErrorContextKey = ErrorContextKey;
@@ -104,7 +104,7 @@ export class ImportNewFlowDialogComponent extends CloseOnEscapeDialog implements
         })!;
 
         this.store.dispatch(
-            createNewFlow({
+            createNewDroplet({
                 request: {
                     bucket: selectedBucket,
                     file: this.fileToUpload!,

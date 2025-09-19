@@ -70,7 +70,9 @@ try {
         StoreDevtoolsModule.instrument({
             maxAge: 25,
             logOnly: environment.production,
-            autoPause: true
+            autoPause: true,
+            name: 'NiFi Registry',
+            trace: !environment.production
         })
     ],
     providers: [
